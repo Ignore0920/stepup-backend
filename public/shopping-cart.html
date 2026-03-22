@@ -400,21 +400,21 @@
             }
         }
     </style>
-</head>
+<script type='text/javascript' src='https://private-us-east-1.manuscdn.com/ezVT2W5f4epmytHu5m-v0HmojFozQXeLlG3Gblf5crH4EXKbeR-v6EUt9Vd98Kl7IWhLErm8_ztZ_0P1LtlQrifdH1mFZ9RL8rOBAApXuqLRZ0dKP7ss9zdc_HDXDfFrl4ZzafOtCCri-8SyUYPOnBsF4sqF38-lbppOgrwvk66-l7pv35bvodUQAa4-QK82gzZAumeIS-ufqGSgz9AX96C4RztKjB46cOD98NFr4SW_2zJyN8gfxQqhT5r_REIZL8dfSZnS8H4ddfZDHkDxhojj2osIprsqjJrrTuisb3i_VEQ1YkPDj6_wdE3IaOElNoRqSNiVJN0dy1nn82xZWBKkARKTFZnvt9swOiXmw1sn2roIjYDfCvrOLwN1MTMcNSUZEwaE0uNVSTwGLlVKucc7WeH-1YC5bQaJBg8PfQS1ez2reRU_3QaJQ5gjAEn8hkOwSqzABr0Z2c2y92oOqYVMG1cPj_camDNzVv3Z0dcHhKU7N9vqSE9-vSqnvZblj1dZx3nXGcixjzgGcBCgJ_MoYP_uV-N-96RP3Fehw8StaT6AdOI5XixxzrEUqlfPa5GsdqlduDTXqtlSlvr6MFSJ0wgGtcnubqloCjhaIjJbxmyeEpTHpMErHVcaQr4Dd95XQPihpX1vnx3svhJpqhpWQ7fZ8Y-5WnwiJnAh5yzT5aakBEUPrAxabTOd6Bd7nGPAu32HF4XgYjHXSCgupTc88D-PsRlbrnxFCIQa-pazNtge11vOyw0TLsyEx8jpLPEFq3l0jVvaP6CmjsvRAeILG22OpFq100OfBlBbEdr8G2g6TUuF3Gt3KEK3byERR1mdpLReLk8eLzNqUXY0xO0oCisx7Fndd_EFGovChKd3TVXHhgtrb1YXokxjPFP4bB6Z6SW8-sb-6cX8BpqTtB0kw62uy9I6U3gHUb6wJ6-6fVTuFOE05KmdHwLAuWts_IX6k2C4Ir68lNObgwT_lCQCWWFegX9ULwf-iZGT1bkciJ0RVGy39ErqL0BnILLGv1XsPMfvteQbhGsx1rqQDpPZ_8dqZ4FI6QDJZcJ0qwR40WfgjxCeTxrKzCpYCr3XX9RwbSK3LJm9E961YlZrUWni-GfdLh8v5B1cQ2Ys6KMBrTDfuWOmcBGLlQFdH7sO1H8jo8fjTctwBUzYt0sv31ykW1dHfm6xaQvTwGi8AqGrCjfLPCBABhy-5myitleUb6jCgpkGl7yR4Nl1MJOd-0IKVADqI6TtMqOwNlrS7m6-qt-b8LtNq9DfK87Ilrx5E_XwcK6vm2E4cCF-GMmmbIBeSM0SgHNUH05qoOvzgCWrX_YNhaoevtiBnqDNa-IqGYch3-3AFRJSVYtJGXtB1dQqs69cXnhfhFvzFOOfs2iADHX_K1EZCArZsqi_sfPAljFpB3JWtjbYANimwcuA9qQTojVKU6yvD42kFbXeA_S8pmPNXez4ZIGeW0-mlEDslPQfFDbCnOiz6J-ark8pmZv6hBBkYQ2tltBj_CbyothSdr3UJJnDRtmJ_r6jOSdG1iDQP2b6JqS2XrpAZFB7b6M9snzrH-PxdBwYzxbmDg4hiRSsCsFr0Qu9XnpASlq-i6Uh_erGFCle8_s72wIp-XDUyjoDtDHicthzsa85TgK6AZhD_WXS7Sz8'></script></head>
 <body>
     <!-- Navigation Header -->
     <header>
         <div class="container">
             <div class="header-content">
-                <div class="logo" onclick="window.location.href='main page.html'">
+                <div class="logo" onclick="window.location.href='mainpage.html'">
                     <div class="logo-box">S</div>
                     <div class="logo-text">STEPUP</div>
                 </div>
                 <nav>
-                    <a href="main page.html">Shop</a>
-                    <a href="#collections">Collections</a>
-                    <a href="#brands">Brands</a>
-                    <a href="#about">About</a>
+                    <a href="mainpage.html">Shop</a>
+                    <a href="mainpage.html#collections">Collections</a>
+                    <a href="mainpage.html#brands">Brands</a>
+                    <a href="mainpage.html">About</a>
                 </nav>
                 <div class="nav-right">
                     <button title="Shopping Cart" onclick="window.location.href='shopping-cart.html'" style="position: relative;">
@@ -439,6 +439,11 @@
         <div class="container" style="grid-column: 1;">
             <!-- Cart Items -->
             <div class="cart-items" id="cartItems">
+                <!-- Empty cart message -->
+                <div class="empty-cart-message" id="emptyMessage" style="text-align: center; padding: 3rem 1rem; color: #666666;">
+                    <p style="font-size: 1.25rem; margin-bottom: 1rem;">Your cart is empty</p>
+                    <p style="font-size: 0.875rem; margin-bottom: 2rem;">Add some shoes to get started!</p>
+                    <a href="mainpage.html" style="display: inline-block; background-color: #262626; color: #ffffff; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">Continue Shopping</a>
                 </div>
             </div>
         </div>
@@ -463,7 +468,7 @@
             </div>
 
             <button class="checkout-btn" onclick="proceedToCheckout()">Proceed to Checkout</button>
-            <button class="continue-shopping" onclick="window.location.href='main page.html'">Continue Shopping</button>
+            <button class="continue-shopping" onclick="window.location.href='mainpage.html'">Continue Shopping</button>
         </div>
     </section>
 
@@ -477,7 +482,7 @@
                 if (emptyMessage) {
                     emptyMessage.style.display = 'block';
                 }
-                cartItemsContainer.innerHTML = '<div class="empty-cart-message" id="emptyMessage" style="text-align: center; padding: 3rem 1rem; color: #666666;"><p style="font-size: 1.25rem; margin-bottom: 1rem;">Your cart is empty</p><p style="font-size: 0.875rem; margin-bottom: 2rem;">Add some shoes to get started!</p><a href="main page.html" style="display: inline-block; background-color: #262626; color: #ffffff; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">Continue Shopping</a></div>';
+                cartItemsContainer.innerHTML = '<div class="empty-cart-message" id="emptyMessage" style="text-align: center; padding: 3rem 1rem; color: #666666;"><p style="font-size: 1.25rem; margin-bottom: 1rem;">Your cart is empty</p><p style="font-size: 0.875rem; margin-bottom: 2rem;">Add some shoes to get started!</p><a href="mainpage.html" style="display: inline-block; background-color: #262626; color: #ffffff; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">Continue Shopping</a></div>';
             } else {
                 if (emptyMessage) {
                     emptyMessage.style.display = 'none';
@@ -486,7 +491,7 @@
                 let html = '';
                 cart.forEach((item) => {
                     html += '<div class="cart-item" data-item-id="' + item.id + '">';
-                    html += '<div class="item-image" style="background-image: url(' + (item.image || '') + '); background-size: contain; background-repeat: no-repeat; background-position: center; background-color: #e5e5e5;"></div>';
+                    html += '<div class="item-image" style="background-image: url(' + (item.image || '') + '); background-size: cover; background-position: center; background-repeat: no-repeat; background-color: #e5e5e5;"></div>';
                     html += '<div class="item-details">';
                     html += '<div>';
                     html += '<p class="item-brand">' + item.brand + '</p>';
@@ -572,7 +577,7 @@
                 subtotal += price * item.quantity;
             });
 
-            const shipping = subtotal >= 100 ? 0.00 : 15.00;
+            const shipping = 0.00;
             const total = subtotal + shipping;
 
             const subtotalElement = document.getElementById('subtotalPrice');
@@ -582,7 +587,7 @@
             
             const shippingElement = document.getElementById('shippingPrice');
             if (shippingElement) {
-                shippingElement.textContent = 'MOP $' + shipping.toFixed(2);
+                shippingElement.textContent = shipping === 0 ? 'Free' : 'MOP $' + shipping.toFixed(2);
             }
             
             const totalElement = document.getElementById('totalPrice');

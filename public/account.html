@@ -118,6 +118,37 @@
             color: #ffffff;
         }
 
+        .cart-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            position: relative;
+            text-decoration: none;
+            color: #262626;
+            transition: color 0.3s;
+        }
+
+        .cart-btn:hover {
+            color: #666666;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #262626;
+            color: #ffffff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
         /* Page Title */
         .page-title {
             font-family: 'Playfair Display', serif;
@@ -435,21 +466,23 @@
             }
         }
     </style>
-</head>
+<script type='text/javascript' src='https://private-us-east-1.manuscdn.com/FgnhjE8MbGICoTl50NvBisIEvGCXodwV1NwabVf3WnjAaNBwU4uruBaCD-jxT-XKZHwcjNZa2NJQw6Vfsx1KlMckV3LLPZDQ3h6UgSturqfp3FU1a9lIbyYzXBkMeRWF_H1i_Hfex0BGio9970cxux1fhUvI45fHf3UeDAFmmcqUigVSDDw7-gsSQPPmv6D8-ouqVTiotjCE4FCykZ_u5nGyouG4E4RyGcgJMjlSQIF0jspnMdSzfHTUa5eJAf562UpXeiRfKWIXm1gtqTFhusG5aALSPf2s0EPPQ9-lzw86F3BgvGDvBiEgrAES1x-waVz07I9QlWYXeUPSpuxTasf_X7o0JW_fKRSI71xrd-vEYROenJPqaQNsBe5mOM872vAsO2vHDqEecgdtNo8IWg15ayT1ovNRCCyEpUFDBIxzqQ-P3F7zSuNzo4DuiGaHGZU_O_kbiA3O5L9tDYdtA5c-MjURbO0lZ_x1GkEJM4LFlx42dv17gVH4VmX_6_hq0mM38p2Izd3Zb6itrBXT5QtSeLShCzQM0wseo3lIVJ0PL-aKdSlI_JgsDk_qh7NgqOFhyff7MwMlctEl9z5M_q-THj5KUYX3_NojFOeR2jlfRbVO9AvZeXzZm3ujlD8goDLxlFdNsorSdLokXkG9kLugBTcoao0fd3D0lvLEG31K70L3q5NCFTx7Cl4DjUXEBiJPtI_hMB6jDxdexGf74N_ew9tOu_FtS2xE2bn__gVqCLB6t_jvJQ6JrGwYNYEtoT-Qje-ATnmQPg7e9_6igqTZwccMpuYZuTdM9ZaMxy4BigT05IxEgQd7o-o_p2bjIFi5Q6ZVQ05F_O7Faklmx-ghRhhVJgCObjSJfJ3QoP6fLoyY0-X9YTRmHotQaGF2M6FpwVH1QMhVp_3MkRGwq9BY2g4uTv48_vvSCf8GvKS_yrNIzSiwDsMcvylxF4TGqNI7UdZ7eXJ8cyAa0LrJjzFbJRwGpYj1lOSHdrvz6CtTA7I4Iz7tankYnevE_2M8l3z2NhHRZZ3_3RdY3mtYycmQNM--1w4ibzZbEJ_xR3wvUMe4z-9ZqH5Zolzst-YyZhmUl5deIfbiE6424msvsUIgdgjGqk4yLo_3zZamYuDV-h8zTqNUNV9A2RWnTX_DqSO6J9H43rQIyenPsXxYwpowh22pKQBbGNC1W_18hnsNreFFObifPYEA5Ro0J9wHEqLqOsG5aME4V9DWndD84Kj290lnY_lffLsXok4m5XNXP3QxSnmPtZr9g8tyODsWxFH0MBsXqch0uEv7YYTA2kf5NhnxeMysQuDCnfO2Sc89i3lt0z2aqs7vagt_gJcGBQLPJuOpNwVzETRaCjy1wneoWFLO2MFxzTcDs-LwENFQuE_vledMn-NuxmvMuyrgrVcnQ3c-q4tvxyyMxjO8VstbYlmLcZXRxA1xQR6SHUoMXz5hL2ELp1Jd6cWvV_X542ZwhWrehDLZ_FFB0hndpeQ7R5ekQjO_vtF6vFFgNv1ZGYOYQjh6uQmZeTEP2SEm6mPa5DvdZ4jF6ySRWlsepN4P9poonATH_Ly_ypwTaf_BOEON47iHQrQl7Ij3kLkKt2sztJB1lpAEfqpG4oECDL8Akl-6-renGVI'></script></head>
 <body>
     <!-- Header -->
     <header>
         <div class="container">
             <div class="header-content">
-                <a href="main page.html" class="logo">
+                <a href="mainpage.html" class="logo">
                     <div class="logo-box">S</div>
                     <span>STEPUP</span>
                 </a>
                 <nav class="header-nav">
-                        <a href="main page.html">Home</a>
-                        <a href="shop.html">Shop</a>
-                        <a href="about.html">About</a>
-                        <a href="shopping-cart.html">Cart</a>
+                    <a href="mainpage.html">Home</a>
+                    <a href="mainpage.html">Shop</a>
+                    <button class="cart-btn" title="Shopping Cart" onclick="window.location.href='shopping-cart.html'" style="position: relative;">
+                        🛒
+                        <span class="cart-badge" id="cartBadge">0</span>
+                    </button>
                     <div class="user-info" id="userInfo">
                         <div class="user-avatar" id="userAvatar"></div>
                         <span id="userName"></span>
@@ -463,7 +496,7 @@
     <!-- Main Content -->
     <div class="container">
         <div class="breadcrumb">
-            <a href="main page.html">Home</a> / <span>My Account</span>
+            <a href="mainpage.html">Home</a> / <span>My Account</span>
         </div>
 
         <h1 class="page-title">My Account</h1>
@@ -687,11 +720,22 @@
             document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
         }
 
+        // Update cart badge
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = totalItems;
+            }
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             checkLoginStatus();
             loadAllData();
             loadOrders();
+            updateCartBadge();
         });
 
         // Check if user is logged in
@@ -723,7 +767,7 @@
             if (!userEmail || !isLoggedIn) {
                 console.log('User not logged in, redirecting...');
                 alert('Please log in to access your account');
-                window.location.href = 'login register.html';
+                window.location.href = 'loginregister.html';
                 return;
             }
 
@@ -941,7 +985,7 @@
             console.log('All user data cleared');
             
             alert('Logged out successfully');
-            window.location.href = 'main page.html';
+            window.location.href = 'mainpage.html';
         }
     </script>
 </body>

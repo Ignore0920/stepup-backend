@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StepUp - Premium Men's Athletic Footwear</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #ffffff;
+            color: #262626;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Navigation Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-box {
+            width: 40px;
+            height: 40px;
+            background-color: #262626;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+        }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #262626;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #666666;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-right button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #262626;
+            font-size: 1.25rem;
+            transition: color 0.3s;
+        }
+
+        .nav-right button:hover {
+            color: #666666;
+        }
+
+        .user-icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #262626;
+            font-size: 1.25rem;
+            transition: color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .user-icon-btn:hover {
+            color: #666666;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #262626;
+            color: #FAFAF8;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                display: none;
+            }
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 4rem 0;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .deco-frame {
+            position: relative;
+            border-left: 4px solid #262626;
+            border-top: 4px solid #262626;
+            padding-left: 1.5rem;
+            padding-top: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .deco-frame::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-right: 4px solid #262626;
+            border-bottom: 4px solid #262626;
+        }
+
+        .hero-text-label {
+            color: #262626;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title .highlight {
+            color: #262626;
+        }
+
+        .hero-description {
+            color: #666666;
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+            max-width: 400px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #262626;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: #262626;
+            border: 2px solid #262626;
+        }
+
+        .btn-secondary:hover {
+            background-color: #262626;
+            color: #ffffff;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .stat {
+            text-align: left;
+        }
+
+        .stat-number {
+            font-size: 1.75rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            color: #262626;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #999999;
+            margin-top: 0.25rem;
+        }
+
+        .hero-visual {
+            position: relative;
+            aspect-ratio: 1;
+            background-color: #f5f5f5;
+            border: 2px solid #d9d9d9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0;
+        }
+
+        .hero-visual-content {
+            text-align: center;
+        }
+
+        .hero-visual-emoji {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-visual-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #262626;
+        }
+
+        @media (max-width: 768px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-visual {
+                display: none;
+            }
+        }
+
+        /* Monthly Selection Section */
+        .monthly-selection-section {
+            padding: 5rem 0;
+            background-color: #ffffff;
+        }
+
+        .monthly-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 3rem;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .monthly-products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .monthly-product-card {
+            text-align: center;
+        }
+
+        .monthly-product-image {
+            width: 100%;
+            height: 300px;
+            background-color: #f5f5f5;
+            margin-bottom: 1.5rem;
+            object-fit: cover;
+            border: 1px solid #e5e5e5;
+        }
+
+        .stars {
+            display: flex;
+            justify-content: center;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .star {
+            color: #ffc107;
+        }
+
+        .monthly-product-description {
+            font-size: 0.95rem;
+            color: #666666;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        /* Recommendation Section */
+        .recommendation-section {
+            background-color: #f9f9f9;
+            padding: 3rem;
+            border-radius: 0;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .recommendation-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #262626;
+            white-space: nowrap;
+        }
+
+        .recommendation-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 1rem 1.5rem;
+            background-color: #ffc107;
+            border: none;
+            font-size: 0.95rem;
+            color: #262626;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .recommendation-input:hover {
+            background-color: #ffb300;
+        }
+
+        .recommendation-button {
+            padding: 1rem 2rem;
+            background-color: #4a90e2;
+            color: #ffffff;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .recommendation-button:hover {
+            background-color: #3a7bc8;
+        }
+
+        /* Featured Products Section */
+        .featured-section {
+            padding: 5rem 0;
+            background-color: #f9f9f9;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 0;
+            width: 6rem;
+            height: 4px;
+            background-color: #262626;
+        }
+
+        .section-description {
+            color: #666666;
+            font-size: 1rem;
+            max-width: 600px;
+            margin-bottom: 3rem;
+            margin-top: 1rem;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .product-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e5e5;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-0.5rem);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            background-color: transparent;
+            margin-bottom: 1rem;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-tag {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: #262626;
+            color: #ffffff;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .product-brand {
+            color: #262626;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-name {
+            font-size: 1.125rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .product-price {
+            color: #262626;
+            font-weight: 600;
+        }
+
+        /* Collections Section */
+        .collections-section {
+            padding: 5rem 0;
+            background-color: #f9f9f9;
+        }
+
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .collection-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e5e5;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .collection-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-0.5rem);
+            border-color: #262626;
+        }
+
+        .collection-image {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            transition: transform 0.3s;
+        }
+
+        .collection-card:hover .collection-image {
+            transform: scale(1.1);
+        }
+
+        .collection-name {
+            font-size: 1.25rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #262626;
+        }
+
+        .collection-count {
+            font-size: 0.875rem;
+            color: #999999;
+            font-weight: 500;
+        }
+
+        /* Brands Section */
+        .brands-section {
+            padding: 5rem 0;
+            background-color: #ffffff;
+        }
+
+        .brands-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .brands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+        }
+
+        .brand-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            border: 1px solid #e5e5e5;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .brand-card:hover {
+            border-color: #262626;
+        }
+
+        .brand-emoji {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            transition: transform 0.3s;
+        }
+
+        .brand-card:hover .brand-emoji {
+            transform: scale(1.1);
+        }
+
+        .brand-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: center;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 5rem 0;
+            background-color: #f9f9f9;
+            border-top: 1px solid #e5e5e5;
+            border-bottom: 1px solid #e5e5e5;
+            text-align: center;
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-description {
+            color: #666666;
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #f5f5f5;
+            border-top: 1px solid #e5e5e5;
+            padding: 3rem 0;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3rem;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .footer-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .footer-section-brand {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .footer-section-brand .logo-box {
+            width: 32px;
+            height: 32px;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section-brand .brand-name {
+            font-weight: bold;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .footer-section-brand p {
+            font-size: 0.875rem;
+            color: #666666;
+            line-height: 1.6;
+        }
+
+        .footer-section h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            color: #262626;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-section ul li a {
+            color: #666666;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.3s;
+        }
+
+        .footer-section ul li a:hover {
+            color: #262626;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #666666;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .social-links a {
+            color: #666666;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: #262626;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .social-links {
+                justify-content: center;
+            }
+        }    .recommendation-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .recommendation-input,
+            .recommendation-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-box">S</div>
+                    <div class="logo-text">STEPUP</div>
+                </div>
+                <nav>
+                    <a href="#shop">Shop</a>
+                    <a href="#collections">Collections</a>
+                    <a href="#brands">Brands</a>
+                    <a href="about.html">About</a>
+                </nav>
+                <div class="nav-right">
+                    <button title="Shopping Cart" onclick="location.href='shopping-cart.html'" style="position: relative;">🛒<span class="cart-badge" id="cartBadge">0</span></button>
+                    <a href="account.html" class="user-icon-btn" title="User Account">👤</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div>
+                    <div class="deco-frame">
+                        <div>
+                            <p class="hero-text-label">Luxury Athletic Footwear</p>
+                            <h1 class="hero-title">
+                                Step Into
+                                <br>
+                                <span class="highlight">Excellence</span>
+                            </h1>
+                            <p class="hero-description">
+                                Curated collection of premium athletic sneakers and casual footwear for the modern man.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="window.location.href='products.html'">Explore Collection</button>
+                        <button class="btn btn-secondary" onclick="window.location.href='about.html'">View Lookbook</button>
+                    </div>
+
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-number">500+</div>
+                            <div class="stat-label">Premium Styles</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">50+</div>
+                            <div class="stat-label">Top Brands</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">10K+</div>
+                            <div class="stat-label">Happy Customers</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-visual">
+                    <div class="hero-visual-content">
+                        <div class="hero-visual-emoji">👟</div>
+                        <div class="hero-visual-text">Featured Collection</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Monthly Selection Section -->
+    <section class="monthly-selection-section" id="monthly">
+        <div class="container">
+            <h2 class="monthly-title">This Month's Selection</h2>
+
+            <div class="monthly-products">
+                <!-- Product 1 -->
+                <div class="monthly-product-card">
+                    <div class="monthly-product-image" style="background-color: #e5e5e5;"></div>
+                    <div class="stars">
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                    </div>
+                    <p class="monthly-product-description">Leather Shoes, Tan, Waterproof</p>
+                </div>
+
+                <!-- Product 2 -->
+                <div class="monthly-product-card">
+                    <div class="monthly-product-image" style="background-color: #e5e5e5;"></div>
+                    <div class="stars">
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                    </div>
+                    <p class="monthly-product-description">Leather Shoes, Tan, Formal Occasion</p>
+                </div>
+
+                <!-- Product 3 -->
+                <div class="monthly-product-card">
+                    <div class="monthly-product-image" style="background-color: #e5e5e5;"></div>
+                    <div class="stars">
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                    </div>
+                    <p class="monthly-product-description">Leather Shoes, Black, Formal Occasion</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section class="featured-section" id="shop">
+        <div class="container">
+            <h2 class="section-title">Featured Selection</h2>
+            <p class="section-description">
+                Handpicked premium athletic footwear representing the pinnacle of design and performance.
+            </p>
+
+            <div class="products-grid">
+                <div class="product-card" onclick="window.location.href='NikeAirMax270.html'" style="cursor: pointer;">
+                    <div style="position: relative;">
+                        <div class="product-image" style="background-image: url('https://files.manuscdn.com/user_upload_by_module/session_file/310519663381436063/lOZOEbUZRBkODyvf.png'); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
+                        <span class="product-tag">FEATURED</span>
+                    </div>
+                    <p class="product-brand">Nike</p>
+                    <h3 class="product-name">Air Max 270</h3>
+                    <div class="product-footer">
+                        <span class="product-price">MOP $189.99</span>
+                        <span style="cursor: pointer; font-size: 1.25rem;">→</span>
+                    </div>
+                </div>
+
+
+                <div class="product-card" onclick="window.location.href='Jordan1Retro.html'" style="cursor: pointer;">
+                    <div style="position: relative;">
+                        <div class="product-image" style="background-image: url('https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/HZDiSqxfpxfavVAe.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
+                        <span class="product-tag">NEW</span>
+                    </div>
+                    <p class="product-brand">Jordan</p>
+                    <h3 class="product-name">1 Retro</h3>
+                    <div class="product-footer">
+                        <span class="product-price">MOP $199.99</span>
+                        <span style="cursor: pointer; font-size: 1.25rem;">→</span>
+                    </div>
+                </div>
+
+                <div class="product-card" onclick="window.location.href='AdidasUltraBoost.html'" style="cursor: pointer;">
+                    <div style="position: relative;">
+                        <div class="product-image" style="background-image: url('https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/XHAmwqukAvqToiZo.png'); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
+                        <span class="product-tag">TRENDING</span>
+                    </div>
+                    <p class="product-brand">Adidas</p>
+                    <h3 class="product-name">Ultra Boost</h3>
+                    <div class="product-footer">
+                        <span class="product-price">MOP $179.99</span>
+                        <span style="cursor: pointer; font-size: 1.25rem;">→</span>
+                    </div>
+                </div>
+
+                <div class="product-card" onclick="window.location.href='PumaRS-X.html'" style="cursor: pointer;">
+                    <div style="position: relative;">
+                        <div class="product-image" style="background-image: url('https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/EAhzJUEkqDjgMWwe.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
+                        <span class="product-tag">SALE</span>
+                    </div>
+                    <p class="product-brand">Puma</p>
+                    <h3 class="product-name">RS-X</h3>
+                    <div class="product-footer">
+                        <span class="product-price">MOP $149.99</span>
+                        <span style="cursor: pointer; font-size: 1.25rem;">→</span>
+                    </div>
+                </div>
+
+                <div class="product-card" onclick="window.location.href='NikeEliteRunnerPro.html'" style="cursor: pointer;">
+                    <div style="position: relative;">
+                        <div class="product-image" style="background-image: url('https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/LBUPnoswZhcidJkY.png'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+                        <span class="product-tag">PREMIUM</span>
+                    </div>
+                    <p class="product-brand">Nike</p>
+                    <h3 class="product-name">Elite Runner Pro</h3>
+                    <div class="product-footer">
+                        <span class="product-price">MOP $229.99</span>
+                        <span style="cursor: pointer; font-size: 1.25rem;">→</span>
+                    </div>
+                </div>
+
+                <div class="product-card" onclick="window.location.href='NikeComfortWalkPlus.html'" style="cursor: pointer;">
+                    <div style="position: relative;">
+                        <div class="product-image" style="background-image: url('https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/oNmiTuSXqeoDCyvh.jpeg'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+                        <span class="product-tag">NEW</span>
+                    </div>
+                    <p class="product-brand">Nike</p>
+                    <h3 class="product-name">Comfort Walk Plus</h3>
+                    <div class="product-footer">
+                        <span class="product-price">MOP $159.99</span>
+                        <span style="cursor: pointer; font-size: 1.25rem;">→</span>
+                    </div>
+                </div>
+
+                <div class="product-card" onclick="window.location.href='NikeUrbanFlexSneaker.html'" style="cursor: pointer;">
+                    <div style="position: relative;">
+                        <div class="product-image" style="background-image: url('https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/WPMbFctvNLFtqdqv.png'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+                        <span class="product-tag">NEW</span>
+                    </div>
+                    <p class="product-brand">Nike</p>
+                    <h3 class="product-name">Urban Flex Sneaker</h3>
+                    <div class="product-footer">
+                        <span class="product-price">MOP $179.99</span>
+                        <span style="cursor: pointer; font-size: 1.25rem;">→</span>
+                    </div>
+                </div>
+
+                <div class="product-card" onclick="window.location.href='NikeClassicTrainer.html'" style="cursor: pointer;">
+                    <div style="position: relative;">
+                        <div class="product-image" style="background-image: url('https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/jtJqPMOhRFGrvlBZ.png'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+                    </div>
+                    <p class="product-brand">Nike</p>
+                    <h3 class="product-name">Classic Trainer</h3>
+                    <div class="product-footer">
+                        <span class="product-price">MOP $149.99</span>
+                        <span style="cursor: pointer; font-size: 1.25rem;">→</span>
+                    </div>
+                </div>
+
+                <div class="product-card" onclick="window.location.href='NewBalance990v6.html'" style="cursor: pointer;">
+                    <div style="position: relative;">
+                        <div class="product-image" style="background-image: url('https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OISFcGUaRzULPMhv.jpg'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+                    </div>
+                    <p class="product-brand">New Balance</p>
+                    <h3 class="product-name">990v6</h3>
+                    <div class="product-footer">
+                        <span class="product-price">MOP $189.99</span>
+                        <span style="cursor: pointer; font-size: 1.25rem;">→</span>
+                    </div>
+                </div>
+
+                <div class="product-card" onclick="window.location.href='ConverseOneStar.html'" style="cursor: pointer;">
+                    <div style="position: relative;">
+                        <div class="product-image" style="background-image: url('https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OqEvWuXBAyHMsEtW.jpg'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+                    </div>
+                    <p class="product-brand">Converse</p>
+                    <h3 class="product-name">One Star</h3>
+                    <div class="product-footer">
+                        <span class="product-price">MOP $149.99</span>
+                        <span style="cursor: pointer; font-size: 1.25rem;">→</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Collections Section -->
+    <section class="collections-section" id="collections">
+        <div class="container">
+            <h2 class="section-title">Shop by Collection</h2>
+            <p class="section-description">
+                Curated collections designed for every lifestyle and occasion.
+            </p>
+
+            <div class="collections-grid">
+                <div class="collection-card" onclick="goToProductsWithFilter('Running')" style="cursor: pointer;">
+                    <div class="collection-image">🏃</div>
+                    <h3 class="collection-name">Athletic</h3>
+                </div>
+
+                <div class="collection-card" onclick="goToProductsWithFilter('Casual')" style="cursor: pointer;">
+                    <div class="collection-image">👟</div>
+                    <h3 class="collection-name">Casual</h3>
+                </div>
+
+                <div class="collection-card" onclick="goToProductsWithFilter('Basketball')" style="cursor: pointer;">
+                    <div class="collection-image">⚽</div>
+                    <h3 class="collection-name">Sport</h3>
+                </div>
+
+                <div class="collection-card" onclick="goToProductsWithFilter('Training')" style="cursor: pointer;">
+                    <div class="collection-image">👑</div>
+                    <h3 class="collection-name">Premium</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Brands Section -->
+    <section class="brands-section" id="brands">
+        <div class="container">
+            <div class="brands-title">
+                <h2 class="section-title">Trusted Brands</h2>
+                <p class="section-description">
+                    We partner with the world's most prestigious athletic and lifestyle brands.
+                </p>
+            </div>
+
+            <div class="brands-grid">
+                <div class="brand-card" onclick="goToProductsWithBrand('Nike')" style="cursor: pointer;">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/nike_logo-3ofqLp6PBdCCDqG4ZLiuEV.webp" alt="Nike" style="width: 120px; height: 120px; object-fit: contain;">
+                    <div class="brand-name">Nike</div>
+                </div>
+                <div class="brand-card" onclick="goToProductsWithBrand('Adidas')" style="cursor: pointer;">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/adidas_logo-gD7A8tdW3c8kf4LAiBdpj6.webp" alt="Adidas" style="width: 120px; height: 120px; object-fit: contain;">
+                    <div class="brand-name">Adidas</div>
+                </div>
+                <div class="brand-card" onclick="goToProductsWithBrand('Jordan')" style="cursor: pointer;">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/jordan_logo-XbKPzVfYBPX7WYw9MFaxz4.webp" alt="Jordan" style="width: 120px; height: 120px; object-fit: contain;">
+                    <div class="brand-name">Jordan</div>
+                </div>
+                <div class="brand-card" onclick="goToProductsWithBrand('Puma')" style="cursor: pointer;">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/puma_logo-efjVBACcBRSEgTHJmiJfqc.webp" alt="Puma" style="width: 120px; height: 120px; object-fit: contain;">
+                    <div class="brand-name">Puma</div>
+                </div>
+                <div class="brand-card" onclick="goToProductsWithBrand('New Balance')" style="cursor: pointer;">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/newbalance_logo-FxVhjrqBwtHjs7pmYDMfhd.webp" alt="New Balance" style="width: 120px; height: 120px; object-fit: contain;">
+                    <div class="brand-name">New Balance</div>
+                </div>
+                <div class="brand-card" onclick="goToProductsWithBrand('Converse')" style="cursor: pointer;">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/converse_logo-RFfmSudDH2EGYUBRkBHL5a.webp" alt="Converse" style="width: 120px; height: 120px; object-fit: contain;">
+                    <div class="brand-name">Converse</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="cta-title">Discover Your Perfect Fit</h2>
+            <p class="cta-description">
+                Browse our complete collection of premium athletic footwear and find the perfect pair for your lifestyle.
+            </p>
+            <button class="btn btn-primary" onclick="goToProducts()">Start Shopping</button>
+        </div>
+    </section>
+
+
+</body>
+</html>
+
+<script>
+    // Product collections data
+    const collections = [
+        { name: 'Athletic', key: 'Running' },
+        { name: 'Casual', key: 'Casual' },
+        { name: 'Sport', key: 'Basketball' },
+        { name: 'Premium', key: 'Training' }
+    ];
+
+    const allProducts = [
+        { id: 1, name: 'Nike Air Max 270', brand: 'Nike', collection: 'Casual', price: 219.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/8hxfQKfVfXwjEqGD.jpg', link: 'NikeAirMax270.html', tag: '' },
+        { id: 2, name: 'Nike Classic Trainer', brand: 'Nike', collection: 'Running', price: 189.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/jtJqPMOhRFGrvlBZ.png', link: 'NikeClassicTrainer.html', tag: '' },
+        { id: 3, name: 'Nike Comfort Walk Plus', brand: 'Nike', collection: 'Casual', price: 199.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/4tFqKXJhKJfQKXfQ.jpg', link: 'NikeComfortWalkPlus.html', tag: '' },
+        { id: 4, name: 'Nike Elite Runner Pro', brand: 'Nike', collection: 'Running', price: 229.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/HNQhKJhJKJhKJhKJ.jpg', link: 'NikeEliteRunnerPro.html', tag: '' },
+        { id: 5, name: 'Nike Urban Flex Sneaker', brand: 'Nike', collection: 'Training', price: 209.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/KJhKJhKJhKJhKJhK.jpg', link: 'NikeUrbanFlexSneaker.html', tag: '' },
+        { id: 6, name: 'Jordan 1 Retro', brand: 'Jordan', collection: 'Basketball', price: 249.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/HZDiSqxfpxfavVAe.jpg', link: 'Jordan1Retro.html', tag: '' },
+        { id: 7, name: 'Adidas Ultra Boost', brand: 'Adidas', collection: 'Running', price: 239.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/XHAmwqukAvqToiZo.png', link: 'AdidasUltraBoost.html', tag: '' },
+        { id: 8, name: 'Puma RS-X', brand: 'Puma', collection: 'Casual', price: 169.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/EAhzJUEkqDjgMWwe.jpg', link: 'PumaRS-X.html', tag: '' },
+        { id: 9, name: 'New Balance 990v6', brand: 'New Balance', collection: 'Training', price: 189.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OISFcGUaRzULPMhv.jpg', link: 'NewBalance990v6.html', tag: '' },
+        { id: 10, name: 'Converse One Star', brand: 'Converse', collection: 'Casual', price: 149.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OqEvWuXBAyHMsEtW.jpg', link: 'ConverseOneStar.html', tag: '' },
+        { id: 11, name: 'New Balance Classic Runner', brand: 'New Balance', collection: 'Casual', price: 189.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OISFcGUaRzULPMhv.jpg', link: 'NewBalance.html', tag: '' }
+    ];
+
+    // Calculate collection counts
+    function getCollectionCount(collectionKey) {
+        return allProducts.filter(product => product.collection === collectionKey).length;
+    }
+
+    // Update collection counts on page load
+    function updateCollectionCounts() {
+        collections.forEach(collection => {
+            const count = getCollectionCount(collection.key);
+            const countElements = document.querySelectorAll('.collection-count');
+            countElements.forEach(element => {
+                const parent = element.closest('.collection-card');
+                if (parent && parent.querySelector('.collection-name').textContent === collection.name) {
+                    element.textContent = count + ' Products';
+                }
+            });
+        });
+    }
+
+    // Collection filtering function
+    function goToProductsWithFilter(collection) {
+        // Store the selected collection in sessionStorage
+        sessionStorage.setItem('selectedCollection', collection);
+        // Redirect to products page
+        window.location.href = 'products.html';
+    }
+
+    // Brand filtering function
+    function goToProductsWithBrand(brand) {
+        // Store the selected brand in sessionStorage
+        sessionStorage.setItem('selectedBrand', brand);
+        // Redirect to products page
+        window.location.href = 'products.html';
+    }
+
+    // Navigate to products page without any filter
+    function goToProducts() {
+        // Clear any previous filters
+        sessionStorage.removeItem('selectedBrand');
+        sessionStorage.removeItem('selectedCollection');
+        // Redirect to products page
+        window.location.href = 'products.html';
+    }
+
+    function filterByType(type) {
+        // Show a message indicating the filter was selected
+        alert('Showing ' + type.charAt(0).toUpperCase() + type.slice(1) + ' collection products');
+        // In a full implementation, this would filter the products displayed on the page
+        // For now, it provides user feedback that the collection was selected
+    }
+
+    function updateCartBadge() {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const badge = document.getElementById('cartBadge');
+        if (badge) {
+            badge.textContent = totalItems;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartBadge();
+        updateCollectionCounts();
+    });
+
+    window.addEventListener('storage', function() {
+        updateCartBadge();
+    });
+</script>

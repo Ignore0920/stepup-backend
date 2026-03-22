@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Products - StepUp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #ffffff;
+            color: #262626;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Navigation Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .logo-box {
+            width: 40px;
+            height: 40px;
+            background-color: #262626;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+        }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #262626;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #666666;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-right button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #262626;
+            font-size: 1.25rem;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-right button:hover {
+            color: #666666;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #262626;
+            color: #ffffff;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .user-icon-btn {
+            text-decoration: none;
+            color: #262626;
+            font-size: 1.25rem;
+            transition: color 0.3s;
+        }
+
+        .user-icon-btn:hover {
+            color: #666666;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            margin: 2rem 0;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #262626;
+            box-shadow: 0 0 0 2px rgba(38, 38, 38, 0.1);
+        }
+
+        .search-button {
+            padding: 0.75rem 1.5rem;
+            background-color: #262626;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: background-color 0.3s;
+        }
+
+        .search-button:hover {
+            background-color: #444444;
+        }
+
+        /* Products Page Styles */
+        .products-page {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .sidebar {
+            background-color: #f9f9f9;
+            padding: 2rem;
+            border-radius: 8px;
+            height: fit-content;
+        }
+
+        .filter-group {
+            margin-bottom: 2rem;
+        }
+
+        .filter-group h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .filter-option input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .filter-option label {
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .products-section {
+            background-color: #ffffff;
+        }
+
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .products-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .sort-dropdown {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 1rem;
+        }
+
+        .product-info {
+            padding: 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-brand {
+            font-size: 0.8rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .product-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .product-price {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #000;
+            margin-top: auto;
+        }
+
+        .product-tag {
+            display: inline-block;
+            background-color: #ff6b6b;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            margin-top: 0.5rem;
+            width: fit-content;
+        }
+
+        .no-products {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+
+        .no-products p {
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .products-page {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            nav {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo" onclick="window.location.href='mainpage.html'">
+                    <div class="logo-box">S</div>
+                    <div class="logo-text">STEPUP</div>
+                </div>
+                <nav>
+                    <a href="products.html">Shop</a>
+                    <a href="mainpage.html#collections">Collections</a>
+                    <a href="mainpage.html#brands">Brands</a>
+                    <a href="mainpage.html#about">About</a>
+                </nav>
+                <div class="nav-right">
+                    <button title="Shopping Cart" onclick="window.location.href='shopping-cart.html'" style="position: relative;">
+                        🛒
+                        <span class="cart-badge" id="cartBadge">0</span>
+                    </button>
+                    <a href="account.html" class="user-icon-btn" title="User Account">👤</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="products-page">
+            <!-- Sidebar Filters -->
+            <aside class="sidebar">
+                <div class="filter-group">
+                    <h3>Brand</h3>
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="checkbox" id="brand-nike" value="Nike" onchange="applyFilters()">
+                            <label for="brand-nike">Nike</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="brand-jordan" value="Jordan" onchange="applyFilters()">
+                            <label for="brand-jordan">Jordan</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="brand-adidas" value="Adidas" onchange="applyFilters()">
+                            <label for="brand-adidas">Adidas</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="brand-puma" value="Puma" onchange="applyFilters()">
+                            <label for="brand-puma">Puma</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="brand-newbalance" value="New Balance" onchange="applyFilters()">
+                            <label for="brand-newbalance">New Balance</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="brand-converse" value="Converse" onchange="applyFilters()">
+                            <label for="brand-converse">Converse</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h3>Collection</h3>
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="checkbox" id="collection-running" value="Running" onchange="applyFilters()">
+                            <label for="collection-running">Running</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="collection-casual" value="Casual" onchange="applyFilters()">
+                            <label for="collection-casual">Casual</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="collection-sports" value="Basketball" onchange="applyFilters()">
+                            <label for="collection-sports">Sports</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="collection-premium" value="Training" onchange="applyFilters()">
+                            <label for="collection-premium">Premium</label>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Products Section -->
+            <div class="products-section">
+                <!-- Search Bar -->
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search products..." onkeyup="applySearch()">
+                    <button class="search-button" onclick="applySearch()">Search</button>
+                </div>
+
+                <div class="products-header">
+                    <h2>All Products</h2>
+                    <select class="sort-dropdown" onchange="sortProducts(this.value)">
+                        <option value="">Sort By</option>
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="price-asc">Price (Low to High)</option>
+                        <option value="price-desc">Price (High to Low)</option>
+                    </select>
+                </div>
+
+                <div class="products-grid" id="productsGrid">
+                    <!-- Products will be inserted here by JavaScript -->
+                </div>
+
+                <div class="no-products" id="noProducts" style="display: none;">
+                    <p>No products found matching your filters.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            {
+                id: 1,
+                name: 'Nike Air Max 270',
+                brand: 'Nike',
+                collection: 'Casual',
+                price: 219.99,
+                image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663381436063/lOZOEbUZRBkODyvf.png',
+                link: 'NikeAirMax270.html',
+                tag: ''
+            },
+            {
+                id: 2,
+                name: 'Nike Elite Runner Pro',
+                brand: 'Nike',
+                collection: 'Running',
+                price: 229.99,
+                image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/LBUPnoswZhcidJkY.png',
+                link: 'NikeEliteRunnerPro.html',
+                tag: ''
+            },
+            {
+                id: 3,
+                name: 'Nike Comfort Walk Plus',
+                brand: 'Nike',
+                collection: 'Casual',
+                price: 159.99,
+                image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/oNmiTuSXqeoDCyvh.jpeg',
+                link: 'NikeComfortWalkPlus.html',
+                tag: ''
+            },
+            {
+                id: 4,
+                name: 'Nike Urban Flex Sneaker',
+                brand: 'Nike',
+                collection: 'Casual',
+                price: 179.99,
+                image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/WPMbFctvNLFtqdqv.png',
+                link: 'NikeUrbanFlexSneaker.html',
+                tag: 'NEW'
+            },
+            {
+                id: 5,
+                name: 'Nike Classic Trainer',
+                brand: 'Nike',
+                collection: 'Training',
+                price: 149.99,
+                image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/jtJqPMOhRFGrvlBZ.png',
+                link: 'NikeClassicTrainer.html',
+                tag: ''
+            },
+            {
+                id: 6,
+                name: 'Jordan 1 Retro',
+                brand: 'Jordan',
+                collection: 'Basketball',
+                price: 249.99,
+                image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/HZDiSqxfpxfavVAe.jpg',
+                link: 'Jordan1Retro.html',
+                tag: ''
+            },
+            {
+                id: 7,
+                name: 'Adidas Ultra Boost',
+                brand: 'Adidas',
+                collection: 'Running',
+                price: 239.99,
+                image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/XHAmwqukAvqToiZo.png',
+                link: 'AdidasUltraBoost.html',
+                tag: ''
+            },
+            {
+                id: 8,
+                name: 'Puma RS-X',
+                brand: 'Puma',
+                collection: 'Casual',
+                price: 169.99,
+                image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/EAhzJUEkqDjgMWwe.jpg',
+                link: 'PumaRS-X.html',
+                tag: ''
+            },
+            {
+                id: 9,
+                name: 'New Balance 990v6',
+                brand: 'New Balance',
+                collection: 'Running',
+                price: 189.99,
+                image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OISFcGUaRzULPMhv.jpg',
+                link: 'NewBalance990v6.html',
+                tag: ''
+            },
+            {
+                id: 10,
+                name: 'Converse One Star',
+                brand: 'Converse',
+                collection: 'Casual',
+                price: 149.99,
+                image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OqEvWuXBAyHMsEtW.jpg',
+                link: 'ConverseOneStar.html',
+                tag: ''
+            }
+        ];
+
+        let filteredProducts = [...products];
+        let searchQuery = '';
+
+        function applySearch() {
+            searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const selectedBrands = Array.from(document.querySelectorAll('.filter-option input[id^="brand-"]:checked')).map(el => el.value);
+            const selectedCollections = Array.from(document.querySelectorAll('.filter-option input[id^="collection-"]:checked')).map(el => el.value);
+
+            filteredProducts = products.filter(product => {
+                const brandMatch = selectedBrands.length === 0 || selectedBrands.includes(product.brand);
+                const collectionMatch = selectedCollections.length === 0 || selectedCollections.includes(product.collection);
+                const searchMatch = searchQuery === '' || product.name.toLowerCase().includes(searchQuery) || product.brand.toLowerCase().includes(searchQuery);
+                return brandMatch && collectionMatch && searchMatch;
+            });
+
+            renderProducts();
+        }
+
+        function sortProducts(sortBy) {
+            if (sortBy === 'name-asc') {
+                filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (sortBy === 'name-desc') {
+                filteredProducts.sort((a, b) => b.name.localeCompare(a.name));
+            } else if (sortBy === 'price-asc') {
+                filteredProducts.sort((a, b) => a.price - b.price);
+            } else if (sortBy === 'price-desc') {
+                filteredProducts.sort((a, b) => b.price - a.price);
+            }
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const noProducts = document.getElementById('noProducts');
+
+            if (filteredProducts.length === 0) {
+                grid.style.display = 'none';
+                noProducts.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            noProducts.style.display = 'none';
+
+            grid.innerHTML = filteredProducts.map(product => `
+                <a href="${product.link}" class="product-card">
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.name}">
+                    </div>
+                    <div class="product-info">
+                        <div class="product-brand">${product.brand}</div>
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-price">MOP $${product.price.toFixed(2)}</div>
+                        ${product.tag ? `<div class="product-tag">${product.tag}</div>` : ''}
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        // Check if a collection or brand filter was passed from mainpage
+        window.addEventListener('load', function() {
+            const selectedCollection = sessionStorage.getItem('selectedCollection');
+            const selectedBrand = sessionStorage.getItem('selectedBrand');
+            
+            if (selectedCollection) {
+                // Find and check the corresponding collection checkbox
+                const collectionCheckbox = document.getElementById('collection-' + selectedCollection.toLowerCase());
+                if (collectionCheckbox) {
+                    collectionCheckbox.checked = true;
+                    applyFilters();
+                }
+                // Clear the sessionStorage
+                sessionStorage.removeItem('selectedCollection');
+            }
+            
+            if (selectedBrand) {
+                // Find and check the corresponding brand checkbox
+                const brandCheckbox = document.getElementById('brand-' + selectedBrand.toLowerCase());
+                if (brandCheckbox) {
+                    brandCheckbox.checked = true;
+                    applyFilters();
+                }
+                // Clear the sessionStorage
+                sessionStorage.removeItem('selectedBrand');
+            }
+        });
+
+        // Initial render
+        renderProducts();
+    </script>
+</body>
+</html>

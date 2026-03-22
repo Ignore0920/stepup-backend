@@ -18,6 +18,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+// 添加一個簡單的測試路由
+app.get('/test', (req, res) => {
+    res.json({ message: 'Server is working!' });
+});
+
 // 健康檢查路由
 app.get('/health', (req, res) => {
     res.status(200).json({ 

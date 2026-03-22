@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Register - StepUp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #fafaf8;
+            color: #262626;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: bold;
+            font-size: 1.25rem;
+            text-decoration: none;
+            color: #262626;
+            transition: opacity 0.3s;
+        }
+
+        .logo:hover {
+            opacity: 0.7;
+        }
+
+        .logo-box {
+            width: 40px;
+            height: 40px;
+            background-color: #262626;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .header-nav a {
+            text-decoration: none;
+            color: #262626;
+            font-size: 0.875rem;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .header-nav a:hover {
+            color: #666666;
+        }
+
+        .user-info {
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .user-info.logged-in {
+            display: flex;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #262626;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: none;
+            border: 1px solid #262626;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #262626;
+            color: #ffffff;
+        }
+
+        /* Auth Container */
+        .auth-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            min-height: calc(100vh - 80px);
+            padding: 4rem 0;
+        }
+
+        .auth-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .auth-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+
+        .auth-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: #262626;
+        }
+
+        .auth-description {
+            color: #666666;
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid #e5e5e5;
+            background-color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="tel"]:focus {
+            outline: none;
+            border-color: #262626;
+            box-shadow: 0 0 0 3px rgba(38, 38, 38, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group a {
+            color: #262626;
+            text-decoration: none;
+            border-bottom: 1px solid #262626;
+        }
+
+        .checkbox-group a:hover {
+            color: #666666;
+            border-bottom-color: #666666;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.875rem 2rem;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #262626;
+            color: #ffffff;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background-color: #000000;
+        }
+
+        .btn-secondary {
+            background-color: #ffffff;
+            color: #262626;
+            border: 2px solid #262626;
+            width: 100%;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f5f5f5;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-footer a {
+            color: #262626;
+            text-decoration: none;
+            border-bottom: 1px solid #262626;
+            cursor: pointer;
+        }
+
+        .form-footer a:hover {
+            color: #666666;
+            border-bottom-color: #666666;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background-color: #e5e5e5;
+        }
+
+        .divider-text {
+            font-size: 0.875rem;
+            color: #666666;
+        }
+
+        /* Social Login */
+        .social-login {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-btn {
+            padding: 0.875rem 1rem;
+            border: 1px solid #e5e5e5;
+            background-color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .social-btn:hover {
+            border-color: #262626;
+            background-color: #f5f5f5;
+        }
+
+        /* Illustration Section */
+        .illustration-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+            padding: 3rem;
+            border: 2px solid #262626;
+            position: relative;
+        }
+
+        .illustration-section::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            width: 40px;
+            height: 40px;
+            border-top: 3px solid #262626;
+            border-left: 3px solid #262626;
+        }
+
+        .illustration-section::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            width: 40px;
+            height: 40px;
+            border-bottom: 3px solid #262626;
+            border-right: 3px solid #262626;
+        }
+
+        .shoe-illustration {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #e5e5e5 0%, #d0d0d0 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            margin-bottom: 2rem;
+        }
+
+        .illustration-text {
+            text-align: center;
+        }
+
+        .illustration-text h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .illustration-text p {
+            color: #666666;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        /* Tab Toggle */
+        .tab-toggle {
+            display: flex;
+            gap: 0;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e5e5e5;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            background: none;
+            border: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            color: #999999;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            display: none;
+        }
+
+        .tab-btn.active {
+            color: #262626;
+            border-bottom-color: #262626;
+        }
+
+        .tab-btn.visible {
+            display: flex;
+            flex: 1;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .success-message {
+            display: none;
+            background-color: #e8f5e9;
+            border: 1px solid #4caf50;
+            color: #2e7d32;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .auth-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                min-height: auto;
+                padding: 2rem 0;
+            }
+
+            .auth-title {
+                font-size: 2rem;
+            }
+
+            .illustration-section {
+                order: -1;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .social-login {
+                grid-template-columns: 1fr;
+            }
+
+            .header-nav {
+                gap: 1rem;
+                font-size: 0.75rem;
+            }
+         .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            background: none;
+            border: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            color: #999999;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            display: block; /* Changed from 'none' to 'block' */
+    }
+        .tab-btn.visible {
+            display: block; /* Changed from 'flex' to 'block' */
+    }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="main page.html" class="logo">
+                    <div class="logo-box">S</div>
+                    <span>STEPUP</span>
+                </a>
+                <nav class="header-nav">
+                    <a href="main page.html">Home</a>
+                    <a href="#">Shop</a>
+                    <a href="shopping-cart.html">Cart</a>
+                    <div class="user-info" id="userInfo">
+                        <div class="user-avatar" id="userAvatar"></div>
+                        <span id="userName"></span>
+                        <button class="logout-btn" onclick="logout()">Logout</button>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="auth-container">
+            <!-- Left Section - Form -->
+            <div class="auth-section">
+               <div class="tab-toggle">
+                    <button class="tab-btn active visible" onclick="switchTab('login')">Login</button>
+                  <button class="tab-btn visible" onclick="switchTab('register')">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <div id="login" class="tab-content active">
+                    <h2 class="auth-title">Welcome Back</h2>
+                    <p class="auth-description">Sign in to your StepUp account to access your orders and preferences.</p>
+
+                    <form onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="login-email">Email Address</label>
+                            <input type="email" id="login-email" placeholder="your@email.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" placeholder="Enter your password" required>
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="remember" checked>
+                            <label for="remember" style="margin: 0; text-transform: none; letter-spacing: normal;">Remember me</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Sign In</button>
+
+                        <div class="form-footer">
+                            <a onclick="switchTab('forgot-password'); return false;">Forgot your password?</a>
+                        </div>
+                    </form>
+
+                    <div class="divider">
+                        <span class="divider-text">or continue with</span>
+                    </div>
+
+                    <div class="social-login">
+                        <button class="social-btn">Google</button>
+                        <button class="social-btn">Facebook</button>
+                    </div>
+
+                    <div class="form-footer">
+                        Don't have an account? <a onclick="switchTab('register'); return false;">Create one</a>
+                    </div>
+                </div>
+
+                <!-- Forgot Password Form -->
+                <div id="forgot-password" class="tab-content">
+                    <h2 class="auth-title">Reset Password</h2>
+                    <p class="auth-description">Enter your email address and we'll send you a link to reset your password.</p>
+
+                    <form onsubmit="handleForgotPassword(event)">
+                        <div class="form-group">
+                            <label for="forgot-email">Email Address</label>
+                            <input type="email" id="forgot-email" placeholder="your@email.com" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Send Reset Link</button>
+
+                        <div class="form-footer">
+                            <a onclick="switchTab('login'); return false;">Back to Login</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Verify Code Form -->
+                <div id="verify-code" class="tab-content">
+                    <h2 class="auth-title">Verify Code</h2>
+                    <p class="auth-description">Enter the verification code sent to your email address.</p>
+
+                    <form onsubmit="handleVerifyCode(event)">
+                        <div class="form-group">
+                            <label for="verify-code-input">Verification Code</label>
+                            <input type="text" id="verify-code-input" placeholder="000000" maxlength="6" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Verify Code</button>
+
+                        <div class="form-footer">
+                            Didn't receive the code? <a onclick="switchTab('forgot-password'); return false;">Resend</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Reset Password Form -->
+                <div id="reset-password" class="tab-content">
+                    <h2 class="auth-title">Create New Password</h2>
+                    <p class="auth-description">Enter your new password below.</p>
+
+                    <form onsubmit="handleResetPassword(event)">
+                        <div class="form-group">
+                            <label for="new-password">New Password</label>
+                            <input type="password" id="new-password" placeholder="Create a strong password" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm-new-password">Confirm Password</label>
+                            <input type="password" id="confirm-new-password" placeholder="Confirm your password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Reset Password</button>
+
+                        <div class="form-footer">
+                            <a onclick="switchTab('login'); return false;">Back to Login</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Register Form -->
+                <div id="register" class="tab-content">
+                    <h2 class="auth-title">Join StepUp</h2>
+                    <p class="auth-description">Create your account to start shopping premium athletic footwear.</p>
+
+                    <form onsubmit="handleRegister(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="register-first">First Name</label>
+                                <input type="text" id="register-first" placeholder="John" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="register-last">Last Name</label>
+                                <input type="text" id="register-last" placeholder="Doe" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-email">Email Address</label>
+                            <input type="email" id="register-email" placeholder="your@email.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-phone">Phone Number</label>
+                            <input type="tel" id="register-phone" placeholder="+853 0000 0000">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-password">Password</label>
+                            <input type="password" id="register-password" placeholder="Create a strong password" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-confirm">Confirm Password</label>
+                            <input type="password" id="register-confirm" placeholder="Confirm your password" required>
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="terms" required>
+                            <label for="terms" style="margin: 0; text-transform: none; letter-spacing: normal;">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Create Account</button>
+                    </form>
+
+                    <div class="divider">
+                        <span class="divider-text">or sign up with</span>
+                    </div>
+
+                    <div class="social-login">
+                        <button class="social-btn">Google</button>
+                        <button class="social-btn">Facebook</button>
+                    </div>
+
+                    <div class="form-footer">
+                        Already have an account? <a onclick="switchTab('login'); return false;">Sign in</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Section - Illustration -->
+            <div class="illustration-section">
+                <div class="shoe-illustration">👟</div>
+                <div class="illustration-text">
+                    <h3>Premium Footwear</h3>
+                    <p>Discover our curated collection of athletic shoes designed for the modern man. Experience style, comfort, and performance.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cookie Management Functions
+        function setCookie(name, value, days = 7) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + encodeURIComponent(value) + ";" + expires + ";path=/;";
+            console.log('Cookie set:', name, '=', value, 'expires:', date.toUTCString());
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.indexOf(nameEQ) === 0) {
+                    return decodeURIComponent(cookie.substring(nameEQ.length));
+                }
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            setCookie(name, "", -1);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginStatus();
+        });
+
+        // Check if user is logged in
+        function checkLoginStatus() {
+            const userEmail = getCookie('userEmail');
+            const userName = getCookie('userName');
+            
+            if (userEmail) {
+                showUserInfo(userName || userEmail.split('@')[0]);
+            }
+        }
+
+        // Show user info in header
+        function showUserInfo(name) {
+            const userInfo = document.getElementById('userInfo');
+            const userAvatar = document.getElementById('userAvatar');
+            const userNameEl = document.getElementById('userName');
+            
+            userAvatar.textContent = name.charAt(0).toUpperCase();
+            userNameEl.textContent = name;
+            userInfo.classList.add('logged-in');
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+
+            const toggle = document.querySelector('.tab-toggle');
+            if (tabName === 'login' || tabName === 'register') {
+                const mainTabs = document.querySelectorAll('.tab-btn.visible');
+                mainTabs.forEach(tab => {
+                    if (tab.textContent.toLowerCase() === tabName) {
+                        tab.classList.add('active');
+                    }
+                });
+            } else {
+                const mainTabs = document.querySelectorAll('.tab-btn.visible');
+                mainTabs.forEach(tab => tab.classList.remove('active'));
+            }
+        }
+
+        // Form handlers
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const remember = document.getElementById('remember').checked;
+
+            // Save to multiple storage methods for reliability
+            const userName = email.split('@')[0];
+            
+            // SessionStorage (immediate)
+            sessionStorage.setItem('userEmail', email);
+            sessionStorage.setItem('userName', userName);
+            sessionStorage.setItem('isLoggedIn', 'true');
+            
+            // LocalStorage (persistent)
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('userName', userName);
+            localStorage.setItem('isLoggedIn', 'true');
+            
+            // Cookie (backup)
+            setCookie('userEmail', email, remember ? 30 : 1);
+            setCookie('userName', userName, remember ? 30 : 1);
+            setCookie('isLoggedIn', 'true', remember ? 30 : 1);
+
+            console.log('Login data saved to all storage methods');
+            console.log('SessionStorage:', sessionStorage.getItem('userEmail'));
+            console.log('LocalStorage:', localStorage.getItem('userEmail'));
+            
+            // Show success and redirect
+            showUserInfo(userName);
+            alert('Login successful! Welcome back.');
+            // Redirect to home page immediately
+            setTimeout(() => {
+                window.location.href = 'main page.html';
+            }, 500);
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            const firstName = document.getElementById('register-first').value;
+            const lastName = document.getElementById('register-last').value;
+            const email = document.getElementById('register-email').value;
+            const fullName = firstName + ' ' + lastName;
+
+            // Save to multiple storage methods for reliability
+            // SessionStorage (immediate)
+            sessionStorage.setItem('userEmail', email);
+            sessionStorage.setItem('userName', firstName);
+            sessionStorage.setItem('isLoggedIn', 'true');
+            
+            // LocalStorage (persistent)
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('userName', firstName);
+            localStorage.setItem('isLoggedIn', 'true');
+            
+            // Save complete user data to userData object
+            const phone = document.getElementById('register-phone').value;
+            const userData = {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                phone: phone,
+                street: '',
+                city: '',
+                state: '',
+                postal: '',
+                country: '',
+                notifications: 'enabled'
+            };
+            localStorage.setItem('userData', JSON.stringify(userData));
+            
+            // Cookie (backup)
+            setCookie('userEmail', email, 30);
+            setCookie('userName', firstName, 30);
+            setCookie('isLoggedIn', 'true', 30);
+
+            console.log('Register data saved to all storage methods');
+            console.log('SessionStorage:', sessionStorage.getItem('userEmail'));
+            console.log('LocalStorage:', localStorage.getItem('userEmail'));
+            
+            // Show success and redirect
+            showUserInfo(firstName);
+            alert('Account created successfully! Welcome to StepUp.');
+            // Redirect to home page immediately
+            setTimeout(() => {
+                window.location.href = 'main page.html';
+            }, 500);
+        }
+
+        function handleForgotPassword(event) {
+            event.preventDefault();
+            const email = document.getElementById('forgot-email').value;
+            
+            // Save email for password reset
+            setCookie('resetEmail', email, 1);
+            
+            alert('Reset link sent to ' + email);
+            switchTab('verify-code');
+        }
+
+        function handleVerifyCode(event) {
+            event.preventDefault();
+            const code = document.getElementById('verify-code-input').value;
+            
+            if (code.length === 6) {
+                alert('Code verified successfully!');
+                switchTab('reset-password');
+            } else {
+                alert('Please enter a valid 6-digit code');
+            }
+        }
+
+        function handleResetPassword(event) {
+            event.preventDefault();
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-new-password').value;
+
+            if (newPassword === confirmPassword) {
+                alert('Password reset successfully!');
+                deleteCookie('resetEmail');
+                switchTab('login');
+            } else {
+                alert('Passwords do not match');
+            }
+        }
+
+        function logout() {
+            deleteCookie('userEmail');
+            deleteCookie('userName');
+            deleteCookie('isLoggedIn');
+            
+            const userInfo = document.getElementById('userInfo');
+            userInfo.classList.remove('logged-in');
+            
+            alert('Logged out successfully');
+            window.location.href = 'main page.html';
+        }
+    </script>
+</body>
+</html>

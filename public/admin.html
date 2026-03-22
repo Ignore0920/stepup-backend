@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StepUp Admin - Account Creation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Core Styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #f9f9f9; color: #262626; line-height: 1.6; }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+        
+        /* --- SIDEBAR LAYOUT STYLES --- */
+        .admin-wrapper { display: flex; min-height: 100vh; }
+        .sidebar { width: 250px; background-color: #262626; color: white; padding: 20px; flex-shrink: 0; }
+        .sidebar h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; border-bottom: 1px solid #444; padding-bottom: 20px; margin-top: 0; }
+        .sidebar nav a { display: block; color: #bbb; text-decoration: none; padding: 15px 0; transition: 0.3s; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        .sidebar nav a:hover, .sidebar nav a.active { color: white; font-weight: bold; }
+        .sidebar nav a.active { border-left: 3px solid white; padding-left: 10px; }
+        .main-content { flex-grow: 1; padding: 40px; box-sizing: border-box; max-width: calc(100vw - 250px); overflow-y: auto; }
+        
+        /* Layout & UI Components */
+        .admin-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; }
+        .admin-section { background: #fff; padding: 2.5rem; border: 1px solid #e5e5e5; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .btn { padding: 0.85rem 2rem; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border: none; cursor: pointer; transition: all 0.3s; width: 100%; }
+        .btn-primary { background-color: #262626; color: #ffffff; }
+        .btn-primary:hover { background-color: #404040; transform: translateY(-1px); }
+        
+        /* Form Styling */
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
+        .form-control { width: 100%; padding: 0.9rem; border: 1px solid #e5e5e5; font-family: 'Montserrat', sans-serif; transition: border-color 0.3s; }
+        .form-control:focus { outline: none; border-color: #262626; }
+        
+        /* Stats & Table */
+        .stat-card { background: #262626; color: #fff; padding: 2rem; text-align: center; margin-bottom: 2rem; }
+        .stat-number { font-size: 3rem; font-family: 'Playfair Display', serif; font-weight: 900; line-height: 1; margin-bottom: 0.5rem; }
+        .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 500; opacity: 0.8; }
+        
+        .team-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .team-table th { text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem; border-bottom: 2px solid #262626; }
+        .team-table td { padding: 1rem; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+        .role-badge { font-size: 0.7rem; font-weight: 700; background: #f0f0f0; padding: 0.2rem 0.6rem; border-radius: 2px; text-transform: uppercase; }
+
+        .action-btns { display: flex; gap: 0.5rem; }
+        .btn-action { padding: 0.4rem 0.8rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; cursor: pointer; border: 1px solid #e5e5e5; background: #fff; transition: all 0.2s; }
+        .btn-edit:hover { background: #262626; color: #fff; border-color: #262626; }
+        .btn-remove:hover { background: #e74c3c; color: #fff; border-color: #e74c3c; }
+
+        /* --- MODAL STYLES --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+        .modal-content { background: #fff; padding: 2.5rem; width: 100%; max-width: 450px; position: relative; animation: modalFadeIn 0.3s ease-out; }
+        @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .close-modal { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999; }
+        .close-modal:hover { color: #262626; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-wrapper">
+        <aside class="sidebar">
+            <h2>StepUp Admin</h2>
+                <nav>
+                    <a href="admin.html" class="active">Staff Management</a>
+                    <a href="Inventory.html">Inventory Management</a>
+                    <a href="User.html">User Records</a>
+                    <a href="Order.html">Order Fulfillment</a>
+                    <a href="Sales.html">Sales Reports</a>
+                </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="admin-grid">
+                <aside>
+                    <div class="stat-card">
+                        <div class="stat-number" id="adminCount">2</div> <div class="stat-label">Total Admin Staff</div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Create Account</h2>
+                        <form id="addAdminForm">
+                            <div class="form-group">
+                                <label>Staff Username</label>
+                                <input type="text" id="newAdminName" class="form-control" placeholder="e.g. j_walker" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Authority Level</label>
+                                <select id="newAdminRole" class="form-control">
+                                    <option>Manager</option>
+                                    <option>Inventory Specialist</option>
+                                    <option>Order Editor</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Temporary Password</label>
+                                <input type="password" id="newAdminPass" class="form-control" placeholder="••••••••" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Authorize Member</button>
+                        </form>
+                    </div>
+                </aside>
+
+                <div class="admin-section">
+                    <h2 style="margin-bottom: 0.5rem; font-size: 1.8rem;">Admin Team Management</h2>
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 2rem;">Authorized personnel with backstage access permissions.</p>
+                    
+                    <table class="team-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th> </tr>
+                        </thead>
+                        <tbody id="teamList">
+                            <tr>
+                                <td>admin_main</td>
+                                <td><span class="role-badge">Super Admin</span></td>
+                                <td style="color: #27ae60; font-weight: 600;">Active</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-action btn-edit">Edit</button>
+                                        <button class="btn-action btn-remove">Remove</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>marketing_dept</td>
+                                <td><span class="role-badge">Manager</span></td>
+                                <td style="color: #27ae60; font-weight: 600;">Active</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-action btn-edit">Edit</button>
+                                        <button class="btn-action btn-remove">Remove</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" id="cancelBtn">&times;</button>
+            <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Edit Member Permissions</h2>
+            <form id="editAdminForm">
+                <div class="form-group">
+                    <label>Staff Username</label>
+                    <input type="text" id="editAdminName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Authority Level</label>
+                    <select id="editAdminRole" class="form-control">
+                        <option>Super Admin</option>
+                        <option>Manager</option>
+                        <option>Inventory Specialist</option>
+                        <option>Order Editor</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Existing JavaScript Logic remains completely unchanged
+        let totalAdmins = 2;
+        let currentRowEditing = null; 
+        
+        const editModal = document.getElementById('editModal');
+        const editForm = document.getElementById('editAdminForm');
+
+        document.getElementById('addAdminForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('newAdminName').value;
+            const role = document.getElementById('newAdminRole').value;
+
+            alert("Successfully!! New administrator added to the system database.");
+            
+            totalAdmins++;
+            document.getElementById('adminCount').innerText = totalAdmins;
+            
+            const table = document.getElementById('teamList');
+            const newRow = table.insertRow();
+            newRow.innerHTML = `
+                <td>${name}</td>
+                <td><span class="role-badge">${role}</span></td>
+                <td style="color: #27ae60; font-weight: 600;">Active</td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn-action btn-edit">Edit</button>
+                        <button class="btn-action btn-remove">Remove</button>
+                    </div>
+                </td>
+            `;
+            this.reset();
+        });
+
+        document.getElementById('teamList').addEventListener('click', function(e) {
+            const row = e.target.closest('tr');
+            if (e.target.classList.contains('btn-remove')) {
+                const username = row.cells[0].innerText;
+                if (confirm(`Are you sure you want to remove access for ${username}?`)) {
+                    row.remove();
+                    totalAdmins--;
+                    document.getElementById('adminCount').innerText = totalAdmins;
+                }
+            }
+            if (e.target.classList.contains('btn-edit')) {
+                currentRowEditing = row; 
+                document.getElementById('editAdminName').value = row.cells[0].innerText;
+                document.getElementById('editAdminRole').value = row.cells[1].innerText;
+                editModal.style.display = 'flex';
+            }
+        });
+
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (currentRowEditing) {
+                currentRowEditing.cells[0].innerText = document.getElementById('editAdminName').value;
+                const newRole = document.getElementById('editAdminRole').value;
+                currentRowEditing.cells[1].innerHTML = `<span class="role-badge">${newRole}</span>`;
+                editModal.style.display = 'none';
+                currentRowEditing = null;
+            }
+        });
+
+        document.getElementById('cancelBtn').addEventListener('click', () => { editModal.style.display = 'none'; });
+        window.onclick = function(event) { if (event.target == editModal) { editModal.style.display = 'none'; } }
+    </script>
+</body>
+</html>

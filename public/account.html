@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - StepUp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #fafaf8;
+            color: #262626;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: bold;
+            font-size: 1.25rem;
+            text-decoration: none;
+            color: #262626;
+            transition: opacity 0.3s;
+        }
+
+        .logo:hover {
+            opacity: 0.7;
+        }
+
+        .logo-box {
+            width: 40px;
+            height: 40px;
+            background-color: #262626;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .header-nav a {
+            text-decoration: none;
+            color: #262626;
+            font-size: 0.875rem;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .header-nav a:hover {
+            color: #666666;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #262626;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: none;
+            border: 1px solid #262626;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #262626;
+            color: #ffffff;
+        }
+
+        /* Page Title */
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 3rem 0 1rem;
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: #262626;
+        }
+
+        .breadcrumb {
+            font-size: 0.875rem;
+            color: #666666;
+            margin-bottom: 2rem;
+        }
+
+        .breadcrumb a {
+            color: #262626;
+            text-decoration: none;
+            border-bottom: 1px solid #262626;
+        }
+
+        /* Main Content */
+        .account-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: #ffffff;
+            border: 1px solid #e5e5e5;
+            padding: 2rem;
+            height: fit-content;
+        }
+
+        .sidebar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e5e5e5;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .sidebar-menu button {
+            background: none;
+            border: none;
+            padding: 0.875rem 1rem;
+            text-align: left;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.875rem;
+            color: #666666;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            margin-left: -1rem;
+            padding-left: calc(1rem - 3px);
+        }
+
+        .sidebar-menu button:hover {
+            color: #262626;
+            background-color: #f5f5f5;
+        }
+
+        .sidebar-menu button.active {
+            color: #262626;
+            border-left-color: #262626;
+            background-color: #f5f5f5;
+        }
+
+        /* Content Sections */
+        .content-section {
+            background-color: #ffffff;
+            border: 1px solid #e5e5e5;
+            padding: 2rem;
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e5e5e5;
+        }
+
+        /* Profile Section */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #666666;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-value {
+            font-size: 1rem;
+            color: #262626;
+        }
+
+        .edit-btn, .save-btn, .cancel-btn {
+            background-color: #262626;
+            color: #ffffff;
+            border: none;
+            padding: 0.875rem 2rem;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: fit-content;
+            margin-right: 0.5rem;
+        }
+
+        .edit-btn:hover, .save-btn:hover {
+            background-color: #000000;
+        }
+
+        .cancel-btn {
+            background-color: #e5e5e5;
+            color: #262626;
+        }
+
+        .cancel-btn:hover {
+            background-color: #d0d0d0;
+        }
+
+        /* Form Input */
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid #e5e5e5;
+            background-color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus {
+            outline: none;
+            border-color: #262626;
+            box-shadow: 0 0 0 3px rgba(38, 38, 38, 0.1);
+        }
+
+        .edit-form {
+            display: none;
+        }
+
+        .edit-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Orders Section */
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .orders-table thead {
+            background-color: #f5f5f5;
+            border-bottom: 2px solid #e5e5e5;
+        }
+
+        .orders-table th {
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .orders-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e5e5;
+            font-size: 0.875rem;
+        }
+
+        .order-id {
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .order-status {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-shipped {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-delivered {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .view-btn {
+            background: none;
+            border: 1px solid #262626;
+            color: #262626;
+            padding: 0.375rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.3s;
+        }
+
+        .view-btn:hover {
+            background-color: #262626;
+            color: #ffffff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #666666;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            border: 1px solid #4caf50;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .account-container {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .orders-table {
+                font-size: 0.75rem;
+            }
+
+            .orders-table th,
+            .orders-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .header-nav {
+                gap: 1rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="main page.html" class="logo">
+                    <div class="logo-box">S</div>
+                    <span>STEPUP</span>
+                </a>
+                <nav class="header-nav">
+                        <a href="main page.html">Home</a>
+                        <a href="shop.html">Shop</a>
+                        <a href="about.html">About</a>
+                        <a href="shopping-cart.html">Cart</a>
+                    <div class="user-info" id="userInfo">
+                        <div class="user-avatar" id="userAvatar"></div>
+                        <span id="userName"></span>
+                        <button class="logout-btn" onclick="logout()">Logout</button>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="main page.html">Home</a> / <span>My Account</span>
+        </div>
+
+        <h1 class="page-title">My Account</h1>
+
+        <div class="account-container">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-title">Menu</div>
+                <div class="sidebar-menu">
+                    <button class="menu-btn active" onclick="switchSection('profile')">Profile</button>
+                    <button class="menu-btn" onclick="switchSection('orders')">Order History</button>
+                    <button class="menu-btn" onclick="switchSection('addresses')">Addresses</button>
+                    <button class="menu-btn" onclick="switchSection('settings')">Settings</button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Profile Section -->
+                <div id="profile" class="content-section active">
+                    <h2 class="section-title">Personal Information</h2>
+                    
+                    <div class="success-message" id="profileSuccess">Profile updated successfully!</div>
+
+                    <!-- View Mode -->
+                    <div id="profileView">
+                        <div class="profile-grid">
+                            <div class="profile-item">
+                                <div class="profile-label">First Name</div>
+                                <div class="profile-value" id="firstName">-</div>
+                            </div>
+                            <div class="profile-item">
+                                <div class="profile-label">Last Name</div>
+                                <div class="profile-value" id="lastName">-</div>
+                            </div>
+                            <div class="profile-item">
+                                <div class="profile-label">Email Address</div>
+                                <div class="profile-value" id="email">-</div>
+                            </div>
+                            <div class="profile-item">
+                                <div class="profile-label">Phone Number</div>
+                                <div class="profile-value" id="phone">-</div>
+                            </div>
+                        </div>
+
+                        <button class="edit-btn" onclick="startEditProfile()">Edit Profile</button>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <div id="profileEdit" class="edit-form">
+                        <div class="form-group">
+                            <label class="profile-label">First Name</label>
+                            <input type="text" id="editFirstName" placeholder="Enter first name">
+                        </div>
+                        <div class="form-group">
+                            <label class="profile-label">Last Name</label>
+                            <input type="text" id="editLastName" placeholder="Enter last name">
+                        </div>
+                        <div class="form-group">
+                            <label class="profile-label">Email Address</label>
+                            <input type="email" id="editEmail" placeholder="Enter email">
+                        </div>
+                        <div class="form-group">
+                            <label class="profile-label">Phone Number</label>
+                            <input type="tel" id="editPhone" placeholder="+853 0000 0000">
+                        </div>
+
+                        <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+                        <button class="cancel-btn" onclick="cancelEditProfile()">Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Orders Section -->
+                <div id="orders" class="content-section">
+                    <h2 class="section-title">Order History</h2>
+                    
+                    <div id="ordersContent">
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Addresses Section -->
+                <div id="addresses" class="content-section">
+                    <h2 class="section-title">Saved Addresses</h2>
+                    
+                    <div class="success-message" id="addressSuccess">Address updated successfully!</div>
+
+                    <!-- View Mode -->
+                    <div id="addressView">
+                        <div class="profile-grid">
+                            <div class="profile-item">
+                                <div class="profile-label">Street Address</div>
+                                <div class="profile-value" id="street">-</div>
+                            </div>
+                            <div class="profile-item">
+                                <div class="profile-label">City</div>
+                                <div class="profile-value" id="city">-</div>
+                            </div>
+                            <div class="profile-item">
+                                <div class="profile-label">State/Province</div>
+                                <div class="profile-value" id="state">-</div>
+                            </div>
+                            <div class="profile-item">
+                                <div class="profile-label">Postal Code</div>
+                                <div class="profile-value" id="postal">-</div>
+                            </div>
+                            <div class="profile-item">
+                                <div class="profile-label">Country</div>
+                                <div class="profile-value" id="country">-</div>
+                            </div>
+                        </div>
+
+                        <button class="edit-btn" onclick="startEditAddress()">Edit Address</button>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <div id="addressEdit" class="edit-form">
+                        <div class="form-group">
+                            <label class="profile-label">Street Address</label>
+                            <input type="text" id="editStreet" placeholder="Enter street address">
+                        </div>
+                        <div class="form-group">
+                            <label class="profile-label">City</label>
+                            <input type="text" id="editCity" placeholder="Enter city">
+                        </div>
+                        <div class="form-group">
+                            <label class="profile-label">State/Province</label>
+                            <input type="text" id="editState" placeholder="Enter state/province">
+                        </div>
+                        <div class="form-group">
+                            <label class="profile-label">Postal Code</label>
+                            <input type="text" id="editPostal" placeholder="Enter postal code">
+                        </div>
+                        <div class="form-group">
+                            <label class="profile-label">Country</label>
+                            <input type="text" id="editCountry" placeholder="Enter country">
+                        </div>
+
+                        <button class="save-btn" onclick="saveAddress()">Save Changes</button>
+                        <button class="cancel-btn" onclick="cancelEditAddress()">Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Settings Section -->
+                <div id="settings" class="content-section">
+                    <h2 class="section-title">Account Settings</h2>
+                    
+                    <div class="success-message" id="settingsSuccess">Settings updated successfully!</div>
+
+                    <!-- View Mode -->
+                    <div id="settingsView">
+                        <div class="profile-grid">
+                            <div class="profile-item">
+                                <div class="profile-label">Password</div>
+                                <div class="profile-value">••••••••</div>
+                            </div>
+                            <div class="profile-item">
+                                <div class="profile-label">Email Notifications</div>
+                                <div class="profile-value" id="notifications">-</div>
+                            </div>
+                        </div>
+
+                        <button class="edit-btn" onclick="startEditSettings()">Edit Settings</button>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <div id="settingsEdit" class="edit-form">
+                        <div class="form-group">
+                            <label class="profile-label">Email Notifications</label>
+                            <select id="editNotifications" style="width: 100%; padding: 0.875rem 1rem; border: 1px solid #e5e5e5; font-family: 'Montserrat', sans-serif;">
+                                <option value="enabled">Enabled</option>
+                                <option value="disabled">Disabled</option>
+                            </select>
+                        </div>
+
+                        <button class="save-btn" onclick="saveSettings()">Save Changes</button>
+                        <button class="cancel-btn" onclick="cancelEditSettings()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // LocalStorage Management Functions
+        function saveToLocalStorage(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        function getFromLocalStorage(key, defaultValue = null) {
+            const item = localStorage.getItem(key);
+            return item ? JSON.parse(item) : defaultValue;
+        }
+
+        // Cookie Management Functions
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.indexOf(nameEQ) === 0) {
+                    return decodeURIComponent(cookie.substring(nameEQ.length));
+                }
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginStatus();
+            loadAllData();
+            loadOrders();
+        });
+
+        // Check if user is logged in
+        function checkLoginStatus() {
+            // Check multiple storage methods for maximum compatibility
+            const sessionEmail = sessionStorage.getItem('userEmail');
+            const sessionName = sessionStorage.getItem('userName');
+            const sessionLoggedIn = sessionStorage.getItem('isLoggedIn');
+            
+            const localEmail = localStorage.getItem('userEmail');
+            const localName = localStorage.getItem('userName');
+            const localLoggedIn = localStorage.getItem('isLoggedIn');
+            
+            const cookieEmail = getCookie('userEmail');
+            const cookieName = getCookie('userName');
+            const cookieLoggedIn = getCookie('isLoggedIn');
+            
+            console.log('SessionStorage - Email:', sessionEmail);
+            console.log('LocalStorage - Email:', localEmail);
+            console.log('Cookies - Email:', cookieEmail);
+            
+            // Try to get user info from any available storage
+            const userEmail = sessionEmail || localEmail || cookieEmail;
+            const userName = sessionName || localName || cookieName;
+            const isLoggedIn = sessionLoggedIn || localLoggedIn || cookieLoggedIn;
+            
+            console.log('Final - Email:', userEmail, 'LoggedIn:', isLoggedIn);
+            
+            if (!userEmail || !isLoggedIn) {
+                console.log('User not logged in, redirecting...');
+                alert('Please log in to access your account');
+                window.location.href = 'login register.html';
+                return;
+            }
+
+            console.log('User logged in as:', userName);
+            showUserInfo(userName || userEmail.split('@')[0]);
+        }
+
+        // Show user info in header
+        function showUserInfo(name) {
+            const userInfo = document.getElementById('userInfo');
+            const userAvatar = document.getElementById('userAvatar');
+            const userNameEl = document.getElementById('userName');
+            
+            userAvatar.textContent = name.charAt(0).toUpperCase();
+            userNameEl.textContent = name;
+        }
+
+        // Load all data from LocalStorage
+        function loadAllData() {
+            const userData = getFromLocalStorage('userData', {
+                firstName: getCookie('userName') || '',
+                lastName: '',
+                email: getCookie('userEmail') || '',
+                phone: '',
+                street: '',
+                city: '',
+                state: '',
+                postal: '',
+                country: '',
+                notifications: 'enabled'
+            });
+
+            // Load profile
+            document.getElementById('firstName').textContent = userData.firstName || '-';
+            document.getElementById('lastName').textContent = userData.lastName || '-';
+            document.getElementById('email').textContent = userData.email || '-';
+            document.getElementById('phone').textContent = userData.phone || '-';
+
+            // Load address
+            document.getElementById('street').textContent = userData.street || '-';
+            document.getElementById('city').textContent = userData.city || '-';
+            document.getElementById('state').textContent = userData.state || '-';
+            document.getElementById('postal').textContent = userData.postal || '-';
+            document.getElementById('country').textContent = userData.country || '-';
+
+            // Load settings
+            document.getElementById('notifications').textContent = userData.notifications === 'enabled' ? 'Enabled' : 'Disabled';
+        }
+
+        // Load orders from LocalStorage
+        function loadOrders() {
+            const orders = getFromLocalStorage('userOrders', []);
+
+            const ordersBody = document.getElementById('ordersBody');
+            ordersBody.innerHTML = '';
+
+            if (orders.length === 0) {
+                ordersBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No orders yet</td></tr>';
+                return;
+            }
+
+            orders.forEach(order => {
+                const row = document.createElement('tr');
+                const statusClass = `status-${order.status}`;
+                row.innerHTML = `
+                    <td class="order-id">${order.id}</td>
+                    <td>${order.date}</td>
+                    <td>${order.total}</td>
+                    <td><span class="order-status ${statusClass}">${order.status}</span></td>
+                    <td><button class="view-btn" onclick="viewOrder('${order.id}')">View</button></td>
+                `;
+                ordersBody.appendChild(row);
+            });
+        }
+
+        // Switch sections
+        function switchSection(sectionName) {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => section.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.menu-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(sectionName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Profile Edit Functions
+        function startEditProfile() {
+            const userData = getFromLocalStorage('userData', {});
+            document.getElementById('editFirstName').value = userData.firstName || '';
+            document.getElementById('editLastName').value = userData.lastName || '';
+            document.getElementById('editEmail').value = userData.email || '';
+            document.getElementById('editPhone').value = userData.phone || '';
+
+            document.getElementById('profileView').style.display = 'none';
+            document.getElementById('profileEdit').classList.add('active');
+        }
+
+        function saveProfile() {
+            const userData = getFromLocalStorage('userData', {});
+            userData.firstName = document.getElementById('editFirstName').value;
+            userData.lastName = document.getElementById('editLastName').value;
+            userData.email = document.getElementById('editEmail').value;
+            userData.phone = document.getElementById('editPhone').value;
+
+            saveToLocalStorage('userData', userData);
+            loadAllData();
+
+            document.getElementById('profileView').style.display = 'block';
+            document.getElementById('profileEdit').classList.remove('active');
+
+            showSuccessMessage('profileSuccess');
+        }
+
+        function cancelEditProfile() {
+            document.getElementById('profileView').style.display = 'block';
+            document.getElementById('profileEdit').classList.remove('active');
+        }
+
+        // Address Edit Functions
+        function startEditAddress() {
+            const userData = getFromLocalStorage('userData', {});
+            document.getElementById('editStreet').value = userData.street || '';
+            document.getElementById('editCity').value = userData.city || '';
+            document.getElementById('editState').value = userData.state || '';
+            document.getElementById('editPostal').value = userData.postal || '';
+            document.getElementById('editCountry').value = userData.country || '';
+
+            document.getElementById('addressView').style.display = 'none';
+            document.getElementById('addressEdit').classList.add('active');
+        }
+
+        function saveAddress() {
+            const userData = getFromLocalStorage('userData', {});
+            userData.street = document.getElementById('editStreet').value;
+            userData.city = document.getElementById('editCity').value;
+            userData.state = document.getElementById('editState').value;
+            userData.postal = document.getElementById('editPostal').value;
+            userData.country = document.getElementById('editCountry').value;
+
+            saveToLocalStorage('userData', userData);
+            loadAllData();
+
+            document.getElementById('addressView').style.display = 'block';
+            document.getElementById('addressEdit').classList.remove('active');
+
+            showSuccessMessage('addressSuccess');
+        }
+
+        function cancelEditAddress() {
+            document.getElementById('addressView').style.display = 'block';
+            document.getElementById('addressEdit').classList.remove('active');
+        }
+
+        // Settings Edit Functions
+        function startEditSettings() {
+            const userData = getFromLocalStorage('userData', {});
+            document.getElementById('editNotifications').value = userData.notifications || 'enabled';
+
+            document.getElementById('settingsView').style.display = 'none';
+            document.getElementById('settingsEdit').classList.add('active');
+        }
+
+        function saveSettings() {
+            const userData = getFromLocalStorage('userData', {});
+            userData.notifications = document.getElementById('editNotifications').value;
+
+            saveToLocalStorage('userData', userData);
+            loadAllData();
+
+            document.getElementById('settingsView').style.display = 'block';
+            document.getElementById('settingsEdit').classList.remove('active');
+
+            showSuccessMessage('settingsSuccess');
+        }
+
+        function cancelEditSettings() {
+            document.getElementById('settingsView').style.display = 'block';
+            document.getElementById('settingsEdit').classList.remove('active');
+        }
+
+        // Show success message
+        function showSuccessMessage(elementId) {
+            const element = document.getElementById(elementId);
+            element.classList.add('show');
+            setTimeout(() => {
+                element.classList.remove('show');
+            }, 3000);
+        }
+
+        // Action handlers
+        function viewOrder(orderId) {
+            alert('Order details for ' + orderId + ' coming soon!');
+        }
+
+        function logout() {
+            // Clear SessionStorage
+            sessionStorage.removeItem('userEmail');
+            sessionStorage.removeItem('userName');
+            sessionStorage.removeItem('isLoggedIn');
+            
+            // Clear LocalStorage
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userData');
+            localStorage.removeItem('userOrders');
+            
+            // Clear Cookies
+            deleteCookie('userEmail');
+            deleteCookie('userName');
+            deleteCookie('isLoggedIn');
+            
+            console.log('All user data cleared');
+            
+            alert('Logged out successfully');
+            window.location.href = 'main page.html';
+        }
+    </script>
+</body>
+</html>

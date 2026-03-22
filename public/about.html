@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - StepUp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #FAFAF8;
+            color: #262626;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #FAFAF8;
+            border-bottom: 1px solid #262626;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            cursor: pointer;
+        }
+
+        nav {
+            display: flex;
+            gap: 30px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #262626;
+            font-weight: 500;
+            transition: opacity 0.3s ease;
+        }
+
+        nav a:hover {
+            opacity: 0.7;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #262626;
+            color: #FAFAF8;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            position: relative;
+        }
+
+        .user-icon-btn {
+            font-size: 20px;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb {
+            padding: 20px 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .breadcrumb a {
+            color: #262626;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            padding: 60px 0;
+        }
+
+        .about-hero {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .about-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .about-hero p {
+            font-size: 18px;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .about-section {
+            margin-bottom: 80px;
+        }
+
+        .about-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            font-weight: 900;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #262626;
+            padding-bottom: 15px;
+        }
+
+        .about-section p {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .value-card {
+            text-align: center;
+            padding: 30px;
+            background-color: #fff;
+            border: 1px solid #e5e5e5;
+            transition: all 0.3s ease;
+        }
+
+        .value-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .value-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .value-card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .value-card p {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
+
+        .team-section {
+            margin-top: 60px;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .team-member {
+            text-align: center;
+        }
+
+        .team-member-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: #e5e5e5;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+
+        .team-member h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .team-member p {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
+
+        .cta-section {
+            background-color: #262626;
+            color: #FAFAF8;
+            padding: 60px 20px;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        .cta-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #ddd;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background-color: #FAFAF8;
+            color: #262626;
+            padding: 15px 40px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid #FAFAF8;
+        }
+
+        .cta-btn:hover {
+            background-color: transparent;
+            color: #FAFAF8;
+        }
+
+        footer {
+            background-color: #262626;
+            color: #FAFAF8;
+            padding: 40px 0;
+            text-align: center;
+            border-top: 1px solid #444;
+        }
+
+        @media (max-width: 768px) {
+            .about-hero h1 {
+                font-size: 32px;
+            }
+
+            .about-section h2 {
+                font-size: 24px;
+            }
+
+            nav {
+                gap: 15px;
+            }
+
+            nav a {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo" onclick="window.location.href='main page.html'" style="cursor: pointer;">STEPUP</div>
+            <nav>
+                <a href="main page.html">Home</a>
+                <a href="shop.html" class="cta-btn">Shop Now</a>
+                <a href="about.html" style="font-weight: 700; border-bottom: 2px solid #262626; padding-bottom: 5px;">About</a>
+            </nav>
+            <div class="nav-right">
+                <button title="Shopping Cart" onclick="window.location.href='shopping-cart.html'" style="position: relative;">
+                    🛒
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </button>
+                <a href="account.html" class="user-icon-btn" title="User Account">👤</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="main page.html">Home</a> /
+                <span>About Us</span>
+            </div>
+
+            <!-- Hero Section -->
+            <section class="about-hero">
+                <h1>About StepUp</h1>
+                <p>Discover the story behind premium men's athletic footwear and our commitment to quality, style, and excellence.</p>
+            </section>
+
+            <!-- Our Story -->
+            <section class="about-section">
+                <h2>Our Story</h2>
+                <p>
+                    StepUp was founded with a simple mission: to provide men with access to the world's finest athletic footwear. 
+                    What started as a passion for premium sneakers has evolved into a curated marketplace featuring the most sought-after 
+                    brands and exclusive collections.
+                </p>
+                <p>
+                    We believe that great footwear is more than just shoes—it's a statement of style, comfort, and confidence. 
+                    Every pair in our collection is carefully selected to meet our rigorous standards for quality, design, and performance.
+                </p>
+            </section>
+
+            <!-- Our Mission -->
+            <section class="about-section">
+                <h2>Our Mission</h2>
+                <p>
+                    At StepUp, our mission is to empower men to express themselves through premium athletic footwear. 
+                    We're committed to:
+                </p>
+                <div class="values-grid">
+                    <div class="value-card">
+                        <div class="value-icon">✨</div>
+                        <h3>Quality First</h3>
+                        <p>Curating only the finest brands and styles that meet our exacting standards.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon">🎯</div>
+                        <h3>Customer Focus</h3>
+                        <p>Providing exceptional service and support to every customer.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon">🌍</div>
+                        <h3>Sustainability</h3>
+                        <p>Partnering with brands that prioritize environmental responsibility.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon">💡</div>
+                        <h3>Innovation</h3>
+                        <p>Staying ahead of trends and bringing the latest styles to our customers.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Why Choose Us -->
+            <section class="about-section">
+                <h2>Why Choose StepUp?</h2>
+                <p>
+                    With over 500+ premium styles from 50+ top brands, StepUp offers an unparalleled selection of men's athletic footwear. 
+                    Our customers trust us for:
+                </p>
+                <ul style="margin-left: 20px; margin-top: 20px;">
+                    <li style="margin-bottom: 15px;"><strong>Authenticity:</strong> All products are 100% genuine and sourced directly from authorized retailers.</li>
+                    <li style="margin-bottom: 15px;"><strong>Expertise:</strong> Our team is passionate about footwear and ready to help you find the perfect pair.</li>
+                    <li style="margin-bottom: 15px;"><strong>Fast Shipping:</strong> We offer multiple shipping options to get your shoes to you quickly.</li>
+                    <li style="margin-bottom: 15px;"><strong>Easy Returns:</strong> Not satisfied? We offer hassle-free returns within 30 days.</li>
+                    <li style="margin-bottom: 15px;"><strong>Competitive Pricing:</strong> We work hard to offer the best prices on premium footwear.</li>
+                </ul>
+            </section>
+
+
+            <!-- CTA Section -->
+            <section class="cta-section">
+                <h2>Ready to Step Up?</h2>
+                <p>Explore our full collection of premium athletic footwear and find your perfect pair today.</p>
+                <a href="shop.html" class="cta-btn">Shop Now</a>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 StepUp - Premium Men's Athletic Footwear. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = totalItems;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartBadge();
+        });
+    </script>
+</body>
+</html>

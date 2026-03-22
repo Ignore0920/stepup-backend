@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - StepUp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #FAFAF8;
+            color: #262626;
+        }
+
+        header {
+            background-color: #FAFAF8;
+            border-bottom: 1px solid #262626;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            cursor: pointer;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-right button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #262626;
+            color: #FAFAF8;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .user-icon-btn {
+            font-size: 24px;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        main {
+            padding: 40px 0;
+        }
+
+        .breadcrumb {
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .breadcrumb a {
+            color: #262626;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .checkout-wrapper {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+        }
+
+        .checkout-form {
+            background-color: #fff;
+            padding: 30px;
+            border: 1px solid #262626;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .form-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #262626;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #262626;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            background-color: #f5f5f5;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .payment-option {
+            padding: 15px;
+            border: 2px solid #262626;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .payment-option:hover {
+            background-color: #f5f5f5;
+        }
+
+        .payment-option.selected {
+            background-color: #262626;
+            color: #FAFAF8;
+        }
+
+        .order-summary {
+            background-color: #fff;
+            padding: 30px;
+            border: 1px solid #262626;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .summary-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #262626;
+            padding-bottom: 10px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e5e5;
+            font-size: 14px;
+        }
+
+        .summary-row.total {
+            border-bottom: 2px solid #262626;
+            padding: 15px 0;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #262626;
+            color: #FAFAF8;
+            border: none;
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .checkout-btn:hover {
+            background-color: #000;
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            background-color: transparent;
+            border: 1px solid #262626;
+            color: #262626;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background-color: #f5f5f5;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .order-summary {
+                position: relative;
+                top: 0;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo" onclick="window.location.href='main page.html'" style="cursor: pointer;">STEPUP</div>
+            <div class="nav-right">
+                <button title="Shopping Cart" style="position: relative;">
+                    🛒
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </button>
+                <a href="account.html" class="user-icon-btn" title="User Account">👤</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="main page.html">Home</a> /
+                <a href="shopping-cart.html">Shopping Cart</a> /
+                <span>Checkout</span>
+            </div>
+
+            <div class="checkout-wrapper">
+                <!-- Checkout Form -->
+                <div class="checkout-form">
+                    <!-- Shipping Information -->
+                    <div class="form-section">
+                        <h2>Shipping Information</h2>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>First Name *</label>
+                                <input type="text" placeholder="John" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name *</label>
+                                <input type="text" placeholder="Doe" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email Address *</label>
+                            <input type="email" placeholder="john@example.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" placeholder="+853 0000 0000" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Street Address *</label>
+                            <input type="text" placeholder="123 Main Street" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>City *</label>
+                            <input type="text" placeholder="New York" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Country *</label>
+                            <select required>
+                                <option value="">Select Country</option>
+                                <option value="US">United States</option>
+                                <option value="CA">Canada</option>
+                                <option value="GB">United Kingdom</option>
+                                <option value="AU">Australia</option>
+                                <option value="JP">Japan</option>
+                                <option value="CN">China</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Method -->
+                    <div class="form-section">
+                        <h2>Shipping Method</h2>
+                        
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; margin-bottom: 15px;">
+                                <input type="radio" name="shipping" value="standard" checked style="width: auto; margin-right: 10px;">
+                                <span>Standard Shipping (5-7 business days) - Free</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; margin-bottom: 15px;">
+                                <input type="radio" name="shipping" value="express" style="width: auto; margin-right: 10px;">
+                                <span>Express Shipping (2-3 business days) - MOP $15.00</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center;">
+                                <input type="radio" name="shipping" value="overnight" style="width: auto; margin-right: 10px;">
+                                <span>Overnight Shipping (Next business day) - MOP $30.00</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="form-section">
+                        <h2>Payment Method</h2>
+                        
+                        <div class="payment-methods">
+                            <div class="payment-option selected" onclick="selectPayment(this, 'credit')">
+                                <div style="font-size: 24px; margin-bottom: 5px;">💳</div>
+                                <div style="font-size: 12px;">Credit Card</div>
+                            </div>
+                            <div class="payment-option" onclick="selectPayment(this, 'wallet')">
+                                <div style="font-size: 24px; margin-bottom: 5px;">📱</div>
+                                <div style="font-size: 12px;">Digital Wallet</div>
+                            </div>
+
+                        </div>
+
+                        <!-- Credit/Debit Card Form -->
+                        <div id="card-form">
+                            <div class="form-group">
+                                <label>Cardholder Name *</label>
+                                <input type="text" placeholder="John Doe" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Card Number *</label>
+                                <input type="text" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Expiry Date *</label>
+                                    <input type="text" placeholder="MM/YY" maxlength="5" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>CVV *</label>
+                                    <input type="text" placeholder="123" maxlength="3" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Digital Wallet Form -->
+                        <div id="wallet-form" style="display: none;">
+                            <div class="form-group">
+                                <label>Select Digital Wallet *</label>
+                                <select required>
+                                    <option value="">Choose Wallet</option>
+                                    <option value="mpay">MPay</option>
+                                    <option value="alipay">Alipay</option>
+                                    <option value="wechat">WeChat Pay</option>
+                                    <option value="paypal">PayPal</option>
+                                    <option value="applepay">Apple Pay</option>
+                                    <option value="googlepay">Google Pay</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Terms & Conditions -->
+                    <div class="form-section">
+                        <label style="display: flex; align-items: flex-start;">
+                            <input type="checkbox" style="width: auto; margin-right: 10px; margin-top: 5px;" required>
+                            <span>I agree to the Terms & Conditions and Privacy Policy</span>
+                        </label>
+                    </div>
+
+                    <button class="checkout-btn" onclick="completeCheckout()">Complete Purchase</button>
+                    <button class="back-btn" onclick="window.location.href='shopping-cart.html'">Back to Cart</button>
+                </div>
+
+                <!-- Order Summary Sidebar -->
+                <div class="order-summary">
+                    <h3 class="summary-title">Order Summary</h3>
+
+                    <div id="cartItems"></div>
+
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span id="subtotalPrice">MOP $0.00</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Shipping:</span>
+                        <span id="shippingPrice">MOP $0.00</span>
+                    </div>
+
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="totalPrice">MOP $0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Payment method selection
+        function selectPayment(element, method) {
+            // Remove selected class from all options
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            
+            // Show/hide forms based on payment method
+            const cardForm = document.getElementById('card-form');
+            const walletForm = document.getElementById('wallet-form');
+            
+            if (method === 'credit') {
+                cardForm.style.display = 'block';
+                walletForm.style.display = 'none';
+            } else if (method === 'wallet') {
+                cardForm.style.display = 'none';
+                walletForm.style.display = 'block';
+            }
+        }
+
+        function updateTotal() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            let subtotal = 0;
+            cart.forEach(item => {
+                const price = parseFloat(item.price.replace('MOP $', '')) || 0;
+                subtotal += price * item.quantity;
+            });
+            // Match the shipping logic from shopping-cart.html
+            const shipping = subtotal >= 100 ? 0.00 : 15.00;
+            const total = subtotal + shipping;
+            document.getElementById('subtotalPrice').textContent = 'MOP $' + subtotal.toFixed(2);
+            const shippingElement = document.getElementById('shippingPrice');
+            shippingElement.textContent = shipping === 0 ? 'Free' : 'MOP $' + shipping.toFixed(2);
+            document.getElementById('totalPrice').textContent = 'MOP $' + total.toFixed(2);
+        }
+        
+        document.querySelectorAll('input[name="shipping"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                updateTotal();
+            });
+        });
+
+        function completeCheckout() {
+            const firstName = document.querySelector('input[placeholder="John"]').value;
+            const lastName = document.querySelector('input[placeholder="Doe"]').value;
+            const email = document.querySelector('input[placeholder="john@example.com"]').value;
+            if (!firstName || !lastName || !email) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            alert('Thank you for your purchase! Your order has been confirmed. You will receive an email confirmation shortly.');
+            localStorage.removeItem('cart');
+            window.location.href = 'main page.html';
+        }
+
+        function loadCart() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartItemsContainer = document.getElementById('cartItems');
+            let html = '';
+            cart.forEach((item) => {
+                html += '<div class="summary-item"><span>' + item.name + ' (x' + item.quantity + ')</span><span>MOP $' + (parseFloat(item.price.replace('MOP $', '')) * item.quantity).toFixed(2) + '</span></div>';
+            });
+            cartItemsContainer.innerHTML = html;
+            updateTotal();
+        }
+
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = totalItems;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCart();
+            updateCartBadge();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StepUp Admin - Orders</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CORE BRAND STYLES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #f9f9f9; color: #262626; line-height: 1.6; }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+        
+        /* --- SIDEBAR LAYOUT STYLES --- */
+        .admin-wrapper { display: flex; min-height: 100vh; }
+        .sidebar { width: 250px; background-color: #262626; color: white; padding: 20px; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
+        .sidebar h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; border-bottom: 1px solid #444; padding-bottom: 20px; margin-top: 0; }
+        .sidebar nav a { display: block; color: #bbb; text-decoration: none; padding: 15px 0; transition: 0.3s; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        .sidebar nav a:hover, .sidebar nav a.active { color: white; font-weight: bold; }
+        .sidebar nav a.active { border-left: 3px solid white; padding-left: 10px; }
+        .main-content { flex-grow: 1; padding: 40px; box-sizing: border-box; max-width: calc(100vw - 250px); overflow-y: auto; }
+
+        /* --- DASHBOARD & TABLE COMPONENTS --- */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; }
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: #fff; padding: 1.5rem; border: 1px solid #e5e5e5; display: flex; flex-direction: column; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: #262626; }
+        .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #999; }
+
+        .search-bar { width: 100%; padding: 1rem; border: 1px solid #e5e5e5; margin-bottom: 2rem; font-family: inherit; font-size: 0.9rem; }
+
+        .order-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e5e5e5; }
+        .order-table th { text-align: left; padding: 1rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid #262626; background: #fafafa; }
+        .order-table td { padding: 1rem; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+        
+        .badge { padding: 0.3rem 0.6rem; border-radius: 2px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .badge-pending { background: #f39c12; color: #fff; }
+        .badge-shipped { background: #27ae60; color: #fff; }
+        .badge-cancelled { background: #e74c3c; color: #fff; }
+
+        .btn-action { background: #262626; color: #fff; border: none; padding: 0.5rem 1rem; cursor: pointer; text-transform: uppercase; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; transition: 0.2s; }
+        .btn-action:hover { background: #444; }
+
+        /* MODAL STYLES */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .modal-content { background: #fff; padding: 2.5rem; width: 90%; max-width: 600px; position: relative; }
+        .close-btn { position: absolute; top: 1rem; right: 1.5rem; font-size: 1.5rem; cursor: pointer; }
+        
+        .row-cancelled td { opacity: 0.5; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-wrapper">
+        <aside class="sidebar">
+            <h2>StepUp Admin</h2>
+            <nav>
+                <a href="admin.html">Staff Management</a>
+                <a href="Inventory.html">Inventory Management</a>
+                <a href="User.html">User Records</a>
+                <a href="Order.html" class="active">Order Fulfillment</a>
+                <a href="Sales.html">Sales Reports</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Order Fulfillment</h1>
+                    <p style="color: #666; font-size: 0.9rem;">Monitor and manage incoming customer purchases.</p>
+                </div>
+                <button class="btn-action" onclick="exportData()" style="padding: 0.8rem 1.5rem;">Export CSV</button>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <span class="stat-label">Active Orders</span>
+                    <span class="stat-value" id="activeOrders">2</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Pending Processing</span>
+                    <span class="stat-value" id="pendingCount">1</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Refund Rate</span>
+                    <span class="stat-value">1.2%</span>
+                </div>
+            </div>
+
+            <input type="text" id="searchInput" class="search-bar" placeholder="Search by Order ID, Customer Name, or Product..." onkeyup="filterOrders()">
+
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Product Details</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="orderBody">
+                    <tr id="row-10294">
+                        <td>#10294</td>
+                        <td><strong>Marcus Wong</strong><br><small>Macau, SAR</small></td>
+                        <td>Nike Elite Runner Pro (Size 9)</td>
+                        <td>$189.99</td>
+                        <td><span class="badge badge-pending" id="status-10294">Processing</span></td>
+                        <td>
+                            <button class="btn-action" onclick="openModal('10294')">Update Status</button>
+                            <button class="btn-action" style="background:none; color:#e74c3c; border:1px solid #e74c3c; margin-top:5px;" onclick="cancelOrder('10294')">Void</button>
+                        </td>
+                    </tr>
+                    <tr id="row-10293">
+                        <td>#10293</td>
+                        <td><strong>Sofia Chen</strong><br><small>Taipa</small></td>
+                        <td>Adidas Ultraboost (Size 7)</td>
+                        <td>$150.00</td>
+                        <td><span class="badge badge-shipped" id="status-10293">Shipped</span></td>
+                        <td><button class="btn-action" onclick="openModal('10293')">Details</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
+
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle" style="margin-bottom: 1rem;">Order #XXXXX</h2>
+            <hr style="margin-bottom: 1.5rem; border: 0.5px solid #eee;">
+            
+            <div style="margin-bottom: 1.5rem;">
+                <p><strong>Update Tracking Status:</strong></p>
+                <select id="statusSelect" style="width:100%; padding:0.8rem; margin-top:0.5rem;">
+                    <option value="Processing">Processing</option>
+                    <option value="Shipped">Shipped / Out for Delivery</option>
+                    <option value="Delivered">Delivered</option>
+                </select>
+            </div>
+            
+            <button class="btn-action" style="width:100%; padding:1rem;" onclick="saveStatus()">Apply Change</button>
+        </div>
+    </div>
+
+    <script>
+        // --- ORDER MANAGEMENT LOGIC ---
+        let currentEditingId = null;
+
+        function openModal(orderId) {
+            currentEditingId = orderId;
+            document.getElementById('modalTitle').innerText = "Order Fulfillment: #" + orderId;
+            document.getElementById('infoModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('infoModal').style.display = 'none';
+        }
+
+        function saveStatus() {
+            const newStatus = document.getElementById('statusSelect').value;
+            const statusBadge = document.getElementById('status-' + currentEditingId);
+            
+            statusBadge.innerText = newStatus;
+            statusBadge.className = 'badge ' + (newStatus === 'Shipped' || newStatus === 'Delivered' ? 'badge-shipped' : 'badge-pending');
+            
+            updateDashboard();
+            closeModal();
+            alert("Order status updated successfully.");
+        }
+
+        function filterOrders() {
+            const input = document.getElementById('searchInput').value.toUpperCase();
+            const rows = document.getElementById("orderBody").getElementsByTagName("tr");
+            for (let row of rows) {
+                const text = row.textContent || row.innerText;
+                row.style.display = text.toUpperCase().includes(input) ? "" : "none";
+            }
+        }
+
+        function cancelOrder(orderId) {
+            if (confirm("Void this order?")) {
+                const row = document.getElementById('row-' + orderId);
+                row.classList.add('row-cancelled');
+                document.getElementById('status-' + orderId).innerText = "Cancelled";
+                document.getElementById('status-' + orderId).className = 'badge badge-cancelled';
+                updateDashboard();
+            }
+        }
+
+        function updateDashboard() {
+            let activeCount = 0; 
+            let pendingCount = 0;
+            let rows = document.getElementById("orderBody").getElementsByTagName("tr");
+            
+            for (let row of rows) {
+                if (!row.classList.contains('row-cancelled')) {
+                    activeCount++;
+                    const statusText = row.querySelector('[id^="status-"]').innerText;
+                    if(statusText === "Processing") pendingCount++;
+                }
+            }
+            document.getElementById('activeOrders').innerText = activeCount;
+            document.getElementById('pendingCount').innerText = pendingCount;
+        }
+
+        function exportData() { alert("Exporting secure CSV..."); }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('infoModal')) closeModal();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StepUp Admin - Inventory</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CORE BRAND STYLES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #f9f9f9; color: #262626; line-height: 1.6; }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+        /* --- SIDEBAR LAYOUT STYLES --- */
+        .admin-wrapper { display: flex; min-height: 100vh; }
+        .sidebar { width: 250px; background-color: #262626; color: white; padding: 20px; flex-shrink: 0; }
+        .sidebar h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; border-bottom: 1px solid #444; padding-bottom: 20px; margin-top: 0; }
+        .sidebar nav a { display: block; color: #bbb; text-decoration: none; padding: 15px 0; transition: 0.3s; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        .sidebar nav a:hover, .sidebar nav a.active { color: white; font-weight: bold; }
+        .sidebar nav a.active { border-left: 3px solid white; padding-left: 10px; }
+        .main-content { flex-grow: 1; padding: 40px; box-sizing: border-box; max-width: calc(100vw - 250px); overflow-y: auto; }
+
+        /* --- ORIGINAL INVENTORY COMPONENTS --- */
+        .admin-section { background: #fff; padding: 2rem; border: 1px solid #e5e5e5; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
+        .form-control { width: 100%; padding: 0.75rem; border: 1px solid #e5e5e5; font-family: inherit; transition: border-color 0.3s; }
+        .form-control:focus { outline: none; border-color: #262626; }
+        
+        .btn { padding: 0.75rem 2rem; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.3s; letter-spacing: 0.1em; }
+        .btn-primary { background-color: #262626; color: #ffffff; }
+        .btn-primary:hover { background-color: #404040; transform: translateY(-1px); }
+
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .data-table th, .data-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #e5e5e5; }
+        .data-table th { font-family: 'Playfair Display', serif; font-size: 1.1rem; border-bottom: 2px solid #262626; }
+        .data-table td { font-size: 0.9rem; }
+
+        ul.category-list { list-style: none; margin-top: 1rem; }
+        ul.category-list li { background: #f5f5f5; padding: 0.75rem; border: 1px solid #e5e5e5; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
+
+        .action-btns { display: flex; gap: 0.5rem; }
+        .btn-table { padding: 0.4rem 0.8rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; border: 1px solid #e5e5e5; background: #fff; cursor: pointer; transition: all 0.2s; }
+        .btn-edit:hover { background: #262626; color: #fff; border-color: #262626; }
+        .btn-remove:hover { background: #e74c3c; color: #fff; border-color: #e74c3c; }
+
+        h1 { margin-bottom: 2rem; font-size: 2.5rem; color: #262626; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-wrapper">
+        <aside class="sidebar">
+            <h2>StepUp Admin</h2>
+            <nav>
+                <a href="admin.html">Staff Management</a>
+                <a href="Inventory.html" class="active">Inventory Management</a>
+                <a href="User.html">User Records</a>
+                <a href="Order.html">Order Fulfillment</a>
+                <a href="Sales.html">Sales Reports</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <h1>Inventory Management</h1>
+
+            <div class="admin-section">
+                <h2>Equipment Item Classification</h2>
+                <br>
+                <form id="categoryForm" style="display: flex; gap: 1rem; align-items: flex-end;">
+                    <div class="form-group" style="flex: 1; margin: 0;">
+                        <label>New Category Name</label>
+                        <input type="text" id="catInput" class="form-control" placeholder="e.g. Casual Sneakers" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Category</button>
+                </form>
+                <ul class="category-list" id="categoryList">
+                    <li>Athletic Running</li>
+                    <li>Formal Oxfords</li>
+                </ul>
+            </div>
+
+            <div class="admin-section">
+                <h2>Shoe Item Management</h2>
+                <br>
+                <form id="shoeForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group"><label>Brand</label><input type="text" id="sBrand" class="form-control" required></div>
+                    <div class="form-group"><label>Model Name</label><input type="text" id="sModel" class="form-control" required></div>
+                    <div class="form-group"><label>Size Range (e.g. 7-13)</label><input type="text" id="sSize" class="form-control" required></div>
+                    <div class="form-group"><label>Price ($)</label><input type="number" id="sPrice" step="0.01" class="form-control" required></div>
+                    <div class="form-group"><label>Stock Level</label><input type="number" id="sStock" class="form-control" required></div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Add Product</button>
+                    </div>
+                </form>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Brand</th>
+                            <th>Model</th>
+                            <th>Sizes</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Actions</th> 
+                        </tr>
+                    </thead>
+                    <tbody id="shoeTableBody">
+                        <tr>
+                            <td>Nike</td>
+                            <td>Elite Runner Pro</td>
+                            <td>8-12</td>
+                            <td>$189.99</td>
+                            <td>45</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-table btn-edit" onclick="editProduct(this)">Edit</button>
+                                    <button class="btn-table btn-remove" onclick="removeProduct(this)">Remove</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    // Category Management
+    document.addEventListener('DOMContentLoaded', function() {
+        loadInventory();
+        
+        // Category form submission
+        document.getElementById('categoryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const categoryInput = document.getElementById('catInput');
+            const categoryName = categoryInput.value.trim();
+            
+            if (categoryName) {
+                const categoryList = document.getElementById('categoryList');
+                const newCategory = document.createElement('li');
+                newCategory.textContent = categoryName;
+                categoryList.appendChild(newCategory);
+                categoryInput.value = '';
+            }
+        });
+
+        // Shoe form submission
+        document.getElementById('shoeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const brand = document.getElementById('sBrand').value;
+            const model = document.getElementById('sModel').value;
+            const size = document.getElementById('sSize').value;
+            const price = document.getElementById('sPrice').value;
+            const stock = document.getElementById('sStock').value;
+            
+            if (brand && model && size && price && stock) {
+                const tbody = document.getElementById('shoeTableBody');
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${brand}</td>
+                    <td>${model}</td>
+                    <td>${size}</td>
+                    <td>$${parseFloat(price).toFixed(2)}</td>
+                    <td>${stock}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-table btn-edit" onclick="editProduct(this)">Edit</button>
+                            <button class="btn-table btn-remove" onclick="removeProduct(this)">Remove</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(newRow);
+                this.reset();
+            }
+        });
+    });
+
+    // Product management functions
+    function editProduct(btn) {
+        const row = btn.closest('tr');
+        const brand = row.cells[0].textContent;
+        const model = row.cells[1].textContent;
+        const size = row.cells[2].textContent;
+        const price = row.cells[3].textContent.replace('$', '');
+        const stock = row.cells[4].textContent;
+        
+        document.getElementById('sBrand').value = brand;
+        document.getElementById('sModel').value = model;
+        document.getElementById('sSize').value = size;
+        document.getElementById('sPrice').value = price;
+        document.getElementById('sStock').value = stock;
+        
+        row.remove();
+    }
+
+    function removeProduct(btn) {
+        if (confirm('Are you sure you want to remove this product?')) {
+            btn.closest('tr').remove();
+        }
+    }
+
+    function loadInventory() {
+        // This would normally load from a backend
+        console.log('Inventory page loaded');
+    }
+</script>
+</body>
+</html>

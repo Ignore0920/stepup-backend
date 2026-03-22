@@ -9,7 +9,7 @@ const Product = require('./models/Product');
 
 // 中間件配置
 app.use(cors({
-    origin: '*', // 允許所有域名訪問
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// 健康檢查路由（對雲端部署很重要）
+// 健康檢查路由
 app.get('/health', (req, res) => {
     res.status(200).json({ 
         status: 'OK', 
@@ -27,7 +27,7 @@ app.get('/health', (req, res) => {
     });
 });
 
-// 根路由 - API 資訊
+// 根路由
 app.get('/', (req, res) => {
     res.json({
         name: "StepUp Backend API",
@@ -66,7 +66,6 @@ app.post('/api/products', async (req, res) => {
     try {
         console.log("📦 Data received from frontend:", req.body);
         
-        // 數據驗證
         const requiredFields = ['productName', 'brand', 'category', 'price'];
         const missingFields = requiredFields.filter(field => !req.body[field]);
         
@@ -141,7 +140,7 @@ app.delete('/api/products/:id', async (req, res) => {
     }
 });
 
-// 數據庫連接
+// 數據庫連接 - 修復版本（移除不支持的選項）
 const dbURI = process.env.MONGO_URI;
 
 if (!dbURI) {
@@ -151,15 +150,8 @@ if (!dbURI) {
 
 console.log('🔄 Connecting to MongoDB...');
 
-// 連接選項
-const mongooseOptions = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-};
-
-mongoose.connect(dbURI, mongooseOptions)
+// 重要：移除 useNewUrlParser 和 useUnifiedTopology 選項
+mongoose.connect(dbURI)
 .then(() => {
     console.log('✅ Connected to StepUp Database');
     

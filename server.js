@@ -18,27 +18,48 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// 添加一個簡單的測試路由
+// 添加啟動日誌
+console.log('🚀 StepUp Backend Starting...');
+console.log('📦 Node Version:', process.version);
+console.log('🔧 Environment:', process.env.NODE_ENV || 'development');
+
+// 測試路由 - 不依賴數據庫
 app.get('/test', (req, res) => {
-    res.json({ message: 'Server is working!' });
+    res.json({ 
+        message: 'Server is working!',
+        timestamp: new Date().toISOString()
+    });
 });
 
-// 健康檢查路由
+// 健康檢查路由 - 顯示數據庫狀態
 app.get('/health', (req, res) => {
+    const dbStatus = mongoose.connection.readyState;
+    const dbStatusText = {
+        0: 'disconnected',
+        1: 'connected',
+        2: 'connecting',
+        3: 'disconnecting'
+    }[dbStatus] || 'unknown';
+    
     res.status(200).json({ 
-        status: 'OK', 
+        status: 'OK',
         message: 'Server is running',
+        database: dbStatusText,
         timestamp: new Date().toISOString()
     });
 });
 
 // 根路由
 app.get('/', (req, res) => {
+    const dbStatus = mongoose.connection.readyState;
     res.json({
         name: "StepUp Backend API",
         version: "1.0.0",
         description: "Product Management API",
+        status: "running",
+        database: dbStatus === 1 ? "connected" : "disconnected",
         endpoints: {
+            test: "/test",
             health: "/health",
             products: {
                 getAll: "GET /api/products",
@@ -48,7 +69,6 @@ app.get('/', (req, res) => {
                 delete: "DELETE /api/products/:id"
             }
         },
-        status: "running",
         timestamp: new Date().toISOString()
     });
 });
@@ -56,12 +76,18 @@ app.get('/', (req, res) => {
 // 獲取單個產品
 app.get('/api/products/:id', async (req, res) => {
     try {
+        // 檢查數據庫連接
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({ error: "Database not connected" });
+        }
+        
         const product = await Product.findById(req.params.id);
         if (!product) {
             return res.status(404).json({ error: "Product not found" });
         }
         res.json(product);
     } catch (err) {
+        console.error("❌ Fetch Error:", err.message);
         res.status(500).json({ error: err.message });
     }
 });
@@ -69,7 +95,12 @@ app.get('/api/products/:id', async (req, res) => {
 // 創建產品
 app.post('/api/products', async (req, res) => {
     try {
-        console.log("📦 Data received from frontend:", req.body);
+        // 檢查數據庫連接
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({ error: "Database not connected" });
+        }
+        
+        console.log("📦 Data received:", req.body);
         
         const requiredFields = ['productName', 'brand', 'category', 'price'];
         const missingFields = requiredFields.filter(field => !req.body[field]);
@@ -83,13 +114,13 @@ app.post('/api/products', async (req, res) => {
         const newProduct = new Product(req.body);
         await newProduct.save();
         
-        console.log("✅ Product saved successfully:", newProduct._id);
+        console.log("✅ Product saved:", newProduct._id);
         res.status(201).json({ 
             message: "Product saved successfully!",
             product: newProduct 
         });
     } catch (err) {
-        console.error("❌ Database Save Error:", err.message);
+        console.error("❌ Save Error:", err.message);
         res.status(400).json({ error: err.message });
     }
 });
@@ -97,6 +128,11 @@ app.post('/api/products', async (req, res) => {
 // 獲取所有產品
 app.get('/api/products', async (req, res) => {
     try {
+        // 檢查數據庫連接
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({ error: "Database not connected" });
+        }
+        
         const products = await Product.find().sort({ createdAt: -1 });
         res.json({
             success: true,
@@ -112,6 +148,10 @@ app.get('/api/products', async (req, res) => {
 // 更新產品
 app.put('/api/products/:id', async (req, res) => {
     try {
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({ error: "Database not connected" });
+        }
+        
         const product = await Product.findByIdAndUpdate(
             req.params.id,
             req.body,
@@ -125,6 +165,7 @@ app.put('/api/products/:id', async (req, res) => {
             product 
         });
     } catch (err) {
+        console.error("❌ Update Error:", err.message);
         res.status(400).json({ error: err.message });
     }
 });
@@ -132,6 +173,10 @@ app.put('/api/products/:id', async (req, res) => {
 // 刪除產品
 app.delete('/api/products/:id', async (req, res) => {
     try {
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({ error: "Database not connected" });
+        }
+        
         const product = await Product.findByIdAndDelete(req.params.id);
         if (!product) {
             return res.status(404).json({ error: "Product not found" });
@@ -141,53 +186,69 @@ app.delete('/api/products/:id', async (req, res) => {
             product 
         });
     } catch (err) {
+        console.error("❌ Delete Error:", err.message);
         res.status(500).json({ error: err.message });
     }
 });
 
-// 數據庫連接 - 修復版本（移除不支持的選項）
+// ============ 重要修改：先啟動服務器，再嘗試連接數據庫 ============
+
+// 1. 先啟動服務器（無論數據庫是否連接）
+const port = process.env.PORT || 5000;
+
+const server = app.listen(port, '0.0.0.0', () => {
+    console.log(`✅ Server is running on port ${port}`);
+    console.log(`📍 Local: http://localhost:${port}`);
+    console.log(`📊 Health: http://localhost:${port}/health`);
+    console.log(`📝 API: http://localhost:${port}/api/products`);
+    console.log(`🧪 Test: http://localhost:${port}/test`);
+});
+
+// 2. 然後嘗試連接數據庫（不影響服務器運行）
 const dbURI = process.env.MONGO_URI;
 
 if (!dbURI) {
-    console.error('❌ MONGO_URI is not defined in .env file');
-    process.exit(1);
-}
-
-console.log('🔄 Connecting to MongoDB...');
-
-// 重要：移除 useNewUrlParser 和 useUnifiedTopology 選項
-mongoose.connect(dbURI)
-.then(() => {
-    console.log('✅ Connected to StepUp Database');
+    console.error('⚠️  WARNING: MONGO_URI is not defined in environment variables');
+    console.log('💡 Database features will not work until MONGO_URI is set');
+    console.log('   Set it in Render Environment section');
+} else {
+    console.log('🔄 Connecting to MongoDB...');
+    console.log('📝 Connection string starts with:', dbURI.substring(0, 30) + '...');
     
-    const port = process.env.PORT || 5000;
-    app.listen(port, '0.0.0.0', () => {
-        console.log(`🚀 Server running on port ${port}`);
-        console.log(`📝 Local access: http://localhost:${port}`);
-        console.log(`📝 API endpoints:`);
-        console.log(`   📊 Health:  http://localhost:${port}/health`);
-        console.log(`   📦 GET     http://localhost:${port}/api/products`);
-        console.log(`   📦 POST    http://localhost:${port}/api/products`);
-    });
-})
-.catch(err => {
-    console.error('❌ Database connection error:', err.message);
-    console.error('💡 Please check:');
-    console.error('   1. Your MongoDB Atlas IP whitelist (add 0.0.0.0/0)');
-    console.error('   2. Your username and password in MONGO_URI');
-    console.error('   3. Your network connection');
-    process.exit(1);
-});
+    mongoose.connect(dbURI)
+        .then(() => {
+            console.log('✅ Connected to StepUp Database');
+            console.log('📊 Database name:', mongoose.connection.name);
+        })
+        .catch(err => {
+            console.error('❌ Database connection error:', err.message);
+            console.error('💡 Please check:');
+            console.error('   1. MongoDB Atlas IP whitelist (add 0.0.0.0/0)');
+            console.error('   2. Username and password in MONGO_URI');
+            console.error('   3. Database user permissions');
+            console.log('⚠️  API will continue to run without database');
+        });
+}
 
 // 優雅關閉
 process.on('SIGINT', async () => {
-    await mongoose.connection.close();
-    console.log('👋 MongoDB connection closed');
-    process.exit(0);
+    console.log('👋 Shutting down...');
+    server.close(async () => {
+        if (mongoose.connection.readyState === 1) {
+            await mongoose.connection.close();
+            console.log('✅ MongoDB connection closed');
+        }
+        process.exit(0);
+    });
 });
 
 process.on('SIGTERM', async () => {
-    await mongoose.connection.close();
-    console.log('👋 MongoDB connection closed');
-    process.exit(0);
+    console.log('👋 Shutting down...');
+    server.close(async () => {
+        if (mongoose.connection.readyState === 1) {
+            await mongoose.connection.close();
+            console.log('✅ MongoDB connection closed');
+        }
+        process.exit(0);
+    });
 });

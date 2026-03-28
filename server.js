@@ -3,9 +3,14 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const Admin = require('./models/Admin');
 
 const app = express();
 const Product = require('./models/Product');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'stepup_admin_secret_key_change_in_production';
 
 // 中間件配置
 app.use(cors({
@@ -71,6 +76,58 @@ app.get('/', (req, res) => {
         },
         timestamp: new Date().toISOString()
     });
+});
+
+// ============ Admin Authentication Routes ============
+
+app.post('/api/admin/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        const admin = await Admin.findOne({ username });
+        if (!admin) {
+            return res.status(401).json({ error: 'Invalid username or password' });
+        }
+        
+        const isMatch = await admin.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid username or password' });
+        }
+        
+        const token = jwt.sign(
+            { id: admin._id, username: admin.username, role: 'admin' },
+            JWT_SECRET,
+            { expiresIn: '8h' }
+        );
+        
+        res.json({
+            success: true,
+            token,
+            user: { username: admin.username }
+        });
+    } catch (err) {
+        console.error('Admin login error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.get('/api/admin/verify', async (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).json({ error: 'No token provided' });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const admin = await Admin.findById(decoded.id);
+        if (!admin) {
+            return res.status(401).json({ error: 'Admin not found' });
+        }
+        res.json({ success: true, user: { username: admin.username } });
+    } catch (err) {
+        res.status(401).json({ error: 'Invalid token' });
+    }
 });
 
 // 獲取單個產品
@@ -216,19 +273,23 @@ if (!dbURI) {
     console.log('📝 Connection string starts with:', dbURI.substring(0, 30) + '...');
     
     mongoose.connect(dbURI)
-        .then(() => {
-            console.log('✅ Connected to StepUp Database');
-            console.log('📊 Database name:', mongoose.connection.name);
-        })
-        .catch(err => {
-            console.error('❌ Database connection error:', err.message);
-            console.error('💡 Please check:');
-            console.error('   1. MongoDB Atlas IP whitelist (add 0.0.0.0/0)');
-            console.error('   2. Username and password in MONGO_URI');
-            console.error('   3. Database user permissions');
-            console.log('⚠️  API will continue to run without database');
-        });
-}
+    .then(async () => {
+        console.log('✅ Connected to StepUp Database');
+        
+        // Create default admin if none exists
+        const adminCount = await Admin.countDocuments();
+        if (adminCount === 0) {
+            const defaultAdmin = new Admin({
+                username: 'admin',
+                password: 'admin123' // This will be hashed automatically
+            });
+            await defaultAdmin.save();
+            console.log('✅ Default admin created: username = admin, password = admin123');
+        }
+    })
+    .catch(err => {
+        console.error('❌ Database connection error:', err.message);
+    });
 
 // 優雅關閉
 process.on('SIGINT', async () => {

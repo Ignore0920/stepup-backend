@@ -48,6 +48,32 @@
     </style>
 </head>
 <body>
+<script>
+    // Check admin token on page load
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+        window.location.href = 'admin-login.html';
+    }
+    
+    // Optional: verify token with backend
+    async function verifyToken() {
+        try {
+            const response = await fetch('/api/admin/verify', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Invalid token');
+        } catch (err) {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'admin-login.html';
+        }
+    }
+    verifyToken();
+    
+    function logoutAdmin() {
+        localStorage.removeItem('adminToken');
+        window.location.href = 'admin-login.html';
+    }
+</script>
 
     <div class="admin-wrapper">
         <aside class="sidebar">

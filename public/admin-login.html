@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - StepUp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #fafaf8;
+            color: #262626;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .login-container {
+            background: white;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #e5e5e5;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        input {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1px solid #e5e5e5;
+            font-family: 'Montserrat', sans-serif;
+        }
+        button {
+            width: 100%;
+            padding: 0.875rem;
+            background-color: #262626;
+            color: white;
+            border: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #404040;
+        }
+        .error {
+            color: #e74c3c;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+        .back-link a {
+            color: #262626;
+            text-decoration: none;
+            border-bottom: 1px solid #262626;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Admin Login</h1>
+        <form id="adminLoginForm">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username" required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" required autocomplete="current-password">
+            </div>
+            <button type="submit">Sign In</button>
+            <div id="errorMsg" class="error"></div>
+        </form>
+        <div class="back-link">
+            <a href="mainpage.html">← Back to Store</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMsg');
+            errorDiv.textContent = '';
+
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('adminToken', data.token);
+                    window.location.href = 'admin.html';
+                } else {
+                    errorDiv.textContent = data.error || 'Login failed';
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Network error. Please try again.';
+            }
+        });
+    </script>
+</body>
+</html>

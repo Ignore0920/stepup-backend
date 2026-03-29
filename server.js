@@ -129,7 +129,67 @@ app.get('/api/admin/verify', async (req, res) => {
         res.status(401).json({ error: 'Invalid token' });
     }
 });
+// ============ User Authentication (Public) ============
 
+// Register a new user
+app.post('/api/users/register', async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+        const existing = await User.findOne({ email });
+        if (existing) {
+            return res.status(400).json({ error: 'Email already registered' });
+        }
+        const user = new User({ name, email, password });
+        await user.save();
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user._id, email: user.email, role: 'user' },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        res.status(201).json({
+            success: true,
+            token,
+            user: { id: user._id, name: user.name, email: user.email }
+        });
+    } catch (err) {
+        console.error('Registration error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Login an existing user
+app.post('/api/users/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const token = jwt.sign(
+            { id: user._id, email: user.email, role: 'user' },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        res.json({
+            success: true,
+            token,
+            user: { id: user._id, name: user.name, email: user.email }
+        });
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
 // 獲取單個產品
 app.get('/api/products/:id', async (req, res) => {
     try {

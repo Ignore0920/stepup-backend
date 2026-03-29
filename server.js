@@ -266,7 +266,7 @@ app.delete('/api/products/:id', async (req, res) => {
     }
 });
 
-// Middleware to verify admin token
+// Middleware to verify admin token (if not already defined)
 const verifyAdminToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ error: 'No token provided' });
@@ -288,7 +288,7 @@ app.get('/api/admins', verifyAdminToken, async (req, res) => {
         const admins = await Admin.find().select('-password');
         res.json({ success: true, data: admins });
     } catch (err) {
-        console.error(err);
+        console.error('Error fetching admins:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -303,7 +303,7 @@ app.post('/api/admins', verifyAdminToken, async (req, res) => {
         await newAdmin.save();
         res.status(201).json({ success: true, admin: { id: newAdmin._id, username: newAdmin.username } });
     } catch (err) {
-        console.error(err);
+        console.error('Error creating admin:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -315,11 +315,11 @@ app.put('/api/admins/:id', verifyAdminToken, async (req, res) => {
         const admin = await Admin.findById(req.params.id);
         if (!admin) return res.status(404).json({ error: 'Admin not found' });
         if (username) admin.username = username;
-        if (password) admin.password = password;
+        if (password) admin.password = password; // password will be hashed by pre-save hook
         await admin.save();
         res.json({ success: true, admin: { id: admin._id, username: admin.username } });
     } catch (err) {
-        console.error(err);
+        console.error('Error updating admin:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -331,10 +331,11 @@ app.delete('/api/admins/:id', verifyAdminToken, async (req, res) => {
         if (!admin) return res.status(404).json({ error: 'Admin not found' });
         res.json({ success: true, message: 'Admin deleted' });
     } catch (err) {
-        console.error(err);
+        console.error('Error deleting admin:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
+
 // ============ Start Server ============
 const port = process.env.PORT || 5000;
 const server = app.listen(port, '0.0.0.0', () => {

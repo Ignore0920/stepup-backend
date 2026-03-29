@@ -6,12 +6,10 @@
     <title>StepUp Admin - Account Creation</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Core Styles */
+        /* (Keep all your existing CSS – unchanged) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; background-color: #f9f9f9; color: #262626; line-height: 1.6; }
         h1, h2, h3 { font-family: 'Playfair Display', serif; }
-        
-        /* --- SIDEBAR LAYOUT STYLES --- */
         .admin-wrapper { display: flex; min-height: 100vh; }
         .sidebar { width: 250px; background-color: #262626; color: white; padding: 20px; flex-shrink: 0; }
         .sidebar h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; border-bottom: 1px solid #444; padding-bottom: 20px; margin-top: 0; }
@@ -19,36 +17,26 @@
         .sidebar nav a:hover, .sidebar nav a.active { color: white; font-weight: bold; }
         .sidebar nav a.active { border-left: 3px solid white; padding-left: 10px; }
         .main-content { flex-grow: 1; padding: 40px; box-sizing: border-box; max-width: calc(100vw - 250px); overflow-y: auto; }
-        
-        /* Layout & UI Components */
         .admin-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; }
         .admin-section { background: #fff; padding: 2.5rem; border: 1px solid #e5e5e5; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .btn { padding: 0.85rem 2rem; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border: none; cursor: pointer; transition: all 0.3s; width: 100%; }
         .btn-primary { background-color: #262626; color: #ffffff; }
         .btn-primary:hover { background-color: #404040; transform: translateY(-1px); }
-        
-        /* Form Styling */
         .form-group { margin-bottom: 1.5rem; }
         .form-group label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
         .form-control { width: 100%; padding: 0.9rem; border: 1px solid #e5e5e5; font-family: 'Montserrat', sans-serif; transition: border-color 0.3s; }
         .form-control:focus { outline: none; border-color: #262626; }
-        
-        /* Stats & Table */
         .stat-card { background: #262626; color: #fff; padding: 2rem; text-align: center; margin-bottom: 2rem; }
         .stat-number { font-size: 3rem; font-family: 'Playfair Display', serif; font-weight: 900; line-height: 1; margin-bottom: 0.5rem; }
         .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 500; opacity: 0.8; }
-        
         .team-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
         .team-table th { text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem; border-bottom: 2px solid #262626; }
         .team-table td { padding: 1rem; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
         .role-badge { font-size: 0.7rem; font-weight: 700; background: #f0f0f0; padding: 0.2rem 0.6rem; border-radius: 2px; text-transform: uppercase; }
-
         .action-btns { display: flex; gap: 0.5rem; }
         .btn-action { padding: 0.4rem 0.8rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; cursor: pointer; border: 1px solid #e5e5e5; background: #fff; transition: all 0.2s; }
         .btn-edit:hover { background: #262626; color: #fff; border-color: #262626; }
         .btn-remove:hover { background: #e74c3c; color: #fff; border-color: #e74c3c; }
-
-        /* --- MODAL STYLES --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
         .modal-content { background: #fff; padding: 2.5rem; width: 100%; max-width: 450px; position: relative; animation: modalFadeIn 0.3s ease-out; }
         @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
@@ -64,7 +52,6 @@
         window.location.href = 'admin-login.html';
     }
     
-    // Verify token with backend
     async function verifyToken() {
         try {
             const response = await fetch('/api/admin/verify', {
@@ -83,7 +70,6 @@
         window.location.href = 'admin-login.html';
     }
 
-    // ========== Admin Management with API ==========
     let currentEditingId = null;
 
     async function loadAdmins() {
@@ -93,7 +79,6 @@
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error);
-
             const tbody = document.getElementById('teamList');
             tbody.innerHTML = '';
             data.data.forEach(admin => {
@@ -118,37 +103,6 @@
         }
     }
 
-    // Add admin
-    document.getElementById('addAdminForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('newAdminName').value.trim();
-        const password = document.getElementById('newAdminPass').value;
-
-        if (!username || !password) {
-            alert('Please enter username and password');
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/admins', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error);
-            alert('Admin created successfully!');
-            loadAdmins();
-            document.getElementById('addAdminForm').reset();
-        } catch (err) {
-            alert(err.message);
-        }
-    });
-
-    // Edit admin modal
     function openEditModal(id, username) {
         currentEditingId = id;
         document.getElementById('editAdminName').value = username;
@@ -161,40 +115,6 @@
         currentEditingId = null;
     }
 
-    // Save edit (update username and/or password)
-    document.getElementById('editAdminForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const newUsername = document.getElementById('editAdminName').value.trim();
-        const newPassword = document.getElementById('editAdminPassword').value;
-
-        if (!newUsername) {
-            alert('Username cannot be empty');
-            return;
-        }
-
-        const updateData = { username: newUsername };
-        if (newPassword) updateData.password = newPassword;
-
-        try {
-            const response = await fetch(`/api/admins/${currentEditingId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(updateData)
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error);
-            alert('Admin updated successfully');
-            loadAdmins();
-            closeEditModal();
-        } catch (err) {
-            alert(err.message);
-        }
-    });
-
-    // Remove admin
     async function removeAdmin(id, username) {
         if (confirm(`Are you sure you want to remove admin "${username}"?`)) {
             try {
@@ -212,7 +132,6 @@
         }
     }
 
-    // Helper to escape HTML to prevent injection
     function escapeHtml(str) {
         return str.replace(/[&<>]/g, function(m) {
             if (m === '&') return '&amp;';
@@ -222,13 +141,84 @@
         });
     }
 
-    // Modal close handlers
-    document.getElementById('cancelBtn').addEventListener('click', closeEditModal);
+    // --- Safe event listeners with null checks ---
+    const addAdminForm = document.getElementById('addAdminForm');
+    if (addAdminForm) {
+        addAdminForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('newAdminName').value.trim();
+            const password = document.getElementById('newAdminPass').value;
+            if (!username || !password) {
+                alert('Please enter username and password');
+                return;
+            }
+            try {
+                const response = await fetch('/api/admins', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                alert('Admin created successfully!');
+                loadAdmins();
+                addAdminForm.reset();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+    } else {
+        console.error('addAdminForm not found');
+    }
+
+    const editAdminForm = document.getElementById('editAdminForm');
+    if (editAdminForm) {
+        editAdminForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newUsername = document.getElementById('editAdminName').value.trim();
+            const newPassword = document.getElementById('editAdminPassword').value;
+            if (!newUsername) {
+                alert('Username cannot be empty');
+                return;
+            }
+            const updateData = { username: newUsername };
+            if (newPassword) updateData.password = newPassword;
+            try {
+                const response = await fetch(`/api/admins/${currentEditingId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                alert('Admin updated successfully');
+                loadAdmins();
+                closeEditModal();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+    } else {
+        console.error('editAdminForm not found');
+    }
+
+    const cancelBtn = document.getElementById('cancelBtn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', closeEditModal);
+    } else {
+        console.error('cancelBtn not found');
+    }
+
     window.onclick = function(event) {
         if (event.target == document.getElementById('editModal')) closeEditModal();
     };
 
-    // Load admins on page load
     loadAdmins();
 </script>
 
@@ -253,7 +243,6 @@
                     <div class="stat-number" id="adminCount">0</div>
                     <div class="stat-label">Total Admin Staff</div>
                 </div>
-
                 <div class="admin-section">
                     <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Create Account</h2>
                     <form id="addAdminForm">
@@ -277,23 +266,14 @@
                     </form>
                 </div>
             </aside>
-
             <div class="admin-section">
                 <h2 style="margin-bottom: 0.5rem; font-size: 1.8rem;">Admin Team Management</h2>
                 <p style="color: #666; font-size: 0.9rem; margin-bottom: 2rem;">Authorized personnel with backstage access permissions.</p>
-                
                 <table class="team-table">
                     <thead>
-                        <tr>
-                            <th>Username</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
+                        <tr><th>Username</th><th>Role</th><th>Status</th><th>Actions</th></tr>
                     </thead>
-                    <tbody id="teamList">
-                        <!-- Rows will be inserted here by JavaScript -->
-                    </tbody>
+                    <tbody id="teamList"></tbody>
                 </table>
             </div>
         </div>

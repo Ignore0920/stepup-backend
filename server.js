@@ -338,6 +338,40 @@ app.delete('/api/admins/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
+// ============ Seed Default Products (Admin only, one‑time) ============
+app.post('/api/admin/seed-products', verifyAdminToken, async (req, res) => {
+    try {
+        const defaultProducts = [
+            { name: 'Nike Air Max 270', brand: 'Nike', model: 'Air Max 270', sizeRange: '7-13', price: 189.99, stock: 50, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663381436063/lOZOEbUZRBkODyvf.png', tag: 'FEATURED', collection: 'Casual' },
+            { name: 'Nike Elite Runner Pro', brand: 'Nike', model: 'Elite Runner Pro', sizeRange: '8-12', price: 229.99, stock: 45, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/LBUPnoswZhcidJkY.png', tag: 'PREMIUM', collection: 'Running' },
+            { name: 'Nike Comfort Walk Plus', brand: 'Nike', model: 'Comfort Walk Plus', sizeRange: '6-11', price: 159.99, stock: 30, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/oNmiTuSXqeoDCyvh.jpeg', tag: 'NEW', collection: 'Casual' },
+            { name: 'Nike Urban Flex Sneaker', brand: 'Nike', model: 'Urban Flex', sizeRange: '7-12', price: 179.99, stock: 25, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/WPMbFctvNLFtqdqv.png', tag: 'NEW', collection: 'Casual' },
+            { name: 'Nike Classic Trainer', brand: 'Nike', model: 'Classic Trainer', sizeRange: '6-15', price: 149.99, stock: 40, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/jtJqPMOhRFGrvlBZ.png', tag: '', collection: 'Training' },
+            { name: 'Jordan 1 Retro', brand: 'Jordan', model: '1 Retro', sizeRange: '7-14', price: 249.99, stock: 20, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/HZDiSqxfpxfavVAe.jpg', tag: 'NEW', collection: 'Basketball' },
+            { name: 'Adidas Ultra Boost', brand: 'Adidas', model: 'Ultra Boost', sizeRange: '6-13', price: 239.99, stock: 35, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/XHAmwqukAvqToiZo.png', tag: 'TRENDING', collection: 'Running' },
+            { name: 'Puma RS-X', brand: 'Puma', model: 'RS-X', sizeRange: '7-12', price: 169.99, stock: 28, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/EAhzJUEkqDjgMWwe.jpg', tag: 'SALE', collection: 'Casual' },
+            { name: 'New Balance 990v6', brand: 'New Balance', model: '990v6', sizeRange: '8-14', price: 189.99, stock: 22, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OISFcGUaRzULPMhv.jpg', tag: '', collection: 'Running' },
+            { name: 'Converse One Star', brand: 'Converse', model: 'One Star', sizeRange: '5-13', price: 149.99, stock: 60, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OqEvWuXBAyHMsEtW.jpg', tag: '', collection: 'Casual' }
+        ];
+
+        let inserted = 0;
+        let skipped = 0;
+        for (const prod of defaultProducts) {
+            const exists = await Product.findOne({ name: prod.name, brand: prod.brand });
+            if (!exists) {
+                await Product.create(prod);
+                inserted++;
+            } else {
+                skipped++;
+            }
+        }
+        res.json({ success: true, message: `Seeding complete. Inserted: ${inserted}, Skipped: ${skipped}` });
+    } catch (err) {
+        console.error('Seed error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ============ Inventory Management (Admin only) ============
 // Get all products
 app.get('/api/admin/inventory/products', verifyAdminToken, async (req, res) => {

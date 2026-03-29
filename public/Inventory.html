@@ -6,470 +6,246 @@
     <title>StepUp Admin - Inventory</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CORE BRAND STYLES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; background-color: #f9f9f9; color: #262626; line-height: 1.6; }
         h1, h2, h3 { font-family: 'Playfair Display', serif; }
-
-        /* --- SIDEBAR LAYOUT STYLES --- */
         .admin-wrapper { display: flex; min-height: 100vh; }
         .sidebar { width: 250px; background-color: #262626; color: white; padding: 20px; flex-shrink: 0; }
-        .sidebar h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; border-bottom: 1px solid #444; padding-bottom: 20px; margin-top: 0; }
-        .sidebar nav a { display: block; color: #bbb; text-decoration: none; padding: 15px 0; transition: 0.3s; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
-        .sidebar nav a:hover, .sidebar nav a.active { color: white; font-weight: bold; }
-        .sidebar nav a.active { border-left: 3px solid white; padding-left: 10px; }
-        .main-content { flex-grow: 1; padding: 40px; box-sizing: border-box; max-width: calc(100vw - 250px); overflow-y: auto; }
-
-        /* --- ORIGINAL INVENTORY COMPONENTS --- */
-        .admin-section { background: #fff; padding: 2rem; border: 1px solid #e5e5e5; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .sidebar h2 { font-size: 1.5rem; border-bottom: 1px solid #444; padding-bottom: 20px; }
+        .sidebar nav a { display: block; color: #bbb; text-decoration: none; padding: 15px 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+        .sidebar nav a:hover, .sidebar nav a.active { color: white; font-weight: bold; border-left: 3px solid white; padding-left: 10px; }
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
+        .admin-section { background: #fff; padding: 2rem; border: 1px solid #e5e5e5; margin-bottom: 2rem; }
         .form-group { margin-bottom: 1.5rem; }
         .form-group label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
         .form-control { width: 100%; padding: 0.75rem; border: 1px solid #e5e5e5; font-family: inherit; transition: border-color 0.3s; }
         .form-control:focus { outline: none; border-color: #262626; }
-        
         .btn { padding: 0.75rem 2rem; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.3s; letter-spacing: 0.1em; }
-        .btn-primary { background-color: #262626; color: #ffffff; }
+        .btn-primary { background-color: #262626; color: #fff; }
         .btn-primary:hover { background-color: #404040; transform: translateY(-1px); }
-
         .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
         .data-table th, .data-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #e5e5e5; }
-        .data-table th { font-family: 'Playfair Display', serif; font-size: 1.1rem; border-bottom: 2px solid #262626; }
-        .data-table td { font-size: 0.9rem; }
-
+        .data-table th { font-size: 1.1rem; border-bottom: 2px solid #262626; }
         ul.category-list { list-style: none; margin-top: 1rem; }
-        ul.category-list li { background: #f5f5f5; padding: 0.75rem; border: 1px solid #e5e5e5; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
-
+        ul.category-list li { background: #f5f5f5; padding: 0.75rem; border: 1px solid #e5e5e5; margin-bottom: 0.5rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
         .action-btns { display: flex; gap: 0.5rem; }
         .btn-table { padding: 0.4rem 0.8rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; border: 1px solid #e5e5e5; background: #fff; cursor: pointer; transition: all 0.2s; }
-        .btn-edit:hover { background: #262626; color: #fff; border-color: #262626; }
-        .btn-remove:hover { background: #e74c3c; color: #fff; border-color: #e74c3c; }
-
-        h1 { margin-bottom: 2rem; font-size: 2.5rem; color: #262626; }
+        .btn-edit:hover { background: #262626; color: #fff; }
+        .btn-remove:hover { background: #e74c3c; color: #fff; }
+        .btn-remove-category { background: #e74c3c; color: white; border: none; border-radius: 3px; padding: 2px 8px; cursor: pointer; }
+        .btn-remove-category:hover { background: #c0392b; }
+        h1 { margin-bottom: 2rem; font-size: 2.5rem; }
     </style>
 </head>
 <body>
 <script>
-    // --- Admin token check (same as before) ---
     const token = localStorage.getItem('adminToken');
-    if (!token) {
-        window.location.href = 'admin-login.html';
-    }
+    if (!token) window.location.href = 'admin-login.html';
 
     async function verifyToken() {
         try {
-            const response = await fetch('/api/admin/verify', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!response.ok) throw new Error('Invalid token');
+            const res = await fetch('/api/admin/verify', { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) throw new Error();
         } catch (err) {
             localStorage.removeItem('adminToken');
             window.location.href = 'admin-login.html';
         }
     }
     verifyToken();
+    function logoutAdmin() { localStorage.removeItem('adminToken'); window.location.href = 'admin-login.html'; }
 
-    function logoutAdmin() {
-        localStorage.removeItem('adminToken');
-        window.location.href = 'admin-login.html';
-    }
-
-    // --- Load categories from backend ---
+    // Categories
     async function loadCategories() {
         try {
-            const response = await fetch('/api/admin/inventory/categories', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error);
-            const categoryList = document.getElementById('categoryList');
-            categoryList.innerHTML = '';
+            const res = await fetch('/api/admin/inventory/categories', { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            const list = document.getElementById('categoryList');
+            list.innerHTML = '';
             data.data.forEach(cat => {
                 const li = document.createElement('li');
                 li.setAttribute('data-id', cat._id);
-                li.innerHTML = `${cat.name} <button class="btn-remove-category" style="margin-left:10px; background:#e74c3c; color:white; border:none; border-radius:3px; padding:2px 8px; cursor:pointer;">✕</button>`;
-                categoryList.appendChild(li);
+                li.innerHTML = `${cat.name} <button class="btn-remove-category">✕</button>`;
+                list.appendChild(li);
             });
-            // attach delete event to each remove button
             document.querySelectorAll('.btn-remove-category').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
                     const li = btn.closest('li');
                     const id = li.getAttribute('data-id');
                     if (confirm('Delete this category?')) {
-                        const delRes = await fetch(`/api/admin/inventory/categories/${id}`, {
-                            method: 'DELETE',
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        if (delRes.ok) {
-                            loadCategories();
-                        } else {
-                            alert('Failed to delete category');
-                        }
+                        const delRes = await fetch(`/api/admin/inventory/categories/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                        if (delRes.ok) loadCategories();
+                        else alert('Failed to delete category');
                     }
                 });
             });
-        } catch (err) {
-            console.error(err);
-            alert('Failed to load categories');
-        }
+        } catch (err) { console.error(err); alert('Failed to load categories'); }
     }
 
-    // Add category form
     document.getElementById('categoryForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const categoryName = document.getElementById('catInput').value.trim();
-        if (!categoryName) return;
+        const name = document.getElementById('catInput').value.trim();
+        if (!name) return;
         try {
-            const response = await fetch('/api/admin/inventory/categories', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ name: categoryName })
+            const res = await fetch('/api/admin/inventory/categories', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ name })
             });
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.error || 'Failed');
-            }
+            if (!res.ok) throw new Error((await res.json()).error);
             document.getElementById('catInput').value = '';
             loadCategories();
-        } catch (err) {
-            alert(err.message);
-        }
+        } catch (err) { alert(err.message); }
     });
 
-    // --- Load products from backend ---
+    // Products
+    let editingProductId = null;
+
     async function loadProducts() {
         try {
-            const response = await fetch('/api/admin/inventory/products', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error);
+            const res = await fetch('/api/admin/inventory/products', { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
             const tbody = document.getElementById('shoeTableBody');
             tbody.innerHTML = '';
-            data.data.forEach(product => {
+            data.data.forEach(prod => {
                 const row = tbody.insertRow();
-                row.setAttribute('data-id', product._id);
+                row.setAttribute('data-id', prod._id);
                 row.innerHTML = `
-                    <td>${escapeHtml(product.brand)}</td>
-                    <td>${escapeHtml(product.model)}</td>
-                    <td>${escapeHtml(product.sizeRange)}</td>
-                    <td>$${product.price.toFixed(2)}</td>
-                    <td>${product.stock}</td>
+                    <td>${escapeHtml(prod.name)}</td>
+                    <td>${escapeHtml(prod.brand)}</td>
+                    <td>${escapeHtml(prod.model)}</td>
+                    <td>${escapeHtml(prod.sizeRange)}</td>
+                    <td>$${prod.price.toFixed(2)}</td>
+                    <td>${prod.stock}</td>
                     <td>
                         <div class="action-btns">
-                            <button class="btn-table btn-edit" onclick="editProduct('${product._id}')">Edit</button>
-                            <button class="btn-table btn-remove" onclick="removeProduct('${product._id}')">Remove</button>
+                            <button class="btn-table btn-edit" onclick="editProduct('${prod._id}')">Edit</button>
+                            <button class="btn-table btn-remove" onclick="removeProduct('${prod._id}')">Remove</button>
                         </div>
                     </td>
                 `;
             });
-        } catch (err) {
-            console.error(err);
-            alert('Failed to load products');
-        }
+        } catch (err) { console.error(err); alert('Failed to load products'); }
     }
 
-    // Add product form
-    document.getElementById('shoeForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const brand = document.getElementById('sBrand').value.trim();
-        const model = document.getElementById('sModel').value.trim();
-        const sizeRange = document.getElementById('sSize').value.trim();
-        const price = parseFloat(document.getElementById('sPrice').value);
-        const stock = parseInt(document.getElementById('sStock').value);
-        if (!brand || !model || !sizeRange || isNaN(price) || isNaN(stock)) {
-            alert('Please fill all fields correctly');
-            return;
-        }
-        try {
-            const response = await fetch('/api/admin/inventory/products', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ brand, model, sizeRange, price, stock })
-            });
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.error || 'Failed');
-            }
-            document.getElementById('shoeForm').reset();
-            loadProducts();
-        } catch (err) {
-            alert(err.message);
-        }
-    });
-
-    // Edit product - fetch current data and fill form
     window.editProduct = async function(id) {
         try {
-            const response = await fetch(`/api/admin/inventory/products/${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error);
-            const product = data.product;
-            document.getElementById('sBrand').value = product.brand;
-            document.getElementById('sModel').value = product.model;
-            document.getElementById('sSize').value = product.sizeRange;
-            document.getElementById('sPrice').value = product.price;
-            document.getElementById('sStock').value = product.stock;
-            // Remove the original product first (we'll update on submit)
-            // We'll change form behavior: if editing, we'll use a different endpoint.
-            // For simplicity, we'll store editingId and submit as PUT.
-            window.editingProductId = id;
-            // Change submit button text temporarily
-            const submitBtn = document.querySelector('#shoeForm button[type="submit"]');
-            submitBtn.textContent = 'Update Product';
-        } catch (err) {
-            alert(err.message);
-        }
+            const res = await fetch(`/api/admin/inventory/products/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            const p = data.product;
+            document.getElementById('sName').value = p.name;
+            document.getElementById('sBrand').value = p.brand;
+            document.getElementById('sModel').value = p.model;
+            document.getElementById('sSize').value = p.sizeRange;
+            document.getElementById('sPrice').value = p.price;
+            document.getElementById('sStock').value = p.stock;
+            document.getElementById('sImage').value = p.image || '';
+            document.getElementById('sTag').value = p.tag || '';
+            editingProductId = id;
+            document.querySelector('#shoeForm button[type="submit"]').textContent = 'Update Product';
+        } catch (err) { alert(err.message); }
     };
 
-    // Override form submit to handle update if editingProductId exists
-    const originalSubmitHandler = document.getElementById('shoeForm').submit;
+    window.removeProduct = async function(id) {
+        if (!confirm('Remove this product?')) return;
+        try {
+            const res = await fetch(`/api/admin/inventory/products/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) throw new Error((await res.json()).error);
+            loadProducts();
+        } catch (err) { alert(err.message); }
+    };
+
     document.getElementById('shoeForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const brand = document.getElementById('sBrand').value.trim();
-        const model = document.getElementById('sModel').value.trim();
-        const sizeRange = document.getElementById('sSize').value.trim();
-        const price = parseFloat(document.getElementById('sPrice').value);
-        const stock = parseInt(document.getElementById('sStock').value);
-        if (!brand || !model || !sizeRange || isNaN(price) || isNaN(stock)) {
-            alert('Please fill all fields correctly');
+        const productData = {
+            name: document.getElementById('sName').value.trim(),
+            brand: document.getElementById('sBrand').value.trim(),
+            model: document.getElementById('sModel').value.trim(),
+            sizeRange: document.getElementById('sSize').value.trim(),
+            price: parseFloat(document.getElementById('sPrice').value),
+            stock: parseInt(document.getElementById('sStock').value),
+            image: document.getElementById('sImage').value.trim(),
+            tag: document.getElementById('sTag').value.trim()
+        };
+        if (!productData.name || !productData.brand || !productData.model || !productData.sizeRange || isNaN(productData.price) || isNaN(productData.stock)) {
+            alert('Please fill all required fields correctly');
             return;
         }
-        const productData = { brand, model, sizeRange, price, stock };
         try {
             let response;
-            if (window.editingProductId) {
-                response = await fetch(`/api/admin/inventory/products/${window.editingProductId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+            if (editingProductId) {
+                response = await fetch(`/api/admin/inventory/products/${editingProductId}`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(productData)
                 });
                 if (response.ok) {
-                    delete window.editingProductId;
-                    const submitBtn = document.querySelector('#shoeForm button[type="submit"]');
-                    submitBtn.textContent = 'Add Product';
+                    editingProductId = null;
+                    document.querySelector('#shoeForm button[type="submit"]').textContent = 'Add Product';
                 }
             } else {
                 response = await fetch('/api/admin/inventory/products', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(productData)
                 });
             }
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.error || 'Failed');
-            }
+            if (!response.ok) throw new Error((await response.json()).error);
             document.getElementById('shoeForm').reset();
             loadProducts();
-        } catch (err) {
-            alert(err.message);
-        }
+        } catch (err) { alert(err.message); }
     });
 
-    // Remove product
-    window.removeProduct = async function(id) {
-        if (confirm('Are you sure you want to remove this product?')) {
-            try {
-                const response = await fetch(`/api/admin/inventory/products/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error || 'Failed');
-                }
-                loadProducts();
-            } catch (err) {
-                alert(err.message);
-            }
-        }
-    };
+    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
 
-    function escapeHtml(str) {
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
-    // Initial load
     loadCategories();
     loadProducts();
 </script>
 
-    <div class="admin-wrapper">
-        <aside class="sidebar">
-            <h2>StepUp Admin</h2>
-            <nav>
-                <a href="admin.html">Staff Management</a>
-                <a href="Inventory.html" class="active">Inventory Management</a>
-                <a href="User.html">User Records</a>
-                <a href="Order.html">Order Fulfillment</a>
-                <a href="Sales.html">Sales Reports</a>
-            </nav>
-        </aside>
-
-        <main class="main-content">
-            <h1>Inventory Management</h1>
-
-            <div class="admin-section">
-                <h2>Equipment Item Classification</h2>
-                <br>
-                <form id="categoryForm" style="display: flex; gap: 1rem; align-items: flex-end;">
-                    <div class="form-group" style="flex: 1; margin: 0;">
-                        <label>New Category Name</label>
-                        <input type="text" id="catInput" class="form-control" placeholder="e.g. Casual Sneakers" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Add Category</button>
-                </form>
-                <ul class="category-list" id="categoryList">
-                    <li>Athletic Running</li>
-                    <li>Formal Oxfords</li>
-                </ul>
-            </div>
-
-            <div class="admin-section">
-                <h2>Shoe Item Management</h2>
-                <br>
-                <form id="shoeForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group"><label>Brand</label><input type="text" id="sBrand" class="form-control" required></div>
-                    <div class="form-group"><label>Model Name</label><input type="text" id="sModel" class="form-control" required></div>
-                    <div class="form-group"><label>Size Range (e.g. 7-13)</label><input type="text" id="sSize" class="form-control" required></div>
-                    <div class="form-group"><label>Price ($)</label><input type="number" id="sPrice" step="0.01" class="form-control" required></div>
-                    <div class="form-group"><label>Stock Level</label><input type="number" id="sStock" class="form-control" required></div>
-                    <div class="form-group" style="display: flex; align-items: flex-end;">
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">Add Product</button>
-                    </div>
-                </form>
-
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Brand</th>
-                            <th>Model</th>
-                            <th>Sizes</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Actions</th> 
-                        </tr>
-                    </thead>
-                    <tbody id="shoeTableBody">
-                        <tr>
-                            <td>Nike</td>
-                            <td>Elite Runner Pro</td>
-                            <td>8-12</td>
-                            <td>$189.99</td>
-                            <td>45</td>
-                            <td>
-                                <div class="action-btns">
-                                    <button class="btn-table btn-edit" onclick="editProduct(this)">Edit</button>
-                                    <button class="btn-table btn-remove" onclick="removeProduct(this)">Remove</button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </main>
-    </div>
-
-    <script>
-    // Category Management
-    document.addEventListener('DOMContentLoaded', function() {
-        loadInventory();
-        
-        // Category form submission
-        document.getElementById('categoryForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const categoryInput = document.getElementById('catInput');
-            const categoryName = categoryInput.value.trim();
-            
-            if (categoryName) {
-                const categoryList = document.getElementById('categoryList');
-                const newCategory = document.createElement('li');
-                newCategory.textContent = categoryName;
-                categoryList.appendChild(newCategory);
-                categoryInput.value = '';
-            }
-        });
-
-        // Shoe form submission
-        document.getElementById('shoeForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const brand = document.getElementById('sBrand').value;
-            const model = document.getElementById('sModel').value;
-            const size = document.getElementById('sSize').value;
-            const price = document.getElementById('sPrice').value;
-            const stock = document.getElementById('sStock').value;
-            
-            if (brand && model && size && price && stock) {
-                const tbody = document.getElementById('shoeTableBody');
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td>${brand}</td>
-                    <td>${model}</td>
-                    <td>${size}</td>
-                    <td>$${parseFloat(price).toFixed(2)}</td>
-                    <td>${stock}</td>
-                    <td>
-                        <div class="action-btns">
-                            <button class="btn-table btn-edit" onclick="editProduct(this)">Edit</button>
-                            <button class="btn-table btn-remove" onclick="removeProduct(this)">Remove</button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(newRow);
-                this.reset();
-            }
-        });
-    });
-
-    // Product management functions
-    function editProduct(btn) {
-        const row = btn.closest('tr');
-        const brand = row.cells[0].textContent;
-        const model = row.cells[1].textContent;
-        const size = row.cells[2].textContent;
-        const price = row.cells[3].textContent.replace('$', '');
-        const stock = row.cells[4].textContent;
-        
-        document.getElementById('sBrand').value = brand;
-        document.getElementById('sModel').value = model;
-        document.getElementById('sSize').value = size;
-        document.getElementById('sPrice').value = price;
-        document.getElementById('sStock').value = stock;
-        
-        row.remove();
-    }
-
-    function removeProduct(btn) {
-        if (confirm('Are you sure you want to remove this product?')) {
-            btn.closest('tr').remove();
-        }
-    }
-
-    function loadInventory() {
-        // This would normally load from a backend
-        console.log('Inventory page loaded');
-    }
-</script>
+<div class="admin-wrapper">
+    <aside class="sidebar">
+        <h2>StepUp Admin</h2>
+        <nav>
+            <a href="admin.html">Staff Management</a>
+            <a href="Inventory.html" class="active">Inventory Management</a>
+            <a href="User.html">User Records</a>
+            <a href="Order.html">Order Fulfillment</a>
+            <a href="Sales.html">Sales Reports</a>
+            <hr style="margin: 20px 0; border-color: #444;">
+            <a href="#" onclick="logoutAdmin(); return false;" style="color: #e74c3c;">Logout</a>
+        </nav>
+    </aside>
+    <main class="main-content">
+        <h1>Inventory Management</h1>
+        <div class="admin-section">
+            <h2>Equipment Item Classification</h2>
+            <form id="categoryForm" style="display: flex; gap: 1rem; align-items: flex-end;">
+                <div class="form-group" style="flex: 1; margin: 0;">
+                    <label>New Category Name</label>
+                    <input type="text" id="catInput" class="form-control" placeholder="e.g. Casual Sneakers" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Category</button>
+            </form>
+            <ul class="category-list" id="categoryList"></ul>
+        </div>
+        <div class="admin-section">
+            <h2>Shoe Item Management</h2>
+            <form id="shoeForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group"><label>Product Name *</label><input type="text" id="sName" class="form-control" required></div>
+                <div class="form-group"><label>Brand *</label><input type="text" id="sBrand" class="form-control" required></div>
+                <div class="form-group"><label>Model Name *</label><input type="text" id="sModel" class="form-control" required></div>
+                <div class="form-group"><label>Size Range *</label><input type="text" id="sSize" class="form-control" required></div>
+                <div class="form-group"><label>Price ($) *</label><input type="number" id="sPrice" step="0.01" class="form-control" required></div>
+                <div class="form-group"><label>Stock Level *</label><input type="number" id="sStock" class="form-control" required></div>
+                <div class="form-group"><label>Image URL</label><input type="text" id="sImage" class="form-control" placeholder="https://..."></div>
+                <div class="form-group"><label>Tag (optional)</label><input type="text" id="sTag" class="form-control" placeholder="NEW, FEATURED, SALE"></div>
+                <div class="form-group" style="display: flex; align-items: flex-end;"><button type="submit" class="btn btn-primary" style="width: 100%;">Add Product</button></div>
+            </form>
+            <table class="data-table">
+                <thead><tr><th>Name</th><th>Brand</th><th>Model</th><th>Sizes</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
+                <tbody id="shoeTableBody"></tbody>
+            </table>
+        </div>
+    </main>
+</div>
 </body>
 </html>

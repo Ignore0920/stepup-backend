@@ -898,12 +898,9 @@
                 Handpicked premium athletic footwear representing the pinnacle of design and performance.
             </p>
 
-            <div class="products-grid">
-                <div class="product-card" onclick="window.location.href='NikeAirMax270.html'" style="cursor: pointer;">
-                    <div style="position: relative;">
-                        <div class="product-image" style="background-image: url('https://files.manuscdn.com/user_upload_by_module/session_file/310519663381436063/lOZOEbUZRBkODyvf.png'); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
-                        <span class="product-tag">FEATURED</span>
-                    </div>
+            <div class="products-grid" id="featuredProductsGrid">
+                <!-- Products will be loaded dynamically -->
+                </div>
                     <p class="product-brand">Nike</p>
                     <h3 class="product-name">Air Max 270</h3>
                     <div class="product-footer">
@@ -1207,4 +1204,37 @@
     window.addEventListener('storage', function() {
         updateCartBadge();
     });
+    async function loadFeaturedProducts() {
+    try {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        if (data.success) {
+            const products = data.data.slice(0, 8); // first 8 products
+            const grid = document.getElementById('featuredProductsGrid');
+            if (grid) {
+                grid.innerHTML = products.map(p => `
+                    <div class="product-card" onclick="window.location.href='product-detail.html?id=${p._id}'" style="cursor: pointer;">
+                        <div style="position: relative;">
+                            <div class="product-image" style="background-image: url('${p.image || 'https://via.placeholder.com/200?text=No+Image'}'); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
+                            ${p.tag ? `<span class="product-tag">${p.tag}</span>` : ''}
+                        </div>
+                        <p class="product-brand">${p.brand}</p>
+                        <h3 class="product-name">${p.name}</h3>
+                        <div class="product-footer">
+                            <span class="product-price">MOP $${p.price.toFixed(2)}</span>
+                            <span style="cursor: pointer; font-size: 1.25rem;">→</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+    } catch (err) { console.error('Failed to load featured products:', err); }
+}
+
+// Call inside DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    updateCartBadge();
+    updateCollectionCounts();  // your existing function
+    loadFeaturedProducts();    // <-- add this line
+});
 </script>

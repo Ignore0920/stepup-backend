@@ -266,6 +266,75 @@ app.delete('/api/products/:id', async (req, res) => {
     }
 });
 
+// Middleware to verify admin token
+const verifyAdminToken = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const admin = await Admin.findById(decoded.id);
+        if (!admin) return res.status(401).json({ error: 'Admin not found' });
+        req.admin = admin;
+        next();
+    } catch (err) {
+        res.status(401).json({ error: 'Invalid token' });
+    }
+};
+
+// GET all admins (excluding passwords)
+app.get('/api/admins', verifyAdminToken, async (req, res) => {
+    try {
+        const admins = await Admin.find().select('-password');
+        res.json({ success: true, data: admins });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// POST create a new admin
+app.post('/api/admins', verifyAdminToken, async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const existing = await Admin.findOne({ username });
+        if (existing) return res.status(400).json({ error: 'Username already exists' });
+        const newAdmin = new Admin({ username, password });
+        await newAdmin.save();
+        res.status(201).json({ success: true, admin: { id: newAdmin._id, username: newAdmin.username } });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// PUT update an admin (username and optional password)
+app.put('/api/admins/:id', verifyAdminToken, async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const admin = await Admin.findById(req.params.id);
+        if (!admin) return res.status(404).json({ error: 'Admin not found' });
+        if (username) admin.username = username;
+        if (password) admin.password = password;
+        await admin.save();
+        res.json({ success: true, admin: { id: admin._id, username: admin.username } });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// DELETE an admin
+app.delete('/api/admins/:id', verifyAdminToken, async (req, res) => {
+    try {
+        const admin = await Admin.findByIdAndDelete(req.params.id);
+        if (!admin) return res.status(404).json({ error: 'Admin not found' });
+        res.json({ success: true, message: 'Admin deleted' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
 // ============ Start Server ============
 const port = process.env.PORT || 5000;
 const server = app.listen(port, '0.0.0.0', () => {

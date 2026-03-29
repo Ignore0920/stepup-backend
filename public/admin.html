@@ -64,7 +64,7 @@
         window.location.href = 'admin-login.html';
     }
     
-    // Optional: verify token with backend
+    // Verify token with backend
     async function verifyToken() {
         try {
             const response = await fetch('/api/admin/verify', {
@@ -82,181 +82,240 @@
         localStorage.removeItem('adminToken');
         window.location.href = 'admin-login.html';
     }
+
+    // ========== Admin Management with API ==========
+    let currentEditingId = null;
+
+    async function loadAdmins() {
+        try {
+            const response = await fetch('/api/admins', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error);
+
+            const tbody = document.getElementById('teamList');
+            tbody.innerHTML = '';
+            data.data.forEach(admin => {
+                const row = tbody.insertRow();
+                row.setAttribute('data-id', admin._id);
+                row.innerHTML = `
+                    <td>${escapeHtml(admin.username)}</td>
+                    <td><span class="role-badge">Admin</span></td>
+                    <td style="color: #27ae60; font-weight: 600;">Active</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-action btn-edit" onclick="openEditModal('${admin._id}', '${escapeHtml(admin.username)}')">Edit</button>
+                            <button class="btn-action btn-remove" onclick="removeAdmin('${admin._id}', '${escapeHtml(admin.username)}')">Remove</button>
+                        </div>
+                    </td>
+                `;
+            });
+            document.getElementById('adminCount').innerText = data.data.length;
+        } catch (err) {
+            console.error(err);
+            alert('Failed to load admins: ' + err.message);
+        }
+    }
+
+    // Add admin
+    document.getElementById('addAdminForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('newAdminName').value.trim();
+        const password = document.getElementById('newAdminPass').value;
+
+        if (!username || !password) {
+            alert('Please enter username and password');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/admins', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error);
+            alert('Admin created successfully!');
+            loadAdmins();
+            document.getElementById('addAdminForm').reset();
+        } catch (err) {
+            alert(err.message);
+        }
+    });
+
+    // Edit admin modal
+    function openEditModal(id, username) {
+        currentEditingId = id;
+        document.getElementById('editAdminName').value = username;
+        document.getElementById('editAdminPassword').value = '';
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+        currentEditingId = null;
+    }
+
+    // Save edit (update username and/or password)
+    document.getElementById('editAdminForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newUsername = document.getElementById('editAdminName').value.trim();
+        const newPassword = document.getElementById('editAdminPassword').value;
+
+        if (!newUsername) {
+            alert('Username cannot be empty');
+            return;
+        }
+
+        const updateData = { username: newUsername };
+        if (newPassword) updateData.password = newPassword;
+
+        try {
+            const response = await fetch(`/api/admins/${currentEditingId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(updateData)
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error);
+            alert('Admin updated successfully');
+            loadAdmins();
+            closeEditModal();
+        } catch (err) {
+            alert(err.message);
+        }
+    });
+
+    // Remove admin
+    async function removeAdmin(id, username) {
+        if (confirm(`Are you sure you want to remove admin "${username}"?`)) {
+            try {
+                const response = await fetch(`/api/admins/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                alert('Admin removed');
+                loadAdmins();
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+    }
+
+    // Helper to escape HTML to prevent injection
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Modal close handlers
+    document.getElementById('cancelBtn').addEventListener('click', closeEditModal);
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('editModal')) closeEditModal();
+    };
+
+    // Load admins on page load
+    loadAdmins();
 </script>
 
-    <div class="admin-wrapper">
-        <aside class="sidebar">
-            <h2>StepUp Admin</h2>
-                <nav>
-                    <a href="admin.html" class="active">Staff Management</a>
-                    <a href="Inventory.html">Inventory Management</a>
-                    <a href="User.html">User Records</a>
-                    <a href="Order.html">Order Fulfillment</a>
-                    <a href="Sales.html">Sales Reports</a>
-                </nav>
-        </aside>
+<div class="admin-wrapper">
+    <aside class="sidebar">
+        <h2>StepUp Admin</h2>
+        <nav>
+            <a href="admin.html" class="active">Staff Management</a>
+            <a href="Inventory.html">Inventory Management</a>
+            <a href="User.html">User Records</a>
+            <a href="Order.html">Order Fulfillment</a>
+            <a href="Sales.html">Sales Reports</a>
+            <hr style="margin: 20px 0; border-color: #444;">
+            <a href="#" onclick="logoutAdmin(); return false;" style="color: #e74c3c;">Logout</a>
+        </nav>
+    </aside>
 
-        <main class="main-content">
-            <div class="admin-grid">
-                <aside>
-                    <div class="stat-card">
-                        <div class="stat-number" id="adminCount">2</div> <div class="stat-label">Total Admin Staff</div>
-                    </div>
-
-                    <div class="admin-section">
-                        <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Create Account</h2>
-                        <form id="addAdminForm">
-                            <div class="form-group">
-                                <label>Staff Username</label>
-                                <input type="text" id="newAdminName" class="form-control" placeholder="e.g. j_walker" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Authority Level</label>
-                                <select id="newAdminRole" class="form-control">
-                                    <option>Manager</option>
-                                    <option>Inventory Specialist</option>
-                                    <option>Order Editor</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Temporary Password</label>
-                                <input type="password" id="newAdminPass" class="form-control" placeholder="••••••••" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Authorize Member</button>
-                        </form>
-                    </div>
-                </aside>
+    <main class="main-content">
+        <div class="admin-grid">
+            <aside>
+                <div class="stat-card">
+                    <div class="stat-number" id="adminCount">0</div>
+                    <div class="stat-label">Total Admin Staff</div>
+                </div>
 
                 <div class="admin-section">
-                    <h2 style="margin-bottom: 0.5rem; font-size: 1.8rem;">Admin Team Management</h2>
-                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 2rem;">Authorized personnel with backstage access permissions.</p>
-                    
-                    <table class="team-table">
-                        <thead>
-                            <tr>
-                                <th>Username</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Actions</th> </tr>
-                        </thead>
-                        <tbody id="teamList">
-                            <tr>
-                                <td>admin_main</td>
-                                <td><span class="role-badge">Super Admin</span></td>
-                                <td style="color: #27ae60; font-weight: 600;">Active</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="btn-action btn-edit">Edit</button>
-                                        <button class="btn-action btn-remove">Remove</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>marketing_dept</td>
-                                <td><span class="role-badge">Manager</span></td>
-                                <td style="color: #27ae60; font-weight: 600;">Active</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="btn-action btn-edit">Edit</button>
-                                        <button class="btn-action btn-remove">Remove</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Create Account</h2>
+                    <form id="addAdminForm">
+                        <div class="form-group">
+                            <label>Staff Username</label>
+                            <input type="text" id="newAdminName" class="form-control" placeholder="e.g. j_walker" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Authority Level</label>
+                            <select id="newAdminRole" class="form-control">
+                                <option>Manager</option>
+                                <option>Inventory Specialist</option>
+                                <option>Order Editor</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Temporary Password</label>
+                            <input type="password" id="newAdminPass" class="form-control" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Authorize Member</button>
+                    </form>
                 </div>
+            </aside>
+
+            <div class="admin-section">
+                <h2 style="margin-bottom: 0.5rem; font-size: 1.8rem;">Admin Team Management</h2>
+                <p style="color: #666; font-size: 0.9rem; margin-bottom: 2rem;">Authorized personnel with backstage access permissions.</p>
+                
+                <table class="team-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teamList">
+                        <!-- Rows will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
             </div>
-        </main>
-    </div>
-
-    <div id="editModal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="close-modal" id="cancelBtn">&times;</button>
-            <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Edit Member Permissions</h2>
-            <form id="editAdminForm">
-                <div class="form-group">
-                    <label>Staff Username</label>
-                    <input type="text" id="editAdminName" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>Authority Level</label>
-                    <select id="editAdminRole" class="form-control">
-                        <option>Super Admin</option>
-                        <option>Manager</option>
-                        <option>Inventory Specialist</option>
-                        <option>Order Editor</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-            </form>
         </div>
+    </main>
+</div>
+
+<div id="editModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="close-modal" id="cancelBtn">&times;</button>
+        <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Edit Member Permissions</h2>
+        <form id="editAdminForm">
+            <div class="form-group">
+                <label>Staff Username</label>
+                <input type="text" id="editAdminName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>New Password (leave blank to keep unchanged)</label>
+                <input type="password" id="editAdminPassword" class="form-control" placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
     </div>
-
-    <script>
-        // Existing JavaScript Logic remains completely unchanged
-        let totalAdmins = 2;
-        let currentRowEditing = null; 
-        
-        const editModal = document.getElementById('editModal');
-        const editForm = document.getElementById('editAdminForm');
-
-        document.getElementById('addAdminForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('newAdminName').value;
-            const role = document.getElementById('newAdminRole').value;
-
-            alert("Successfully!! New administrator added to the system database.");
-            
-            totalAdmins++;
-            document.getElementById('adminCount').innerText = totalAdmins;
-            
-            const table = document.getElementById('teamList');
-            const newRow = table.insertRow();
-            newRow.innerHTML = `
-                <td>${name}</td>
-                <td><span class="role-badge">${role}</span></td>
-                <td style="color: #27ae60; font-weight: 600;">Active</td>
-                <td>
-                    <div class="action-btns">
-                        <button class="btn-action btn-edit">Edit</button>
-                        <button class="btn-action btn-remove">Remove</button>
-                    </div>
-                </td>
-            `;
-            this.reset();
-        });
-
-        document.getElementById('teamList').addEventListener('click', function(e) {
-            const row = e.target.closest('tr');
-            if (e.target.classList.contains('btn-remove')) {
-                const username = row.cells[0].innerText;
-                if (confirm(`Are you sure you want to remove access for ${username}?`)) {
-                    row.remove();
-                    totalAdmins--;
-                    document.getElementById('adminCount').innerText = totalAdmins;
-                }
-            }
-            if (e.target.classList.contains('btn-edit')) {
-                currentRowEditing = row; 
-                document.getElementById('editAdminName').value = row.cells[0].innerText;
-                document.getElementById('editAdminRole').value = row.cells[1].innerText;
-                editModal.style.display = 'flex';
-            }
-        });
-
-        editForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (currentRowEditing) {
-                currentRowEditing.cells[0].innerText = document.getElementById('editAdminName').value;
-                const newRole = document.getElementById('editAdminRole').value;
-                currentRowEditing.cells[1].innerHTML = `<span class="role-badge">${newRole}</span>`;
-                editModal.style.display = 'none';
-                currentRowEditing = null;
-            }
-        });
-
-        document.getElementById('cancelBtn').addEventListener('click', () => { editModal.style.display = 'none'; });
-        window.onclick = function(event) { if (event.target == editModal) { editModal.style.display = 'none'; } }
-    </script>
+</div>
 </body>
 </html>

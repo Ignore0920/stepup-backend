@@ -12,6 +12,9 @@ const Product = require('./models/Product');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'stepup_admin_secret_key_change_in_production';
 
+const Product = require('./models/Product');
+const User = require('./models/User');
+
 // 中間件配置
 app.use(cors({
     origin: '*',

@@ -480,26 +480,6 @@
                 gap: 1rem;
                 font-size: 0.75rem;
             }
-         .tab-btn {
-            flex: 1;
-            padding: 1rem;
-            background: none;
-            border: none;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            cursor: pointer;
-            color: #999999;
-            transition: all 0.3s;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
-            display: block; /* Changed from 'none' to 'block' */
-    }
-        .tab-btn.visible {
-            display: block; /* Changed from 'flex' to 'block' */
-    }
         }
     </style>
 </head>
@@ -508,13 +488,13 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <a href="main page.html" class="logo">
+                <a href="mainpage.html" class="logo">
                     <div class="logo-box">S</div>
                     <span>STEPUP</span>
                 </a>
                 <nav class="header-nav">
-                    <a href="main page.html">Home</a>
-                    <a href="products.html">Shop</a>
+                    <a href="mainpage.html">Home</a>
+                    <a href="mainpage.html">Shop</a>
                     <a href="shopping-cart.html">Cart</a>
                     <div class="user-info" id="userInfo">
                         <div class="user-avatar" id="userAvatar"></div>
@@ -531,9 +511,9 @@
         <div class="auth-container">
             <!-- Left Section - Form -->
             <div class="auth-section">
-               <div class="tab-toggle">
+                <div class="tab-toggle">
                     <button class="tab-btn active visible" onclick="switchTab('login')">Login</button>
-                  <button class="tab-btn visible" onclick="switchTab('register')">Register</button>
+                    <button class="tab-btn visible" onclick="switchTab('register')">Register</button>
                 </div>
 
                 <!-- Login Form -->

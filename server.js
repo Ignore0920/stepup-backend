@@ -171,108 +171,7 @@ app.post('/api/users/login', async (req, res) => {
     }
 });
 
-// ============ Inventory Management (Admin only) ============
-
-// Get all products
-app.get('/api/admin/inventory/products', verifyAdminToken, async (req, res) => {
-    try {
-        const products = await Product.find().sort({ createdAt: -1 });
-        res.json({ success: true, data: products });
-    } catch (err) {
-        console.error('Error fetching products:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// Create a new product
-app.post('/api/admin/inventory/products', verifyAdminToken, async (req, res) => {
-    try {
-        const { brand, model, sizeRange, price, stock } = req.body;
-        if (!brand || !model || !sizeRange || price === undefined || stock === undefined) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
-        const product = new Product({ brand, model, sizeRange, price, stock });
-        await product.save();
-        res.status(201).json({ success: true, product });
-    } catch (err) {
-        console.error('Error creating product:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// Update a product
-app.put('/api/admin/inventory/products/:id', verifyAdminToken, async (req, res) => {
-    try {
-        const { brand, model, sizeRange, price, stock } = req.body;
-        const product = await Product.findById(req.params.id);
-        if (!product) return res.status(404).json({ error: 'Product not found' });
-        if (brand !== undefined) product.brand = brand;
-        if (model !== undefined) product.model = model;
-        if (sizeRange !== undefined) product.sizeRange = sizeRange;
-        if (price !== undefined) product.price = price;
-        if (stock !== undefined) product.stock = stock;
-        await product.save();
-        res.json({ success: true, product });
-    } catch (err) {
-        console.error('Error updating product:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// Delete a product
-app.delete('/api/admin/inventory/products/:id', verifyAdminToken, async (req, res) => {
-    try {
-        const product = await Product.findByIdAndDelete(req.params.id);
-        if (!product) return res.status(404).json({ error: 'Product not found' });
-        res.json({ success: true, message: 'Product deleted' });
-    } catch (err) {
-        console.error('Error deleting product:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// ============ Category Management (Admin only) ============
-
-// Get all categories
-app.get('/api/admin/inventory/categories', verifyAdminToken, async (req, res) => {
-    try {
-        const categories = await Category.find().sort({ name: 1 });
-        res.json({ success: true, data: categories });
-    } catch (err) {
-        console.error('Error fetching categories:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// Create a new category
-app.post('/api/admin/inventory/categories', verifyAdminToken, async (req, res) => {
-    try {
-        const { name } = req.body;
-        if (!name) return res.status(400).json({ error: 'Category name required' });
-        const existing = await Category.findOne({ name });
-        if (existing) return res.status(400).json({ error: 'Category already exists' });
-        const category = new Category({ name });
-        await category.save();
-        res.status(201).json({ success: true, category });
-    } catch (err) {
-        console.error('Error creating category:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// Delete a category
-app.delete('/api/admin/inventory/categories/:id', verifyAdminToken, async (req, res) => {
-    try {
-        const category = await Category.findByIdAndDelete(req.params.id);
-        if (!category) return res.status(404).json({ error: 'Category not found' });
-        res.json({ success: true, message: 'Category deleted' });
-    } catch (err) {
-        console.error('Error deleting category:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// ============ Product Routes ============
+// ============ Product Routes (Public) ============
 app.get('/api/products/:id', async (req, res) => {
     try {
         if (mongoose.connection.readyState !== 1) {
@@ -368,7 +267,7 @@ app.delete('/api/products/:id', async (req, res) => {
     }
 });
 
-// Middleware to verify admin token (if not already defined)
+// ============ Middleware to verify admin token ============
 const verifyAdminToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ error: 'No token provided' });
@@ -384,6 +283,7 @@ const verifyAdminToken = async (req, res, next) => {
     }
 };
 
+// ============ Admin Management (Admin only) ============
 // GET all admins (excluding passwords)
 app.get('/api/admins', verifyAdminToken, async (req, res) => {
     try {
@@ -417,7 +317,7 @@ app.put('/api/admins/:id', verifyAdminToken, async (req, res) => {
         const admin = await Admin.findById(req.params.id);
         if (!admin) return res.status(404).json({ error: 'Admin not found' });
         if (username) admin.username = username;
-        if (password) admin.password = password; // password will be hashed by pre-save hook
+        if (password) admin.password = password;
         await admin.save();
         res.json({ success: true, admin: { id: admin._id, username: admin.username } });
     } catch (err) {
@@ -434,6 +334,105 @@ app.delete('/api/admins/:id', verifyAdminToken, async (req, res) => {
         res.json({ success: true, message: 'Admin deleted' });
     } catch (err) {
         console.error('Error deleting admin:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ============ Inventory Management (Admin only) ============
+// Get all products
+app.get('/api/admin/inventory/products', verifyAdminToken, async (req, res) => {
+    try {
+        const products = await Product.find().sort({ createdAt: -1 });
+        res.json({ success: true, data: products });
+    } catch (err) {
+        console.error('Error fetching products:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Create a new product
+app.post('/api/admin/inventory/products', verifyAdminToken, async (req, res) => {
+    try {
+        const { brand, model, sizeRange, price, stock } = req.body;
+        if (!brand || !model || !sizeRange || price === undefined || stock === undefined) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        const product = new Product({ brand, model, sizeRange, price, stock });
+        await product.save();
+        res.status(201).json({ success: true, product });
+    } catch (err) {
+        console.error('Error creating product:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Update a product
+app.put('/api/admin/inventory/products/:id', verifyAdminToken, async (req, res) => {
+    try {
+        const { brand, model, sizeRange, price, stock } = req.body;
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(404).json({ error: 'Product not found' });
+        if (brand !== undefined) product.brand = brand;
+        if (model !== undefined) product.model = model;
+        if (sizeRange !== undefined) product.sizeRange = sizeRange;
+        if (price !== undefined) product.price = price;
+        if (stock !== undefined) product.stock = stock;
+        await product.save();
+        res.json({ success: true, product });
+    } catch (err) {
+        console.error('Error updating product:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Delete a product
+app.delete('/api/admin/inventory/products/:id', verifyAdminToken, async (req, res) => {
+    try {
+        const product = await Product.findByIdAndDelete(req.params.id);
+        if (!product) return res.status(404).json({ error: 'Product not found' });
+        res.json({ success: true, message: 'Product deleted' });
+    } catch (err) {
+        console.error('Error deleting product:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ============ Category Management (Admin only) ============
+// Get all categories
+app.get('/api/admin/inventory/categories', verifyAdminToken, async (req, res) => {
+    try {
+        const categories = await Category.find().sort({ name: 1 });
+        res.json({ success: true, data: categories });
+    } catch (err) {
+        console.error('Error fetching categories:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Create a new category
+app.post('/api/admin/inventory/categories', verifyAdminToken, async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) return res.status(400).json({ error: 'Category name required' });
+        const existing = await Category.findOne({ name });
+        if (existing) return res.status(400).json({ error: 'Category already exists' });
+        const category = new Category({ name });
+        await category.save();
+        res.status(201).json({ success: true, category });
+    } catch (err) {
+        console.error('Error creating category:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Delete a category
+app.delete('/api/admin/inventory/categories/:id', verifyAdminToken, async (req, res) => {
+    try {
+        const category = await Category.findByIdAndDelete(req.params.id);
+        if (!category) return res.status(404).json({ error: 'Category not found' });
+        res.json({ success: true, message: 'Category deleted' });
+    } catch (err) {
+        console.error('Error deleting category:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });

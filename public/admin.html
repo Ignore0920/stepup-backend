@@ -6,7 +6,7 @@
     <title>StepUp Admin - Account Creation</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* (Keep all your existing CSS – unchanged) */
+        /* All your existing CSS – keep unchanged */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; background-color: #f9f9f9; color: #262626; line-height: 1.6; }
         h1, h2, h3 { font-family: 'Playfair Display', serif; }
@@ -45,13 +45,91 @@
     </style>
 </head>
 <body>
+
+<div class="admin-wrapper">
+    <aside class="sidebar">
+        <h2>StepUp Admin</h2>
+        <nav>
+            <a href="admin.html" class="active">Staff Management</a>
+            <a href="Inventory.html">Inventory Management</a>
+            <a href="User.html">User Records</a>
+            <a href="Order.html">Order Fulfillment</a>
+            <a href="Sales.html">Sales Reports</a>
+            <hr style="margin: 20px 0; border-color: #444;">
+            <a href="#" onclick="logoutAdmin(); return false;" style="color: #e74c3c;">Logout</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="admin-grid">
+            <aside>
+                <div class="stat-card">
+                    <div class="stat-number" id="adminCount">0</div>
+                    <div class="stat-label">Total Admin Staff</div>
+                </div>
+                <div class="admin-section">
+                    <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Create Account</h2>
+                    <form id="addAdminForm">
+                        <div class="form-group">
+                            <label>Staff Username</label>
+                            <input type="text" id="newAdminName" class="form-control" placeholder="e.g. j_walker" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Authority Level</label>
+                            <select id="newAdminRole" class="form-control">
+                                <option>Manager</option>
+                                <option>Inventory Specialist</option>
+                                <option>Order Editor</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Temporary Password</label>
+                            <input type="password" id="newAdminPass" class="form-control" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Authorize Member</button>
+                    </form>
+                </div>
+            </aside>
+            <div class="admin-section">
+                <h2 style="margin-bottom: 0.5rem; font-size: 1.8rem;">Admin Team Management</h2>
+                <p style="color: #666; font-size: 0.9rem; margin-bottom: 2rem;">Authorized personnel with backstage access permissions.</p>
+                <table class="team-table">
+                    <thead>
+                        <tr><th>Username</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="teamList"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="editModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="close-modal" id="cancelBtn">&times;</button>
+        <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Edit Member Permissions</h2>
+        <form id="editAdminForm">
+            <div class="form-group">
+                <label>Staff Username</label>
+                <input type="text" id="editAdminName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>New Password (leave blank to keep unchanged)</label>
+                <input type="password" id="editAdminPassword" class="form-control" placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<!-- ========== SCRIPT MOVED TO THE BOTTOM ========== -->
 <script>
     // Check admin token on page load
     const token = localStorage.getItem('adminToken');
     if (!token) {
         window.location.href = 'admin-login.html';
     }
-    
+
     async function verifyToken() {
         try {
             const response = await fetch('/api/admin/verify', {
@@ -64,7 +142,7 @@
         }
     }
     verifyToken();
-    
+
     function logoutAdmin() {
         localStorage.removeItem('adminToken');
         window.location.href = 'admin-login.html';
@@ -141,7 +219,7 @@
         });
     }
 
-    // --- Safe event listeners with null checks ---
+    // --- Event listeners – now all elements exist because script is at the bottom ---
     const addAdminForm = document.getElementById('addAdminForm');
     if (addAdminForm) {
         addAdminForm.addEventListener('submit', async (e) => {
@@ -219,83 +297,8 @@
         if (event.target == document.getElementById('editModal')) closeEditModal();
     };
 
+    // Load admins after everything is ready
     loadAdmins();
 </script>
-
-<div class="admin-wrapper">
-    <aside class="sidebar">
-        <h2>StepUp Admin</h2>
-        <nav>
-            <a href="admin.html" class="active">Staff Management</a>
-            <a href="Inventory.html">Inventory Management</a>
-            <a href="User.html">User Records</a>
-            <a href="Order.html">Order Fulfillment</a>
-            <a href="Sales.html">Sales Reports</a>
-            <hr style="margin: 20px 0; border-color: #444;">
-            <a href="#" onclick="logoutAdmin(); return false;" style="color: #e74c3c;">Logout</a>
-        </nav>
-    </aside>
-
-    <main class="main-content">
-        <div class="admin-grid">
-            <aside>
-                <div class="stat-card">
-                    <div class="stat-number" id="adminCount">0</div>
-                    <div class="stat-label">Total Admin Staff</div>
-                </div>
-                <div class="admin-section">
-                    <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Create Account</h2>
-                    <form id="addAdminForm">
-                        <div class="form-group">
-                            <label>Staff Username</label>
-                            <input type="text" id="newAdminName" class="form-control" placeholder="e.g. j_walker" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Authority Level</label>
-                            <select id="newAdminRole" class="form-control">
-                                <option>Manager</option>
-                                <option>Inventory Specialist</option>
-                                <option>Order Editor</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Temporary Password</label>
-                            <input type="password" id="newAdminPass" class="form-control" placeholder="••••••••" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Authorize Member</button>
-                    </form>
-                </div>
-            </aside>
-            <div class="admin-section">
-                <h2 style="margin-bottom: 0.5rem; font-size: 1.8rem;">Admin Team Management</h2>
-                <p style="color: #666; font-size: 0.9rem; margin-bottom: 2rem;">Authorized personnel with backstage access permissions.</p>
-                <table class="team-table">
-                    <thead>
-                        <tr><th>Username</th><th>Role</th><th>Status</th><th>Actions</th></tr>
-                    </thead>
-                    <tbody id="teamList"></tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-</div>
-
-<div id="editModal" class="modal-overlay">
-    <div class="modal-content">
-        <button class="close-modal" id="cancelBtn">&times;</button>
-        <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Edit Member Permissions</h2>
-        <form id="editAdminForm">
-            <div class="form-group">
-                <label>Staff Username</label>
-                <input type="text" id="editAdminName" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>New Password (leave blank to keep unchanged)</label>
-                <input type="password" id="editAdminPassword" class="form-control" placeholder="••••••••">
-            </div>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-        </form>
-    </div>
-</div>
 </body>
 </html>

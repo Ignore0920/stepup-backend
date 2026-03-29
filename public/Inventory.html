@@ -49,13 +49,12 @@
 </head>
 <body>
 <script>
-    // Check admin token on page load
+    // --- Admin token check (same as before) ---
     const token = localStorage.getItem('adminToken');
     if (!token) {
         window.location.href = 'admin-login.html';
     }
-    
-    // Optional: verify token with backend
+
     async function verifyToken() {
         try {
             const response = await fetch('/api/admin/verify', {
@@ -68,11 +67,251 @@
         }
     }
     verifyToken();
-    
+
     function logoutAdmin() {
         localStorage.removeItem('adminToken');
         window.location.href = 'admin-login.html';
     }
+
+    // --- Load categories from backend ---
+    async function loadCategories() {
+        try {
+            const response = await fetch('/api/admin/inventory/categories', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error);
+            const categoryList = document.getElementById('categoryList');
+            categoryList.innerHTML = '';
+            data.data.forEach(cat => {
+                const li = document.createElement('li');
+                li.setAttribute('data-id', cat._id);
+                li.innerHTML = `${cat.name} <button class="btn-remove-category" style="margin-left:10px; background:#e74c3c; color:white; border:none; border-radius:3px; padding:2px 8px; cursor:pointer;">✕</button>`;
+                categoryList.appendChild(li);
+            });
+            // attach delete event to each remove button
+            document.querySelectorAll('.btn-remove-category').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const li = btn.closest('li');
+                    const id = li.getAttribute('data-id');
+                    if (confirm('Delete this category?')) {
+                        const delRes = await fetch(`/api/admin/inventory/categories/${id}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (delRes.ok) {
+                            loadCategories();
+                        } else {
+                            alert('Failed to delete category');
+                        }
+                    }
+                });
+            });
+        } catch (err) {
+            console.error(err);
+            alert('Failed to load categories');
+        }
+    }
+
+    // Add category form
+    document.getElementById('categoryForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const categoryName = document.getElementById('catInput').value.trim();
+        if (!categoryName) return;
+        try {
+            const response = await fetch('/api/admin/inventory/categories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ name: categoryName })
+            });
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Failed');
+            }
+            document.getElementById('catInput').value = '';
+            loadCategories();
+        } catch (err) {
+            alert(err.message);
+        }
+    });
+
+    // --- Load products from backend ---
+    async function loadProducts() {
+        try {
+            const response = await fetch('/api/admin/inventory/products', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error);
+            const tbody = document.getElementById('shoeTableBody');
+            tbody.innerHTML = '';
+            data.data.forEach(product => {
+                const row = tbody.insertRow();
+                row.setAttribute('data-id', product._id);
+                row.innerHTML = `
+                    <td>${escapeHtml(product.brand)}</td>
+                    <td>${escapeHtml(product.model)}</td>
+                    <td>${escapeHtml(product.sizeRange)}</td>
+                    <td>$${product.price.toFixed(2)}</td>
+                    <td>${product.stock}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-table btn-edit" onclick="editProduct('${product._id}')">Edit</button>
+                            <button class="btn-table btn-remove" onclick="removeProduct('${product._id}')">Remove</button>
+                        </div>
+                    </td>
+                `;
+            });
+        } catch (err) {
+            console.error(err);
+            alert('Failed to load products');
+        }
+    }
+
+    // Add product form
+    document.getElementById('shoeForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const brand = document.getElementById('sBrand').value.trim();
+        const model = document.getElementById('sModel').value.trim();
+        const sizeRange = document.getElementById('sSize').value.trim();
+        const price = parseFloat(document.getElementById('sPrice').value);
+        const stock = parseInt(document.getElementById('sStock').value);
+        if (!brand || !model || !sizeRange || isNaN(price) || isNaN(stock)) {
+            alert('Please fill all fields correctly');
+            return;
+        }
+        try {
+            const response = await fetch('/api/admin/inventory/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ brand, model, sizeRange, price, stock })
+            });
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Failed');
+            }
+            document.getElementById('shoeForm').reset();
+            loadProducts();
+        } catch (err) {
+            alert(err.message);
+        }
+    });
+
+    // Edit product - fetch current data and fill form
+    window.editProduct = async function(id) {
+        try {
+            const response = await fetch(`/api/admin/inventory/products/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error);
+            const product = data.product;
+            document.getElementById('sBrand').value = product.brand;
+            document.getElementById('sModel').value = product.model;
+            document.getElementById('sSize').value = product.sizeRange;
+            document.getElementById('sPrice').value = product.price;
+            document.getElementById('sStock').value = product.stock;
+            // Remove the original product first (we'll update on submit)
+            // We'll change form behavior: if editing, we'll use a different endpoint.
+            // For simplicity, we'll store editingId and submit as PUT.
+            window.editingProductId = id;
+            // Change submit button text temporarily
+            const submitBtn = document.querySelector('#shoeForm button[type="submit"]');
+            submitBtn.textContent = 'Update Product';
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    // Override form submit to handle update if editingProductId exists
+    const originalSubmitHandler = document.getElementById('shoeForm').submit;
+    document.getElementById('shoeForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const brand = document.getElementById('sBrand').value.trim();
+        const model = document.getElementById('sModel').value.trim();
+        const sizeRange = document.getElementById('sSize').value.trim();
+        const price = parseFloat(document.getElementById('sPrice').value);
+        const stock = parseInt(document.getElementById('sStock').value);
+        if (!brand || !model || !sizeRange || isNaN(price) || isNaN(stock)) {
+            alert('Please fill all fields correctly');
+            return;
+        }
+        const productData = { brand, model, sizeRange, price, stock };
+        try {
+            let response;
+            if (window.editingProductId) {
+                response = await fetch(`/api/admin/inventory/products/${window.editingProductId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(productData)
+                });
+                if (response.ok) {
+                    delete window.editingProductId;
+                    const submitBtn = document.querySelector('#shoeForm button[type="submit"]');
+                    submitBtn.textContent = 'Add Product';
+                }
+            } else {
+                response = await fetch('/api/admin/inventory/products', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(productData)
+                });
+            }
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Failed');
+            }
+            document.getElementById('shoeForm').reset();
+            loadProducts();
+        } catch (err) {
+            alert(err.message);
+        }
+    });
+
+    // Remove product
+    window.removeProduct = async function(id) {
+        if (confirm('Are you sure you want to remove this product?')) {
+            try {
+                const response = await fetch(`/api/admin/inventory/products/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Failed');
+                }
+                loadProducts();
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+    };
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Initial load
+    loadCategories();
+    loadProducts();
 </script>
 
     <div class="admin-wrapper">

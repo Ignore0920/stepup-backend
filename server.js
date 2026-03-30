@@ -31,28 +31,14 @@ console.log('🔧 Environment:', process.env.NODE_ENV || 'development');
 
 // Test route
 app.get('/test', (req, res) => {
-    res.json({
-        message: 'Server is working!',
-        timestamp: new Date().toISOString()
-    });
+    res.json({ message: 'Server is working!', timestamp: new Date().toISOString() });
 });
 
 // Health check
 app.get('/health', (req, res) => {
     const dbStatus = mongoose.connection.readyState;
-    const dbStatusText = {
-        0: 'disconnected',
-        1: 'connected',
-        2: 'connecting',
-        3: 'disconnecting'
-    }[dbStatus] || 'unknown';
-
-    res.status(200).json({
-        status: 'OK',
-        message: 'Server is running',
-        database: dbStatusText,
-        timestamp: new Date().toISOString()
-    });
+    const dbStatusText = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' }[dbStatus] || 'unknown';
+    res.status(200).json({ status: 'OK', message: 'Server is running', database: dbStatusText, timestamp: new Date().toISOString() });
 });
 
 // Root
@@ -84,13 +70,9 @@ app.post('/api/admin/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         const admin = await Admin.findOne({ username });
-        if (!admin) {
-            return res.status(401).json({ error: 'Invalid username or password' });
-        }
+        if (!admin) return res.status(401).json({ error: 'Invalid username or password' });
         const isMatch = await admin.comparePassword(password);
-        if (!isMatch) {
-            return res.status(401).json({ error: 'Invalid username or password' });
-        }
+        if (!isMatch) return res.status(401).json({ error: 'Invalid username or password' });
         const token = jwt.sign(
             { id: admin._id, username: admin.username, role: 'admin' },
             JWT_SECRET,
@@ -123,9 +105,7 @@ app.post('/api/users/register', async (req, res) => {
         const { name, email, password } = req.body;
         console.log('Registration attempt:', { name, email });
         const existing = await User.findOne({ email });
-        if (existing) {
-            return res.status(400).json({ error: 'Email already registered' });
-        }
+        if (existing) return res.status(400).json({ error: 'Email already registered' });
         const user = new User({ name, email, password });
         await user.save();
         const token = jwt.sign(
@@ -133,11 +113,7 @@ app.post('/api/users/register', async (req, res) => {
             JWT_SECRET,
             { expiresIn: '7d' }
         );
-        res.status(201).json({
-            success: true,
-            token,
-            user: { id: user._id, name: user.name, email: user.email }
-        });
+        res.status(201).json({ success: true, token, user: { id: user._id, name: user.name, email: user.email } });
     } catch (err) {
         console.error('Registration error:', err);
         res.status(500).json({ error: 'Server error', details: err.message });
@@ -148,23 +124,15 @@ app.post('/api/users/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(401).json({ error: 'Invalid email or password' });
-        }
+        if (!user) return res.status(401).json({ error: 'Invalid email or password' });
         const isMatch = await user.comparePassword(password);
-        if (!isMatch) {
-            return res.status(401).json({ error: 'Invalid email or password' });
-        }
+        if (!isMatch) return res.status(401).json({ error: 'Invalid email or password' });
         const token = jwt.sign(
             { id: user._id, email: user.email, role: 'user' },
             JWT_SECRET,
             { expiresIn: '7d' }
         );
-        res.json({
-            success: true,
-            token,
-            user: { id: user._id, name: user.name, email: user.email }
-        });
+        res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email } });
     } catch (err) {
         console.error('Login error:', err);
         res.status(500).json({ error: 'Server error' });
@@ -174,9 +142,7 @@ app.post('/api/users/login', async (req, res) => {
 // ============ Product Routes (Public) ============
 app.get('/api/products/:id', async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) {
-            return res.status(503).json({ error: "Database not connected" });
-        }
+        if (mongoose.connection.readyState !== 1) return res.status(503).json({ error: "Database not connected" });
         const product = await Product.findById(req.params.id);
         if (!product) return res.status(404).json({ error: "Product not found" });
         res.json(product);
@@ -188,24 +154,17 @@ app.get('/api/products/:id', async (req, res) => {
 
 app.post('/api/products', async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) {
-            return res.status(503).json({ error: "Database not connected" });
-        }
+        if (mongoose.connection.readyState !== 1) return res.status(503).json({ error: "Database not connected" });
         console.log("📦 Data received:", req.body);
         const requiredFields = ['productName', 'brand', 'category', 'price'];
         const missingFields = requiredFields.filter(field => !req.body[field]);
         if (missingFields.length > 0) {
-            return res.status(400).json({
-                error: `Missing required fields: ${missingFields.join(', ')}`
-            });
+            return res.status(400).json({ error: `Missing required fields: ${missingFields.join(', ')}` });
         }
         const newProduct = new Product(req.body);
         await newProduct.save();
         console.log("✅ Product saved:", newProduct._id);
-        res.status(201).json({
-            message: "Product saved successfully!",
-            product: newProduct
-        });
+        res.status(201).json({ message: "Product saved successfully!", product: newProduct });
     } catch (err) {
         console.error("❌ Save Error:", err.message);
         res.status(400).json({ error: err.message });
@@ -214,15 +173,9 @@ app.post('/api/products', async (req, res) => {
 
 app.get('/api/products', async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) {
-            return res.status(503).json({ error: "Database not connected" });
-        }
+        if (mongoose.connection.readyState !== 1) return res.status(503).json({ error: "Database not connected" });
         const products = await Product.find().sort({ createdAt: -1 });
-        res.json({
-            success: true,
-            count: products.length,
-            data: products
-        });
+        res.json({ success: true, count: products.length, data: products });
     } catch (err) {
         console.error("❌ Fetch Error:", err.message);
         res.status(500).json({ error: err.message });
@@ -231,19 +184,10 @@ app.get('/api/products', async (req, res) => {
 
 app.put('/api/products/:id', async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) {
-            return res.status(503).json({ error: "Database not connected" });
-        }
-        const product = await Product.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true, runValidators: true }
-        );
+        if (mongoose.connection.readyState !== 1) return res.status(503).json({ error: "Database not connected" });
+        const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
         if (!product) return res.status(404).json({ error: "Product not found" });
-        res.json({
-            message: "Product updated successfully",
-            product
-        });
+        res.json({ message: "Product updated successfully", product });
     } catch (err) {
         console.error("❌ Update Error:", err.message);
         res.status(400).json({ error: err.message });
@@ -252,15 +196,10 @@ app.put('/api/products/:id', async (req, res) => {
 
 app.delete('/api/products/:id', async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) {
-            return res.status(503).json({ error: "Database not connected" });
-        }
+        if (mongoose.connection.readyState !== 1) return res.status(503).json({ error: "Database not connected" });
         const product = await Product.findByIdAndDelete(req.params.id);
         if (!product) return res.status(404).json({ error: "Product not found" });
-        res.json({
-            message: "Product deleted successfully",
-            product
-        });
+        res.json({ message: "Product deleted successfully", product });
     } catch (err) {
         console.error("❌ Delete Error:", err.message);
         res.status(500).json({ error: err.message });
@@ -284,7 +223,6 @@ const verifyAdminToken = async (req, res, next) => {
 };
 
 // ============ Admin Management (Admin only) ============
-// GET all admins (excluding passwords)
 app.get('/api/admins', verifyAdminToken, async (req, res) => {
     try {
         const admins = await Admin.find().select('-password');
@@ -295,7 +233,6 @@ app.get('/api/admins', verifyAdminToken, async (req, res) => {
     }
 });
 
-// POST create a new admin
 app.post('/api/admins', verifyAdminToken, async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -310,7 +247,6 @@ app.post('/api/admins', verifyAdminToken, async (req, res) => {
     }
 });
 
-// PUT update an admin (username and optional password)
 app.put('/api/admins/:id', verifyAdminToken, async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -326,7 +262,6 @@ app.put('/api/admins/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
-// DELETE an admin
 app.delete('/api/admins/:id', verifyAdminToken, async (req, res) => {
     try {
         const admin = await Admin.findByIdAndDelete(req.params.id);
@@ -354,8 +289,7 @@ app.post('/api/admin/seed-products', verifyAdminToken, async (req, res) => {
             { name: 'Converse One Star', brand: 'Converse', model: 'One Star', sizeRange: '5-13', price: 149.99, stock: 60, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OqEvWuXBAyHMsEtW.jpg', tag: '', collection: 'Casual' }
         ];
 
-        let inserted = 0;
-        let skipped = 0;
+        let inserted = 0, skipped = 0;
         for (const prod of defaultProducts) {
             const exists = await Product.findOne({ name: prod.name, brand: prod.brand });
             if (!exists) {
@@ -384,14 +318,20 @@ app.get('/api/admin/inventory/products', verifyAdminToken, async (req, res) => {
     }
 });
 
-// Create a new product
+// Create a new product (with all fields)
 app.post('/api/admin/inventory/products', verifyAdminToken, async (req, res) => {
     try {
-        const { brand, model, sizeRange, price, stock } = req.body;
-        if (!brand || !model || !sizeRange || price === undefined || stock === undefined) {
-            return res.status(400).json({ error: 'Missing required fields' });
+        const { name, brand, model, sizeRange, price, stock, image, tag, collection } = req.body;
+        // Validate required fields
+        if (!name || !brand || !model || !sizeRange || price === undefined || stock === undefined) {
+            return res.status(400).json({ error: 'Missing required fields: name, brand, model, sizeRange, price, stock' });
         }
-        const product = new Product({ brand, model, sizeRange, price, stock });
+        const product = new Product({
+            name, brand, model, sizeRange, price, stock,
+            image: image || '',
+            tag: tag || '',
+            collection: collection || 'Casual'
+        });
         await product.save();
         res.status(201).json({ success: true, product });
     } catch (err) {
@@ -400,17 +340,21 @@ app.post('/api/admin/inventory/products', verifyAdminToken, async (req, res) => 
     }
 });
 
-// Update a product
+// Update a product (all fields allowed)
 app.put('/api/admin/inventory/products/:id', verifyAdminToken, async (req, res) => {
     try {
-        const { brand, model, sizeRange, price, stock } = req.body;
+        const { name, brand, model, sizeRange, price, stock, image, tag, collection } = req.body;
         const product = await Product.findById(req.params.id);
         if (!product) return res.status(404).json({ error: 'Product not found' });
+        if (name !== undefined) product.name = name;
         if (brand !== undefined) product.brand = brand;
         if (model !== undefined) product.model = model;
         if (sizeRange !== undefined) product.sizeRange = sizeRange;
         if (price !== undefined) product.price = price;
         if (stock !== undefined) product.stock = stock;
+        if (image !== undefined) product.image = image;
+        if (tag !== undefined) product.tag = tag;
+        if (collection !== undefined) product.collection = collection;
         await product.save();
         res.json({ success: true, product });
     } catch (err) {
@@ -432,7 +376,6 @@ app.delete('/api/admin/inventory/products/:id', verifyAdminToken, async (req, re
 });
 
 // ============ Category Management (Admin only) ============
-// Get all categories
 app.get('/api/admin/inventory/categories', verifyAdminToken, async (req, res) => {
     try {
         const categories = await Category.find().sort({ name: 1 });
@@ -443,7 +386,6 @@ app.get('/api/admin/inventory/categories', verifyAdminToken, async (req, res) =>
     }
 });
 
-// Create a new category
 app.post('/api/admin/inventory/categories', verifyAdminToken, async (req, res) => {
     try {
         const { name } = req.body;
@@ -459,7 +401,6 @@ app.post('/api/admin/inventory/categories', verifyAdminToken, async (req, res) =
     }
 });
 
-// Delete a category
 app.delete('/api/admin/inventory/categories/:id', verifyAdminToken, async (req, res) => {
     try {
         const category = await Category.findByIdAndDelete(req.params.id);
@@ -493,10 +434,7 @@ if (!dbURI) {
             console.log('✅ Connected to StepUp Database');
             const adminCount = await Admin.countDocuments();
             if (adminCount === 0) {
-                const defaultAdmin = new Admin({
-                    username: 'admin',
-                    password: 'admin123'
-                });
+                const defaultAdmin = new Admin({ username: 'admin', password: 'admin123' });
                 await defaultAdmin.save();
                 console.log('✅ Default admin created: username = admin, password = admin123');
             }

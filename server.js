@@ -41,8 +41,13 @@ app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK', message: 'Server is running', database: dbStatusText, timestamp: new Date().toISOString() });
 });
 
-// Root
+// Serve mainpage.html at the root
 app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'mainpage.html'));
+});
+
+// API information endpoint (optional)
+app.get('/api/info', (req, res) => {
     const dbStatus = mongoose.connection.readyState;
     res.json({
         name: "StepUp Backend API",

@@ -259,6 +259,71 @@ app.post('/api/orders', async (req, res) => {
     }
 });
 
+// ============ User Management (Admin only) ============
+const User = require('./models/User');
+
+// Get all users
+app.get('/api/admin/users', verifyAdminToken, async (req, res) => {
+    try {
+        const users = await User.find().select('-password').sort({ createdAt: -1 });
+        res.json({ success: true, data: users });
+    } catch (err) {
+        console.error('Error fetching users:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Create new user (admin only)
+app.post('/api/admin/users', verifyAdminToken, async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+        if (!name || !email || !password) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        const existing = await User.findOne({ email });
+        if (existing) return res.status(400).json({ error: 'Email already exists' });
+        const user = new User({ name, email, password });
+        await user.save();
+        const userObj = user.toObject();
+        delete userObj.password;
+        res.status(201).json({ success: true, user: userObj });
+    } catch (err) {
+        console.error('Error creating user:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Update user (admin only)
+app.put('/api/admin/users/:id', verifyAdminToken, async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (name) user.name = name;
+        if (email) user.email = email;
+        if (password) user.password = password;
+        await user.save();
+        const userObj = user.toObject();
+        delete userObj.password;
+        res.json({ success: true, user: userObj });
+    } catch (err) {
+        console.error('Error updating user:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Delete user (admin only)
+app.delete('/api/admin/users/:id', verifyAdminToken, async (req, res) => {
+    try {
+        const user = await User.findByIdAndDelete(req.params.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.json({ success: true, message: 'User deleted' });
+    } catch (err) {
+        console.error('Error deleting user:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // ============ Middleware to verify admin token ============
 const verifyAdminToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;

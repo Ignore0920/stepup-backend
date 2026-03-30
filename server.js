@@ -260,8 +260,6 @@ app.post('/api/orders', async (req, res) => {
 });
 
 // ============ User Management (Admin only) ============
-const User = require('./models/User');
-
 // Get all users
 app.get('/api/admin/users', verifyAdminToken, async (req, res) => {
     try {

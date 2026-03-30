@@ -318,6 +318,18 @@ app.get('/api/admin/inventory/products', verifyAdminToken, async (req, res) => {
     }
 });
 
+// Get a single product by ID
+app.get('/api/admin/inventory/products/:id', verifyAdminToken, async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(404).json({ error: 'Product not found' });
+        res.json({ success: true, product });
+    } catch (err) {
+        console.error('Error fetching product:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // Create a new product (with all fields)
 app.post('/api/admin/inventory/products', verifyAdminToken, async (req, res) => {
     try {

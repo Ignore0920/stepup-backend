@@ -6,6 +6,7 @@
     <title>Checkout - StepUp</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        /* (all your existing CSS remains unchanged) */
         * {
             margin: 0;
             padding: 0;
@@ -337,6 +338,17 @@
                             <input type="text" id="checkoutCity" placeholder="New York" required>
                         </div>
 
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>State/Province</label>
+                                <input type="text" id="checkoutState" placeholder="State/Province">
+                            </div>
+                            <div class="form-group">
+                                <label>Postal Code</label>
+                                <input type="text" id="checkoutPostal" placeholder="Postal Code">
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label>Country *</label>
                             <select id="checkoutCountry" required>
@@ -390,7 +402,6 @@
                                 <div style="font-size: 24px; margin-bottom: 5px;">📱</div>
                                 <div style="font-size: 12px;">Digital Wallet</div>
                             </div>
-
                         </div>
 
                         <!-- Credit/Debit Card Form -->
@@ -399,12 +410,10 @@
                                 <label>Cardholder Name *</label>
                                 <input type="text" placeholder="John Doe" required>
                             </div>
-
                             <div class="form-group">
                                 <label>Card Number *</label>
                                 <input type="text" placeholder="1234 5678 9012 3456" maxlength="19" required>
                             </div>
-
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>Expiry Date *</label>
@@ -449,19 +458,15 @@
                 <!-- Order Summary Sidebar -->
                 <div class="order-summary">
                     <h3 class="summary-title">Order Summary</h3>
-
                     <div id="cartItems"></div>
-
                     <div class="summary-row">
                         <span>Subtotal:</span>
                         <span id="subtotalPrice">MOP $0.00</span>
                     </div>
-
                     <div class="summary-row">
                         <span>Shipping:</span>
                         <span id="shippingPrice">MOP $0.00</span>
                     </div>
-
                     <div class="summary-row total">
                         <span>Total:</span>
                         <span id="totalPrice">MOP $0.00</span>
@@ -474,18 +479,10 @@
     <script>
         // Payment method selection
         function selectPayment(element, method) {
-            // Remove selected class from all options
-            document.querySelectorAll('.payment-option').forEach(option => {
-                option.classList.remove('selected');
-            });
-            
-            // Add selected class to clicked option
+            document.querySelectorAll('.payment-option').forEach(option => option.classList.remove('selected'));
             element.classList.add('selected');
-            
-            // Show/hide forms based on payment method
             const cardForm = document.getElementById('card-form');
             const walletForm = document.getElementById('wallet-form');
-            
             if (method === 'credit') {
                 cardForm.style.display = 'block';
                 walletForm.style.display = 'none';
@@ -505,122 +502,125 @@
             const shippingRadio = document.querySelector('input[name="shipping"]:checked');
             let shipping = 0;
             if (shippingRadio) {
-                if (shippingRadio.value === 'express') {
-                    shipping = 15.00;
-                } else if (shippingRadio.value === 'overnight') {
-                    shipping = 30.00;
-                }
+                if (shippingRadio.value === 'express') shipping = 15.00;
+                else if (shippingRadio.value === 'overnight') shipping = 30.00;
             }
             const total = subtotal + shipping;
             document.getElementById('subtotalPrice').textContent = 'MOP $' + subtotal.toFixed(2);
-            const shippingElement = document.getElementById('shippingPrice');
-            shippingElement.textContent = shipping === 0 ? 'Free' : 'MOP $' + shipping.toFixed(2);
+            document.getElementById('shippingPrice').textContent = shipping === 0 ? 'Free' : 'MOP $' + shipping.toFixed(2);
             document.getElementById('totalPrice').textContent = 'MOP $' + total.toFixed(2);
         }
-        
+
         document.querySelectorAll('input[name="shipping"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                updateTotal();
-            });
+            radio.addEventListener('change', updateTotal);
         });
 
         // Auto-fill checkout form with saved user data
         function autoFillCheckoutForm() {
             try {
                 const userData = JSON.parse(localStorage.getItem('userData')) || {};
-                
-                // Fill in the form fields
-                if (userData.firstName) {
-                    document.getElementById('checkoutFirstName').value = userData.firstName;
-                }
-                if (userData.lastName) {
-                    document.getElementById('checkoutLastName').value = userData.lastName;
-                }
-                if (userData.email) {
-                    document.getElementById('checkoutEmail').value = userData.email;
-                }
-                if (userData.phone) {
-                    document.getElementById('checkoutPhone').value = userData.phone;
-                }
-                if (userData.street) {
-                    document.getElementById('checkoutStreet').value = userData.street;
-                }
-                if (userData.city) {
-                    document.getElementById('checkoutCity').value = userData.city;
-                }
-                if (userData.country) {
-                    document.getElementById('checkoutCountry').value = userData.country;
-                }
-                
-                console.log('Auto-fill completed with user data:', userData);
+                document.getElementById('checkoutFirstName').value = userData.firstName || '';
+                document.getElementById('checkoutLastName').value = userData.lastName || '';
+                document.getElementById('checkoutEmail').value = userData.email || '';
+                document.getElementById('checkoutPhone').value = userData.phone || '';
+                document.getElementById('checkoutStreet').value = userData.street || '';
+                document.getElementById('checkoutCity').value = userData.city || '';
+                document.getElementById('checkoutState').value = userData.state || '';
+                document.getElementById('checkoutPostal').value = userData.postal || '';
+                document.getElementById('checkoutCountry').value = userData.country || '';
             } catch (error) {
-                console.log('No saved user data found or error during auto-fill:', error);
+                console.log('No saved user data found:', error);
             }
         }
 
-        function completeCheckout() {
-            const firstName = document.getElementById('checkoutFirstName').value;
-            const lastName = document.getElementById('checkoutLastName').value;
-            const email = document.getElementById('checkoutEmail').value;
-            if (!firstName || !lastName || !email) {
+        async function completeCheckout() {
+            const firstName = document.getElementById('checkoutFirstName').value.trim();
+            const lastName = document.getElementById('checkoutLastName').value.trim();
+            const email = document.getElementById('checkoutEmail').value.trim();
+            const phone = document.getElementById('checkoutPhone').value.trim();
+            const street = document.getElementById('checkoutStreet').value.trim();
+            const city = document.getElementById('checkoutCity').value.trim();
+            const state = document.getElementById('checkoutState').value.trim();
+            const postal = document.getElementById('checkoutPostal').value.trim();
+            const country = document.getElementById('checkoutCountry').value;
+
+            if (!firstName || !lastName || !email || !street || !city || !country) {
                 alert('Please fill in all required fields');
                 return;
             }
-            
-            // Get cart items and calculate total
+
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+
             let subtotal = 0;
             cart.forEach(item => {
                 const price = parseFloat(item.price.replace('MOP $', '')) || 0;
                 subtotal += price * item.quantity;
             });
-            
-            // Get shipping cost from radio buttons
+
             const shippingRadio = document.querySelector('input[name="shipping"]:checked');
             let shipping = 0;
             if (shippingRadio) {
-                if (shippingRadio.value === 'express') {
-                    shipping = 15.00;
-                } else if (shippingRadio.value === 'overnight') {
-                    shipping = 30.00;
-                }
+                if (shippingRadio.value === 'express') shipping = 15.00;
+                else if (shippingRadio.value === 'overnight') shipping = 30.00;
             }
-            
             const total = subtotal + shipping;
-            
-            // Create order object
-            const order = {
-                id: 'ORD-' + Date.now(),
-                date: new Date().toLocaleDateString(),
-                total: 'MOP $' + total.toFixed(2),
-                status: 'completed',
-                items: cart,
-                firstName: firstName,
-                lastName: lastName,
-                email: email
+
+            const orderData = {
+                orderId: 'ORD-' + Date.now(),
+                customer: {
+                    firstName, lastName, email, phone,
+                    street, city, state, postal, country
+                },
+                items: cart.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    brand: item.brand,
+                    price: item.price,
+                    quantity: item.quantity,
+                    size: item.size,
+                    image: item.image
+                })),
+                subtotal,
+                shipping,
+                total,
+                status: 'pending'
             };
-            
-            // Save order to userOrders array
-            const userOrders = JSON.parse(localStorage.getItem('userOrders')) || [];
-            userOrders.push(order);
-            localStorage.setItem('userOrders', JSON.stringify(userOrders));
-            
-            console.log('Order saved:', order);
-            console.log('All orders:', userOrders);
-            
-            alert('Thank you for your purchase! Your order has been confirmed. You will receive an email confirmation shortly.');
-            localStorage.removeItem('cart');
-            window.location.href = 'mainpage.html';
+
+            try {
+                const userToken = localStorage.getItem('userToken');
+                const headers = { 'Content-Type': 'application/json' };
+                if (userToken) headers['Authorization'] = `Bearer ${userToken}`;
+
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(orderData)
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Order submission failed');
+
+                localStorage.removeItem('cart');
+                alert('Thank you for your purchase! Your order has been confirmed.');
+                window.location.href = 'mainpage.html';
+            } catch (err) {
+                console.error('Checkout error:', err);
+                alert('There was a problem processing your order. Please try again.');
+            }
         }
 
         function loadCart() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const cartItemsContainer = document.getElementById('cartItems');
+            const container = document.getElementById('cartItems');
             let html = '';
-            cart.forEach((item) => {
-                html += '<div class="summary-item"><span>' + item.name + ' (x' + item.quantity + ')</span><span>MOP $' + (parseFloat(item.price.replace('MOP $', '')) * item.quantity).toFixed(2) + '</span></div>';
+            cart.forEach(item => {
+                const itemTotal = (parseFloat(item.price.replace('MOP $', '')) * item.quantity).toFixed(2);
+                html += `<div class="summary-item"><span>${item.name} (x${item.quantity})</span><span>MOP $${itemTotal}</span></div>`;
             });
-            cartItemsContainer.innerHTML = html;
+            container.innerHTML = html;
             updateTotal();
         }
 
@@ -628,12 +628,10 @@
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
             const badge = document.getElementById('cartBadge');
-            if (badge) {
-                badge.textContent = totalItems;
-            }
+            if (badge) badge.textContent = totalItems;
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             loadCart();
             updateCartBadge();
             autoFillCheckoutForm();

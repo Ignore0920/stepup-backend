@@ -392,39 +392,62 @@ app.delete('/api/admin/inventory/products/:id', verifyAdminToken, async (req, re
     }
 });
 
-// ============ Category Management (Admin only) ============
-app.get('/api/admin/inventory/categories', verifyAdminToken, async (req, res) => {
+// ============ Order Management (Admin only) ============
+const Order = require('./models/Order');
+
+// Get all orders
+app.get('/api/admin/orders', verifyAdminToken, async (req, res) => {
     try {
-        const categories = await Category.find().sort({ name: 1 });
-        res.json({ success: true, data: categories });
+        const orders = await Order.find().sort({ createdAt: -1 });
+        res.json({ success: true, data: orders });
     } catch (err) {
-        console.error('Error fetching categories:', err);
+        console.error('Error fetching orders:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-app.post('/api/admin/inventory/categories', verifyAdminToken, async (req, res) => {
+// Get single order
+app.get('/api/admin/orders/:id', verifyAdminToken, async (req, res) => {
     try {
-        const { name } = req.body;
-        if (!name) return res.status(400).json({ error: 'Category name required' });
-        const existing = await Category.findOne({ name });
-        if (existing) return res.status(400).json({ error: 'Category already exists' });
-        const category = new Category({ name });
-        await category.save();
-        res.status(201).json({ success: true, category });
+        const order = await Order.findById(req.params.id);
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+        res.json({ success: true, order });
     } catch (err) {
-        console.error('Error creating category:', err);
+        console.error('Error fetching order:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-app.delete('/api/admin/inventory/categories/:id', verifyAdminToken, async (req, res) => {
+// Update order status
+app.put('/api/admin/orders/:id', verifyAdminToken, async (req, res) => {
     try {
-        const category = await Category.findByIdAndDelete(req.params.id);
-        if (!category) return res.status(404).json({ error: 'Category not found' });
-        res.json({ success: true, message: 'Category deleted' });
+        const { status } = req.body;
+        if (!status) return res.status(400).json({ error: 'Status required' });
+        const order = await Order.findByIdAndUpdate(
+            req.params.id,
+            { status, updatedAt: Date.now() },
+            { new: true }
+        );
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+        res.json({ success: true, order });
     } catch (err) {
-        console.error('Error deleting category:', err);
+        console.error('Error updating order:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Cancel order (set status to cancelled)
+app.delete('/api/admin/orders/:id', verifyAdminToken, async (req, res) => {
+    try {
+        const order = await Order.findByIdAndUpdate(
+            req.params.id,
+            { status: 'cancelled', updatedAt: Date.now() },
+            { new: true }
+        );
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+        res.json({ success: true, message: 'Order cancelled', order });
+    } catch (err) {
+        console.error('Error cancelling order:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });

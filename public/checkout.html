@@ -534,83 +534,77 @@
         }
 
         async function completeCheckout() {
-            const firstName = document.getElementById('checkoutFirstName').value.trim();
-            const lastName = document.getElementById('checkoutLastName').value.trim();
-            const email = document.getElementById('checkoutEmail').value.trim();
-            const phone = document.getElementById('checkoutPhone').value.trim();
-            const street = document.getElementById('checkoutStreet').value.trim();
-            const city = document.getElementById('checkoutCity').value.trim();
-            const state = document.getElementById('checkoutState').value.trim();
-            const postal = document.getElementById('checkoutPostal').value.trim();
-            const country = document.getElementById('checkoutCountry').value;
+    const firstName = document.getElementById('checkoutFirstName').value.trim();
+    const lastName = document.getElementById('checkoutLastName').value.trim();
+    const email = document.getElementById('checkoutEmail').value.trim();
+    const phone = document.getElementById('checkoutPhone').value.trim();
+    const street = document.getElementById('checkoutStreet').value.trim();
+    const city = document.getElementById('checkoutCity').value.trim();
+    const state = document.getElementById('checkoutState').value.trim();
+    const postal = document.getElementById('checkoutPostal').value.trim();
+    const country = document.getElementById('checkoutCountry').value;
 
-            if (!firstName || !lastName || !email || !street || !city || !country) {
-                alert('Please fill in all required fields');
-                return;
-            }
+    if (!firstName || !lastName || !email || !street || !city || !country) {
+        alert('Please fill in all required fields');
+        return;
+    }
 
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            if (cart.length === 0) {
-                alert('Your cart is empty!');
-                return;
-            }
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    if (cart.length === 0) {
+        alert('Your cart is empty!');
+        return;
+    }
 
-            let subtotal = 0;
-            cart.forEach(item => {
-                const price = parseFloat(item.price.replace('MOP $', '')) || 0;
-                subtotal += price * item.quantity;
-            });
+    let subtotal = 0;
+    const items = cart.map(item => {
+        const price = parseFloat(item.price.replace('MOP $', '')) || 0;
+        subtotal += price * item.quantity;
+        return {
+            id: item.id,
+            name: item.name,
+            brand: item.brand,
+            price: price,
+            quantity: item.quantity,
+            size: item.size,
+            image: item.image
+        };
+    });
 
-            const shippingRadio = document.querySelector('input[name="shipping"]:checked');
-            let shipping = 0;
-            if (shippingRadio) {
-                if (shippingRadio.value === 'express') shipping = 15.00;
-                else if (shippingRadio.value === 'overnight') shipping = 30.00;
-            }
-            const total = subtotal + shipping;
+    const shippingRadio = document.querySelector('input[name="shipping"]:checked');
+    let shipping = 0;
+    if (shippingRadio) {
+        if (shippingRadio.value === 'express') shipping = 15.00;
+        else if (shippingRadio.value === 'overnight') shipping = 30.00;
+    }
+    const total = subtotal + shipping;
 
-            const orderData = {
-                orderId: 'ORD-' + Date.now(),
-                customer: {
-                    firstName, lastName, email, phone,
-                    street, city, state, postal, country
-                },
-                items: cart.map(item => ({
-                    id: item.id,
-                    name: item.name,
-                    brand: item.brand,
-                    price: item.price,
-                    quantity: item.quantity,
-                    size: item.size,
-                    image: item.image
-                })),
-                subtotal,
-                shipping,
-                total,
-                status: 'pending'
-            };
+    const orderData = {
+        orderId: 'ORD-' + Date.now(),
+        customer: { firstName, lastName, email, phone, street, city, state, postal, country },
+        items,
+        subtotal,
+        shipping,
+        total,
+        status: 'pending'
+    };
 
-            try {
-                const userToken = localStorage.getItem('userToken');
-                const headers = { 'Content-Type': 'application/json' };
-                if (userToken) headers['Authorization'] = `Bearer ${userToken}`;
+    try {
+        const response = await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Order submission failed');
 
-                const response = await fetch('/api/orders', {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify(orderData)
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Order submission failed');
-
-                localStorage.removeItem('cart');
-                alert('Thank you for your purchase! Your order has been confirmed.');
-                window.location.href = 'mainpage.html';
-            } catch (err) {
-                console.error('Checkout error:', err);
-                alert('There was a problem processing your order. Please try again.');
-            }
-        }
+        localStorage.removeItem('cart');
+        alert('Thank you for your purchase! Your order has been confirmed.');
+        window.location.href = 'mainpage.html';
+    } catch (err) {
+        console.error('Checkout error:', err);
+        alert('There was a problem processing your order. Please try again.');
+    }
+}
 
         function loadCart() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];

@@ -211,6 +211,54 @@ app.delete('/api/products/:id', async (req, res) => {
     }
 });
 
+// ============ Order Routes (Public) ============
+const Order = require('./models/Order');
+
+// Create a new order (public, no auth needed)
+app.post('/api/orders', async (req, res) => {
+    try {
+        const orderData = req.body;
+
+        // Validate required fields
+        if (!orderData.orderId || !orderData.customer?.firstName || !orderData.customer?.email || !orderData.items?.length) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        // Clean items: ensure price is a number and productId is saved (if present)
+        const cleanedItems = orderData.items.map(item => ({
+            ...item,
+            price: typeof item.price === 'string' ? parseFloat(item.price.replace('MOP $', '')) : item.price,
+            productId: item.id // map frontend's 'id' to productId
+        }));
+
+        const order = new Order({
+            orderId: orderData.orderId,
+            customer: {
+                firstName: orderData.customer.firstName,
+                lastName: orderData.customer.lastName,
+                email: orderData.customer.email,
+                phone: orderData.customer.phone,
+                street: orderData.customer.street,
+                city: orderData.customer.city,
+                state: orderData.customer.state,
+                postal: orderData.customer.postal,
+                country: orderData.customer.country
+            },
+            items: cleanedItems,
+            subtotal: orderData.subtotal,
+            shipping: orderData.shipping,
+            total: orderData.total,
+            status: orderData.status || 'pending'
+        });
+
+        await order.save();
+        res.status(201).json({ success: true, order });
+    } catch (err) {
+        console.error('Order creation error:', err);
+        res.status(500).json({ error: 'Failed to create order', details: err.message });
+    }
+});
+
 // ============ Middleware to verify admin token ============
 const verifyAdminToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -393,7 +441,7 @@ app.delete('/api/admin/inventory/products/:id', verifyAdminToken, async (req, re
 });
 
 // ============ Order Management (Admin only) ============
-const Order = require('./models/Order');
+// Order model is already required above (in the public order routes)
 
 // Get all orders
 app.get('/api/admin/orders', verifyAdminToken, async (req, res) => {

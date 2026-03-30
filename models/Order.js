@@ -2,33 +2,31 @@ const mongoose = require('mongoose');
 
 const orderItemSchema = new mongoose.Schema({
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-    name: String,
-    brand: String,
-    price: Number,
-    quantity: Number,
-    size: String,
-    image: String
+    name: { type: String, required: true },
+    brand: { type: String },
+    price: { type: Number, required: true }, // store as number
+    quantity: { type: Number, required: true, min: 1 },
+    size: { type: String },
+    image: { type: String }
 });
 
 const orderSchema = new mongoose.Schema({
-    orderId: { type: String, required: true, unique: true }, // e.g., ORD-123456
+    orderId: { type: String, required: true, unique: true },
     customer: {
         firstName: String,
         lastName: String,
         email: String,
         phone: String,
-        address: {
-            street: String,
-            city: String,
-            state: String,
-            postal: String,
-            country: String
-        }
+        street: String,
+        city: String,
+        state: String,
+        postal: String,
+        country: String
     },
     items: [orderItemSchema],
-    subtotal: Number,
-    shipping: Number,
-    total: Number,
+    subtotal: { type: Number, required: true },
+    shipping: { type: Number, required: true, default: 0 },
+    total: { type: Number, required: true },
     status: { type: String, enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'], default: 'pending' },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }

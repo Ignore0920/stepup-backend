@@ -16,21 +16,31 @@
         .sidebar nav a:hover, .sidebar nav a.active { color: white; font-weight: bold; border-left: 3px solid white; padding-left: 10px; }
         .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
         .admin-section { background: #fff; padding: 2rem; border: 1px solid #e5e5e5; margin-bottom: 2rem; }
-        .form-group { margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1rem; }
         .form-group label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
         .form-control { width: 100%; padding: 0.75rem; border: 1px solid #e5e5e5; font-family: inherit; transition: border-color 0.3s; }
         .form-control:focus { outline: none; border-color: #262626; }
-        .btn { padding: 0.75rem 2rem; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.3s; letter-spacing: 0.1em; }
+        .btn { padding: 0.75rem 1.5rem; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.3s; letter-spacing: 0.1em; }
         .btn-primary { background-color: #262626; color: #fff; }
         .btn-primary:hover { background-color: #404040; transform: translateY(-1px); }
+        .btn-secondary { background-color: #fff; color: #262626; border: 1px solid #262626; }
+        .btn-secondary:hover { background-color: #f5f5f5; }
+        .filter-bar { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; align-items: flex-end; }
+        .filter-group { flex: 1; min-width: 150px; }
+        .filter-group label { font-size: 0.7rem; margin-bottom: 0.25rem; }
+        .filter-group input, .filter-group select { width: 100%; padding: 0.5rem; border: 1px solid #e5e5e5; }
+        .sort-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem; }
+        .sort-select { padding: 0.5rem; border: 1px solid #e5e5e5; background: white; }
         .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
         .data-table th, .data-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #e5e5e5; }
-        .data-table th { font-size: 1.1rem; border-bottom: 2px solid #262626; }
+        .data-table th { font-size: 1rem; border-bottom: 2px solid #262626; background-color: #fafafa; }
         .action-btns { display: flex; gap: 0.5rem; }
         .btn-table { padding: 0.4rem 0.8rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; border: 1px solid #e5e5e5; background: #fff; cursor: pointer; transition: all 0.2s; }
         .btn-edit:hover { background: #262626; color: #fff; }
         .btn-remove:hover { background: #e74c3c; color: #fff; }
-        h1 { margin-bottom: 2rem; font-size: 2.5rem; }
+        .export-btn { background-color: #27ae60; color: white; border: none; }
+        .export-btn:hover { background-color: #2ecc71; }
+        @media (max-width: 768px) { .filter-group { min-width: 100%; } }
     </style>
 </head>
 <body>
@@ -52,7 +62,9 @@
         <h1>Inventory Management</h1>
         <div class="admin-section">
             <h2>Shoe Item Management</h2>
-            <form id="shoeForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            
+            <!-- Add Product Form -->
+            <form id="shoeForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
                 <div class="form-group"><label>Product Name *</label><input type="text" id="sName" class="form-control" required></div>
                 <div class="form-group"><label>Brand *</label><input type="text" id="sBrand" class="form-control" required></div>
                 <div class="form-group"><label>Model Name *</label><input type="text" id="sModel" class="form-control" required></div>
@@ -63,10 +75,67 @@
                 <div class="form-group"><label>Tag (optional)</label><input type="text" id="sTag" class="form-control" placeholder="NEW, FEATURED, SALE"></div>
                 <div class="form-group" style="display: flex; align-items: flex-end;"><button type="submit" class="btn btn-primary" style="width: 100%;">Add Product</button></div>
             </form>
+
+            <!-- Filter & Export Section -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label>Search (Name/Brand)</label>
+                    <input type="text" id="searchInput" placeholder="Search...">
+                </div>
+                <div class="filter-group">
+                    <label>Brand</label>
+                    <select id="brandFilter">
+                        <option value="">All Brands</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Size Range</label>
+                    <input type="text" id="sizeFilter" placeholder="e.g., 7-13">
+                </div>
+                <div class="filter-group">
+                    <label>Price Min ($)</label>
+                    <input type="number" id="priceMin" step="0.01" placeholder="Min">
+                </div>
+                <div class="filter-group">
+                    <label>Price Max ($)</label>
+                    <input type="number" id="priceMax" step="0.01" placeholder="Max">
+                </div>
+                <div class="filter-group">
+                    <label>Stock Min</label>
+                    <input type="number" id="stockMin" placeholder="Min">
+                </div>
+                <div class="filter-group">
+                    <label>Stock Max</label>
+                    <input type="number" id="stockMax" placeholder="Max">
+                </div>
+                <div class="filter-group">
+                    <button class="btn btn-secondary" onclick="applyFilters()">Apply Filters</button>
+                </div>
+            </div>
+
+            <div class="sort-bar">
+                <div>
+                    <label>Sort by: </label>
+                    <select id="sortSelect" class="sort-select" onchange="applySorting()">
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="price-asc">Price (Low to High)</option>
+                        <option value="price-desc">Price (High to Low)</option>
+                        <option value="stock-asc">Stock (Low to High)</option>
+                        <option value="stock-desc">Stock (High to Low)</option>
+                    </select>
+                </div>
+                <div>
+                    <button class="btn export-btn" onclick="exportToExcel()">📊 Export to Excel</button>
+                </div>
+            </div>
+
             <table class="data-table">
-                <thead><th>Name</th><th>Brand</th><th>Model</th><th>Sizes</th><th>Price</th><th>Stock</th><th>Actions</th></thead>
+                <thead>
+                    <th>Name</th><th>Brand</th><th>Model</th><th>Sizes</th><th>Price</th><th>Stock</th><th>Actions</th>
+                </thead>
                 <tbody id="shoeTableBody"></tbody>
-             </table>
+            </table>
         </div>
     </main>
 </div>
@@ -88,35 +157,119 @@
 
     function logoutAdmin() { localStorage.removeItem('adminToken'); window.location.href = 'admin-login.html'; }
 
-    // ========== Products ==========
+    let allProducts = [];
+    let filteredProducts = [];
     let editingProductId = null;
 
+    // Load products from server
     async function loadProducts() {
         try {
             const res = await fetch('/api/admin/inventory/products', { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
-            const tbody = document.getElementById('shoeTableBody');
-            tbody.innerHTML = '';
-            data.data.forEach(prod => {
-                const row = tbody.insertRow();
-                row.setAttribute('data-id', prod._id);
-                row.innerHTML = `
-                      <td>${escapeHtml(prod.name)}</td>
-                      <td>${escapeHtml(prod.brand)}</td>
-                      <td>${escapeHtml(prod.model)}</td>
-                      <td>${escapeHtml(prod.sizeRange)}</td>
-                      <td>$${prod.price.toFixed(2)}</td>
-                      <td>${prod.stock}</td>
-                      <td>
-                        <div class="action-btns">
-                            <button class="btn-table btn-edit" onclick="editProduct('${prod._id}')">Edit</button>
-                            <button class="btn-table btn-remove" onclick="removeProduct('${prod._id}')">Remove</button>
-                        </div>
-                      </td>
-                `;
-            });
+            allProducts = data.data;
+            populateBrandFilter();
+            applyFilters(); // initial render
         } catch (err) { console.error(err); alert('Failed to load products'); }
+    }
+
+    // Populate brand dropdown with unique brands from products
+    function populateBrandFilter() {
+        const brands = [...new Set(allProducts.map(p => p.brand))].sort();
+        const brandSelect = document.getElementById('brandFilter');
+        brandSelect.innerHTML = '<option value="">All Brands</option>';
+        brands.forEach(brand => {
+            brandSelect.innerHTML += `<option value="${escapeHtml(brand)}">${escapeHtml(brand)}</option>`;
+        });
+    }
+
+    // Apply filters from UI
+    function applyFilters() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const brand = document.getElementById('brandFilter').value;
+        const sizeRange = document.getElementById('sizeFilter').value.toLowerCase();
+        const priceMin = parseFloat(document.getElementById('priceMin').value);
+        const priceMax = parseFloat(document.getElementById('priceMax').value);
+        const stockMin = parseInt(document.getElementById('stockMin').value);
+        const stockMax = parseInt(document.getElementById('stockMax').value);
+
+        filteredProducts = allProducts.filter(p => {
+            // Search
+            if (searchTerm && !p.name.toLowerCase().includes(searchTerm) && !p.brand.toLowerCase().includes(searchTerm)) return false;
+            // Brand
+            if (brand && p.brand !== brand) return false;
+            // Size range (simple substring match)
+            if (sizeRange && !p.sizeRange.toLowerCase().includes(sizeRange)) return false;
+            // Price
+            if (!isNaN(priceMin) && p.price < priceMin) return false;
+            if (!isNaN(priceMax) && p.price > priceMax) return false;
+            // Stock
+            if (!isNaN(stockMin) && p.stock < stockMin) return false;
+            if (!isNaN(stockMax) && p.stock > stockMax) return false;
+            return true;
+        });
+        applySorting();
+    }
+
+    function applySorting() {
+        const sortBy = document.getElementById('sortSelect').value;
+        if (sortBy === 'name-asc') filteredProducts.sort((a,b) => a.name.localeCompare(b.name));
+        else if (sortBy === 'name-desc') filteredProducts.sort((a,b) => b.name.localeCompare(a.name));
+        else if (sortBy === 'price-asc') filteredProducts.sort((a,b) => a.price - b.price);
+        else if (sortBy === 'price-desc') filteredProducts.sort((a,b) => b.price - a.price);
+        else if (sortBy === 'stock-asc') filteredProducts.sort((a,b) => a.stock - b.stock);
+        else if (sortBy === 'stock-desc') filteredProducts.sort((a,b) => b.stock - a.stock);
+        renderTable();
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('shoeTableBody');
+        tbody.innerHTML = '';
+        if (filteredProducts.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No products found</td></tr>';
+            return;
+        }
+        filteredProducts.forEach(prod => {
+            const row = tbody.insertRow();
+            row.setAttribute('data-id', prod._id);
+            row.innerHTML = `
+                <td>${escapeHtml(prod.name)}</td>
+                <td>${escapeHtml(prod.brand)}</td>
+                <td>${escapeHtml(prod.model)}</td>
+                <td>${escapeHtml(prod.sizeRange)}</td>
+                <td>$${prod.price.toFixed(2)}</td>
+                <td>${prod.stock}</td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn-table btn-edit" onclick="editProduct('${prod._id}')">Edit</button>
+                        <button class="btn-table btn-remove" onclick="removeProduct('${prod._id}')">Remove</button>
+                    </div>
+                </td>
+            `;
+        });
+    }
+
+    // Export to CSV (Excel compatible)
+    function exportToExcel() {
+        if (filteredProducts.length === 0) {
+            alert('No data to export');
+            return;
+        }
+        // Prepare headers and rows
+        const headers = ['Name', 'Brand', 'Model', 'Size Range', 'Price (MOP)', 'Stock', 'Tag'];
+        const rows = filteredProducts.map(p => [
+            p.name, p.brand, p.model, p.sizeRange, p.price, p.stock, p.tag || ''
+        ]);
+        const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' }); // BOM for UTF-8
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.setAttribute('download', 'inventory_export.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     }
 
     window.editProduct = async function(id) {
@@ -186,11 +339,17 @@
         } catch (err) { alert(err.message); }
     });
 
-    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
+    }
 
-    // Wait for DOM to be fully loaded before initializing
+    // Initialize
     document.addEventListener('DOMContentLoaded', () => {
         loadProducts();
+        // Add event listeners for filter inputs to auto-apply on change? We'll use the button.
+        // For convenience, also add Enter key on search input
+        document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') applyFilters(); });
     });
 </script>
 </body>

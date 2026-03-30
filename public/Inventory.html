@@ -26,14 +26,10 @@
         .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
         .data-table th, .data-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #e5e5e5; }
         .data-table th { font-size: 1.1rem; border-bottom: 2px solid #262626; }
-        ul.category-list { list-style: none; margin-top: 1rem; }
-        ul.category-list li { background: #f5f5f5; padding: 0.75rem; border: 1px solid #e5e5e5; margin-bottom: 0.5rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
         .action-btns { display: flex; gap: 0.5rem; }
         .btn-table { padding: 0.4rem 0.8rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; border: 1px solid #e5e5e5; background: #fff; cursor: pointer; transition: all 0.2s; }
         .btn-edit:hover { background: #262626; color: #fff; }
         .btn-remove:hover { background: #e74c3c; color: #fff; }
-        .btn-remove-category { background: #e74c3c; color: white; border: none; border-radius: 3px; padding: 2px 8px; cursor: pointer; }
-        .btn-remove-category:hover { background: #c0392b; }
         h1 { margin-bottom: 2rem; font-size: 2.5rem; }
     </style>
 </head>
@@ -55,17 +51,6 @@
     <main class="main-content">
         <h1>Inventory Management</h1>
         <div class="admin-section">
-            <h2>Equipment Item Classification</h2>
-            <form id="categoryForm" style="display: flex; gap: 1rem; align-items: flex-end;">
-                <div class="form-group" style="flex: 1; margin: 0;">
-                    <label>New Category Name</label>
-                    <input type="text" id="catInput" class="form-control" placeholder="e.g. Casual Sneakers" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Add Category</button>
-            </form>
-            <ul class="category-list" id="categoryList"></ul>
-        </div>
-        <div class="admin-section">
             <h2>Shoe Item Management</h2>
             <form id="shoeForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group"><label>Product Name *</label><input type="text" id="sName" class="form-control" required></div>
@@ -81,12 +66,11 @@
             <table class="data-table">
                 <thead><th>Name</th><th>Brand</th><th>Model</th><th>Sizes</th><th>Price</th><th>Stock</th><th>Actions</th></thead>
                 <tbody id="shoeTableBody"></tbody>
-            </table>
+             </table>
         </div>
     </main>
 </div>
 
-<!-- ========== SINGLE SCRIPT AT THE BOTTOM ========== -->
 <script>
     const token = localStorage.getItem('adminToken');
     if (!token) window.location.href = 'admin-login.html';
@@ -104,49 +88,6 @@
 
     function logoutAdmin() { localStorage.removeItem('adminToken'); window.location.href = 'admin-login.html'; }
 
-    // ========== Categories ==========
-    async function loadCategories() {
-        try {
-            const res = await fetch('/api/admin/inventory/categories', { headers: { 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-            const list = document.getElementById('categoryList');
-            list.innerHTML = '';
-            data.data.forEach(cat => {
-                const li = document.createElement('li');
-                li.setAttribute('data-id', cat._id);
-                li.innerHTML = `${cat.name} <button class="btn-remove-category">✕</button>`;
-                list.appendChild(li);
-            });
-            document.querySelectorAll('.btn-remove-category').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const li = btn.closest('li');
-                    const id = li.getAttribute('data-id');
-                    if (confirm('Delete this category?')) {
-                        const delRes = await fetch(`/api/admin/inventory/categories/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-                        if (delRes.ok) loadCategories();
-                        else alert('Failed to delete category');
-                    }
-                });
-            });
-        } catch (err) { console.error(err); alert('Failed to load categories'); }
-    }
-
-    document.getElementById('categoryForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const name = document.getElementById('catInput').value.trim();
-        if (!name) return;
-        try {
-            const res = await fetch('/api/admin/inventory/categories', {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ name })
-            });
-            if (!res.ok) throw new Error((await res.json()).error);
-            document.getElementById('catInput').value = '';
-            loadCategories();
-        } catch (err) { alert(err.message); }
-    });
-
     // ========== Products ==========
     let editingProductId = null;
 
@@ -161,18 +102,18 @@
                 const row = tbody.insertRow();
                 row.setAttribute('data-id', prod._id);
                 row.innerHTML = `
-                     <td>${escapeHtml(prod.name)}</td>
-                     <td>${escapeHtml(prod.brand)}</td>
-                     <td>${escapeHtml(prod.model)}</td>
-                     <td>${escapeHtml(prod.sizeRange)}</td>
-                     <td>$${prod.price.toFixed(2)}</td>
-                     <td>${prod.stock}</td>
-                     <td>
+                      <td>${escapeHtml(prod.name)}</td>
+                      <td>${escapeHtml(prod.brand)}</td>
+                      <td>${escapeHtml(prod.model)}</td>
+                      <td>${escapeHtml(prod.sizeRange)}</td>
+                      <td>$${prod.price.toFixed(2)}</td>
+                      <td>${prod.stock}</td>
+                      <td>
                         <div class="action-btns">
                             <button class="btn-table btn-edit" onclick="editProduct('${prod._id}')">Edit</button>
                             <button class="btn-table btn-remove" onclick="removeProduct('${prod._id}')">Remove</button>
                         </div>
-                     </td>
+                      </td>
                 `;
             });
         } catch (err) { console.error(err); alert('Failed to load products'); }
@@ -249,7 +190,6 @@
 
     // Wait for DOM to be fully loaded before initializing
     document.addEventListener('DOMContentLoaded', () => {
-        loadCategories();
         loadProducts();
     });
 </script>

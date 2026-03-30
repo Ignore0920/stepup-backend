@@ -38,6 +38,55 @@
     </style>
 </head>
 <body>
+
+<div class="admin-wrapper">
+    <aside class="sidebar">
+        <h2>StepUp Admin</h2>
+        <nav>
+            <a href="admin.html">Staff Management</a>
+            <a href="Inventory.html" class="active">Inventory Management</a>
+            <a href="User.html">User Records</a>
+            <a href="Order.html">Order Fulfillment</a>
+            <a href="Sales.html">Sales Reports</a>
+            <hr style="margin: 20px 0; border-color: #444;">
+            <a href="#" onclick="logoutAdmin(); return false;" style="color: #e74c3c;">Logout</a>
+        </nav>
+    </aside>
+    <main class="main-content">
+        <h1>Inventory Management</h1>
+        <div class="admin-section">
+            <h2>Equipment Item Classification</h2>
+            <form id="categoryForm" style="display: flex; gap: 1rem; align-items: flex-end;">
+                <div class="form-group" style="flex: 1; margin: 0;">
+                    <label>New Category Name</label>
+                    <input type="text" id="catInput" class="form-control" placeholder="e.g. Casual Sneakers" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Category</button>
+            </form>
+            <ul class="category-list" id="categoryList"></ul>
+        </div>
+        <div class="admin-section">
+            <h2>Shoe Item Management</h2>
+            <form id="shoeForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group"><label>Product Name *</label><input type="text" id="sName" class="form-control" required></div>
+                <div class="form-group"><label>Brand *</label><input type="text" id="sBrand" class="form-control" required></div>
+                <div class="form-group"><label>Model Name *</label><input type="text" id="sModel" class="form-control" required></div>
+                <div class="form-group"><label>Size Range *</label><input type="text" id="sSize" class="form-control" required></div>
+                <div class="form-group"><label>Price ($) *</label><input type="number" id="sPrice" step="0.01" class="form-control" required></div>
+                <div class="form-group"><label>Stock Level *</label><input type="number" id="sStock" class="form-control" required></div>
+                <div class="form-group"><label>Image URL</label><input type="text" id="sImage" class="form-control" placeholder="https://..."></div>
+                <div class="form-group"><label>Tag (optional)</label><input type="text" id="sTag" class="form-control" placeholder="NEW, FEATURED, SALE"></div>
+                <div class="form-group" style="display: flex; align-items: flex-end;"><button type="submit" class="btn btn-primary" style="width: 100%;">Add Product</button></div>
+            </form>
+            <table class="data-table">
+                <thead>运转<th>Name</th><th>Brand</th><th>Model</th><th>Sizes</th><th>Price</th><th>Stock</th><th>Actions</th></thead>
+                <tbody id="shoeTableBody"></tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<!-- ========== SINGLE SCRIPT AT THE BOTTOM ========== -->
 <script>
     const token = localStorage.getItem('adminToken');
     if (!token) window.location.href = 'admin-login.html';
@@ -52,9 +101,10 @@
         }
     }
     verifyToken();
+
     function logoutAdmin() { localStorage.removeItem('adminToken'); window.location.href = 'admin-login.html'; }
 
-    // Categories
+    // ========== Categories ==========
     async function loadCategories() {
         try {
             const res = await fetch('/api/admin/inventory/categories', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -97,7 +147,7 @@
         } catch (err) { alert(err.message); }
     });
 
-    // Products
+    // ========== Products ==========
     let editingProductId = null;
 
     async function loadProducts() {
@@ -111,18 +161,18 @@
                 const row = tbody.insertRow();
                 row.setAttribute('data-id', prod._id);
                 row.innerHTML = `
-                    <td>${escapeHtml(prod.name)}</td>
-                    <td>${escapeHtml(prod.brand)}</td>
-                    <td>${escapeHtml(prod.model)}</td>
-                    <td>${escapeHtml(prod.sizeRange)}</td>
-                    <td>$${prod.price.toFixed(2)}</td>
-                    <td>${prod.stock}</td>
-                    <td>
+                     <td>${escapeHtml(prod.name)}</td>
+                     <td>${escapeHtml(prod.brand)}</td>
+                     <td>${escapeHtml(prod.model)}</td>
+                     <td>${escapeHtml(prod.sizeRange)}</td>
+                     <td>$${prod.price.toFixed(2)}</td>
+                     <td>${prod.stock}</td>
+                     <td>
                         <div class="action-btns">
                             <button class="btn-table btn-edit" onclick="editProduct('${prod._id}')">Edit</button>
                             <button class="btn-table btn-remove" onclick="removeProduct('${prod._id}')">Remove</button>
                         </div>
-                    </td>
+                     </td>
                 `;
             });
         } catch (err) { console.error(err); alert('Failed to load products'); }
@@ -197,55 +247,11 @@
 
     function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
 
-    loadCategories();
-    loadProducts();
+    // Wait for DOM to be fully loaded before initializing
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCategories();
+        loadProducts();
+    });
 </script>
-
-<div class="admin-wrapper">
-    <aside class="sidebar">
-        <h2>StepUp Admin</h2>
-        <nav>
-            <a href="admin.html">Staff Management</a>
-            <a href="Inventory.html" class="active">Inventory Management</a>
-            <a href="User.html">User Records</a>
-            <a href="Order.html">Order Fulfillment</a>
-            <a href="Sales.html">Sales Reports</a>
-            <hr style="margin: 20px 0; border-color: #444;">
-            <a href="#" onclick="logoutAdmin(); return false;" style="color: #e74c3c;">Logout</a>
-        </nav>
-    </aside>
-    <main class="main-content">
-        <h1>Inventory Management</h1>
-        <div class="admin-section">
-            <h2>Equipment Item Classification</h2>
-            <form id="categoryForm" style="display: flex; gap: 1rem; align-items: flex-end;">
-                <div class="form-group" style="flex: 1; margin: 0;">
-                    <label>New Category Name</label>
-                    <input type="text" id="catInput" class="form-control" placeholder="e.g. Casual Sneakers" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Add Category</button>
-            </form>
-            <ul class="category-list" id="categoryList"></ul>
-        </div>
-        <div class="admin-section">
-            <h2>Shoe Item Management</h2>
-            <form id="shoeForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="form-group"><label>Product Name *</label><input type="text" id="sName" class="form-control" required></div>
-                <div class="form-group"><label>Brand *</label><input type="text" id="sBrand" class="form-control" required></div>
-                <div class="form-group"><label>Model Name *</label><input type="text" id="sModel" class="form-control" required></div>
-                <div class="form-group"><label>Size Range *</label><input type="text" id="sSize" class="form-control" required></div>
-                <div class="form-group"><label>Price ($) *</label><input type="number" id="sPrice" step="0.01" class="form-control" required></div>
-                <div class="form-group"><label>Stock Level *</label><input type="number" id="sStock" class="form-control" required></div>
-                <div class="form-group"><label>Image URL</label><input type="text" id="sImage" class="form-control" placeholder="https://..."></div>
-                <div class="form-group"><label>Tag (optional)</label><input type="text" id="sTag" class="form-control" placeholder="NEW, FEATURED, SALE"></div>
-                <div class="form-group" style="display: flex; align-items: flex-end;"><button type="submit" class="btn btn-primary" style="width: 100%;">Add Product</button></div>
-            </form>
-            <table class="data-table">
-                <thead><tr><th>Name</th><th>Brand</th><th>Model</th><th>Sizes</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
-                <tbody id="shoeTableBody"></tbody>
-            </table>
-        </div>
-    </main>
-</div>
 </body>
 </html>

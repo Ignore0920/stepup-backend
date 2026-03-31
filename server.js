@@ -107,18 +107,18 @@ app.get('/api/admin/verify', async (req, res) => {
 // ============ User Authentication (Public) ============
 app.post('/api/users/register', async (req, res) => {
     try {
-        const { name, email, password } = req.body;
-        console.log('Registration attempt:', { name, email });
+        const { name, email, password, firstName, lastName, phone } = req.body;
+        console.log('Registration attempt:', { name, email, firstName, lastName });
         const existing = await User.findOne({ email });
         if (existing) return res.status(400).json({ error: 'Email already registered' });
-        const user = new User({ name, email, password });
+        const user = new User({ name, email, password, firstName, lastName, phone });
         await user.save();
         const token = jwt.sign(
             { id: user._id, email: user.email, role: 'user' },
             JWT_SECRET,
             { expiresIn: '7d' }
         );
-        res.status(201).json({ success: true, token, user: { id: user._id, name: user.name, email: user.email } });
+        res.status(201).json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, firstName: user.firstName, lastName: user.lastName, phone: user.phone } });
     } catch (err) {
         console.error('Registration error:', err);
         res.status(500).json({ error: 'Server error', details: err.message });
@@ -140,6 +140,78 @@ app.post('/api/users/login', async (req, res) => {
         res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email } });
     } catch (err) {
         console.error('Login error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ============ User Profile (Authenticated) ============
+// Middleware to verify user token
+const verifyUserToken = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = await User.findById(decoded.id);
+        if (!user) return res.status(401).json({ error: 'User not found' });
+        req.user = user;
+        next();
+    } catch (err) {
+        res.status(401).json({ error: 'Invalid token' });
+    }
+};
+
+// Get current user profile
+app.get('/api/users/profile', verifyUserToken, async (req, res) => {
+    try {
+        const user = req.user;
+        res.json({
+            success: true,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phone: user.phone,
+                street: user.street,
+                city: user.city,
+                state: user.state,
+                postal: user.postal,
+                country: user.country,
+                cardLast4: user.cardLast4,
+                cardExpiry: user.cardExpiry,
+                cardHolderName: user.cardHolderName,
+                paymentMethodType: user.paymentMethodType
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Update user profile
+app.put('/api/users/profile', verifyUserToken, async (req, res) => {
+    try {
+        const user = req.user;
+        const { firstName, lastName, phone, street, city, state, postal, country, cardLast4, cardExpiry, cardHolderName, paymentMethodType } = req.body;
+        if (firstName !== undefined) user.firstName = firstName;
+        if (lastName !== undefined) user.lastName = lastName;
+        if (phone !== undefined) user.phone = phone;
+        if (street !== undefined) user.street = street;
+        if (city !== undefined) user.city = city;
+        if (state !== undefined) user.state = state;
+        if (postal !== undefined) user.postal = postal;
+        if (country !== undefined) user.country = country;
+        if (cardLast4 !== undefined) user.cardLast4 = cardLast4;
+        if (cardExpiry !== undefined) user.cardExpiry = cardExpiry;
+        if (cardHolderName !== undefined) user.cardHolderName = cardHolderName;
+        if (paymentMethodType !== undefined) user.paymentMethodType = paymentMethodType;
+        await user.save();
+        res.json({ success: true, message: 'Profile updated' });
+    } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Server error' });
     }
 });

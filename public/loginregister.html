@@ -709,25 +709,26 @@
         async function handleRegister(event) {
             event.preventDefault();
             const firstName = document.getElementById('register-first').value;
-            const lastName = document.getElementById('register-last').value;
-            const email = document.getElementById('register-email').value;
-            const password = document.getElementById('register-password').value;
-            const confirm = document.getElementById('register-confirm').value;
-            const phone = document.getElementById('register-phone').value;
+const lastName = document.getElementById('register-last').value;
+const email = document.getElementById('register-email').value;
+const password = document.getElementById('register-password').value;
+const confirm = document.getElementById('register-confirm').value;
+const phone = document.getElementById('register-phone').value;
 
-            if (password !== confirm) {
-                alert('Passwords do not match');
-                return;
-            }
+if (password !== confirm) {
+    alert('Passwords do not match');
+    return;
+}
 
-            const name = `${firstName} ${lastName}`.trim();
+const name = `${firstName} ${lastName}`.trim();
 
-            try {
-                const response = await fetch('/api/users/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password })
-                });
+try {
+    const response = await fetch('/api/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, firstName, lastName, phone })
+    });
+    // ... rest unchanged
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error);
 

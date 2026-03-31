@@ -59,9 +59,13 @@
 
         /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-        .modal-content { background: #fff; padding: 2rem; width: 90%; max-width: 500px; border-radius: 8px; position: relative; }
+        .modal-content { background: #fff; padding: 2rem; width: 90%; max-width: 700px; border-radius: 8px; position: relative; max-height: 85vh; overflow-y: auto; }
         .close-modal { position: absolute; top: 1rem; right: 1.5rem; font-size: 1.5rem; cursor: pointer; }
-
+        .order-detail-row { margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem; }
+        .order-detail-label { font-weight: 700; min-width: 120px; display: inline-block; }
+        .order-items-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+        .order-items-table th, .order-items-table td { padding: 0.5rem; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        .order-items-table th { background-color: #fafafa; font-size: 0.75rem; text-transform: uppercase; }
         @media (max-width: 768px) { .filter-group { min-width: 100%; } }
     </style>
 </head>
@@ -167,7 +171,7 @@
         <!-- Orders Table -->
         <table class="order-table">
             <thead>
-                <tr>
+                 <tr>
                     <th>Order ID</th>
                     <th>Date</th>
                     <th>Customer</th>
@@ -184,10 +188,19 @@
     </main>
 </div>
 
+<!-- Modal for order details -->
+<div id="orderDetailModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeDetailModal()">&times;</span>
+        <h2 id="modalOrderId">Order Details</h2>
+        <div id="orderDetailContent"></div>
+    </div>
+</div>
+
 <!-- Modal for status update -->
 <div id="statusModal" class="modal">
     <div class="modal-content">
-        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <span class="close-modal" onclick="closeStatusModal()">&times;</span>
         <h2>Update Order Status</h2>
         <select id="modalStatusSelect" style="width:100%; padding:0.8rem; margin:1rem 0;">
             <option value="pending">Pending</option>
@@ -204,7 +217,6 @@
     const token = localStorage.getItem('adminToken');
     if (!token) window.location.href = 'admin-login.html';
 
-    // Logout function
     function logoutAdmin() {
         localStorage.removeItem('adminToken');
         window.location.href = 'admin-login.html';
@@ -316,25 +328,75 @@
                 <td>${order.orderId}</td>
                 <td>${new Date(order.createdAt).toLocaleDateString()}</td>
                 <td>${order.customer.firstName} ${order.customer.lastName}<br><small>${order.customer.email}</small></td>
-                <td>${order.items.map(i => `${i.name} (x${i.quantity})`).join(', ')}</td>
+                <td>${order.items.map(i => `${i.name}${i.size ? ` (${i.size})` : ''} x${i.quantity}`).join(', ')}</td>
                 <td>MOP ${order.total.toFixed(2)}</td>
                 <td><span class="badge badge-${order.status}">${order.status}</span></td>
                 <td>
+                    <button class="btn-action" onclick="openDetailModal('${order._id}')">View</button>
                     <button class="btn-action" onclick="openStatusModal('${order._id}', '${order.status}')">Update</button>
-                    <button class="btn-action btn-danger" onclick="cancelOrder('${order._id}')" style="margin-left:5px;">Cancel</button>
+                    <button class="btn-action btn-danger" onclick="cancelOrder('${order._id}')">Cancel</button>
                 </td>
             </tr>
         `).join('');
     }
 
-    // Modal handling
+    // Detail modal
+    function openDetailModal(orderId) {
+        const order = allOrders.find(o => o._id === orderId);
+        if (!order) return;
+        const html = `
+            <div class="order-detail-row">
+                <span class="order-detail-label">Order ID:</span> ${order.orderId}<br>
+                <span class="order-detail-label">Date:</span> ${new Date(order.createdAt).toLocaleString()}<br>
+                <span class="order-detail-label">Status:</span> <span class="badge badge-${order.status}">${order.status}</span>
+            </div>
+            <div class="order-detail-row">
+                <h3>Customer Information</h3>
+                <p><strong>Name:</strong> ${order.customer.firstName} ${order.customer.lastName}<br>
+                <strong>Email:</strong> ${order.customer.email}<br>
+                <strong>Phone:</strong> ${order.customer.phone || 'N/A'}<br>
+                <strong>Address:</strong> ${order.customer.street}, ${order.customer.city}, ${order.customer.state || ''} ${order.customer.postal || ''}, ${order.customer.country}</p>
+            </div>
+            <div class="order-detail-row">
+                <h3>Order Items</h3>
+                <table class="order-items-table">
+                    <thead><tr><th>Product</th><th>Size</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr></thead>
+                    <tbody>
+                        ${order.items.map(item => `
+                            <tr>
+                                <td>${escapeHtml(item.name)}</td>
+                                <td>${item.size || 'N/A'}</td>
+                                <td>${item.quantity}</td>
+                                <td>MOP ${item.price.toFixed(2)}</td>
+                                <td>MOP ${(item.price * item.quantity).toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <p><strong>Subtotal:</strong> MOP ${order.subtotal.toFixed(2)}</p>
+                    <p><strong>Shipping:</strong> ${order.shipping === 0 ? 'Free' : `MOP ${order.shipping.toFixed(2)}`}</p>
+                    <p><strong>Total:</strong> MOP ${order.total.toFixed(2)}</p>
+                </div>
+            </div>
+        `;
+        document.getElementById('modalOrderId').innerText = `Order ${order.orderId}`;
+        document.getElementById('orderDetailContent').innerHTML = html;
+        document.getElementById('orderDetailModal').style.display = 'flex';
+    }
+
+    function closeDetailModal() {
+        document.getElementById('orderDetailModal').style.display = 'none';
+    }
+
+    // Status modal
     function openStatusModal(orderId, currentStatus) {
         currentOrderId = orderId;
         document.getElementById('modalStatusSelect').value = currentStatus;
         document.getElementById('statusModal').style.display = 'flex';
     }
 
-    function closeModal() {
+    function closeStatusModal() {
         document.getElementById('statusModal').style.display = 'none';
         currentOrderId = null;
     }
@@ -353,7 +415,7 @@
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
-            closeModal();
+            closeStatusModal();
             loadOrders(); // refresh
         } catch (err) {
             alert(err.message);
@@ -380,13 +442,16 @@
             alert('No data to export');
             return;
         }
-        const headers = ['Order ID', 'Date', 'Customer Name', 'Email', 'Products', 'Total', 'Status'];
+        const headers = ['Order ID', 'Date', 'Customer Name', 'Email', 'Address', 'Products', 'Subtotal', 'Shipping', 'Total', 'Status'];
         const rows = filteredOrders.map(o => [
             o.orderId,
-            new Date(o.createdAt).toLocaleDateString(),
+            new Date(o.createdAt).toLocaleString(),
             `${o.customer.firstName} ${o.customer.lastName}`,
             o.customer.email,
-            o.items.map(i => `${i.name} (${i.size}, x${i.quantity})`).join('; '),
+            `${o.customer.street}, ${o.customer.city}, ${o.customer.state || ''} ${o.customer.postal || ''}, ${o.customer.country}`,
+            o.items.map(i => `${i.name}${i.size ? ` (${i.size})` : ''} x${i.quantity}`).join('; '),
+            o.subtotal,
+            o.shipping,
             o.total,
             o.status
         ]);
@@ -402,12 +467,17 @@
         URL.revokeObjectURL(url);
     }
 
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
+    }
+
     // Initial load
     document.addEventListener('DOMContentLoaded', () => {
         loadOrders();
-        // Close modal when clicking outside
         window.onclick = function(event) {
-            if (event.target === document.getElementById('statusModal')) closeModal();
+            if (event.target === document.getElementById('orderDetailModal')) closeDetailModal();
+            if (event.target === document.getElementById('statusModal')) closeStatusModal();
         };
     });
 </script>

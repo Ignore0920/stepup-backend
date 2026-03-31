@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login / Register - StepUp</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -24,7 +24,6 @@
             padding: 0 1rem;
         }
 
-        /* Header */
         header {
             background-color: #ffffff;
             border-bottom: 1px solid #e5e5e5;
@@ -122,7 +121,6 @@
             color: #ffffff;
         }
 
-        /* Auth Container */
         .auth-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -163,7 +161,6 @@
             line-height: 1.6;
         }
 
-        /* Form Styles */
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -229,7 +226,6 @@
             border-bottom-color: #666666;
         }
 
-        /* Buttons */
         .btn {
             padding: 0.875rem 2rem;
             font-family: 'Montserrat', sans-serif;
@@ -281,7 +277,6 @@
             border-bottom-color: #666666;
         }
 
-        /* Divider */
         .divider {
             display: flex;
             align-items: center;
@@ -302,7 +297,6 @@
             color: #666666;
         }
 
-        /* Social Login */
         .social-login {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -330,7 +324,6 @@
             background-color: #f5f5f5;
         }
 
-        /* Illustration Section */
         .illustration-section {
             display: flex;
             flex-direction: column;
@@ -392,7 +385,6 @@
             line-height: 1.6;
         }
 
-        /* Tab Toggle */
         .tab-toggle {
             display: flex;
             gap: 0;
@@ -451,7 +443,6 @@
             display: block;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .auth-container {
                 grid-template-columns: 1fr;
@@ -459,23 +450,18 @@
                 min-height: auto;
                 padding: 2rem 0;
             }
-
             .auth-title {
                 font-size: 2rem;
             }
-
             .illustration-section {
                 order: -1;
             }
-
             .form-row {
                 grid-template-columns: 1fr;
             }
-
             .social-login {
                 grid-template-columns: 1fr;
             }
-
             .header-nav {
                 gap: 1rem;
                 font-size: 0.75rem;
@@ -484,7 +470,6 @@
     </style>
 </head>
 <body>
-    <!-- Header (unchanged) -->
     <header>
         <div class="container">
             <div class="header-content">
@@ -494,7 +479,7 @@
                 </a>
                 <nav class="header-nav">
                     <a href="mainpage.html">Home</a>
-                    <a href="mainpage.html">Shop</a>
+                    <a href="products.html">Shop</a>
                     <a href="shopping-cart.html">Cart</a>
                     <div class="user-info" id="userInfo">
                         <div class="user-avatar" id="userAvatar"></div>
@@ -506,17 +491,14 @@
         </div>
     </header>
 
-    <!-- Main Content (unchanged) -->
     <div class="container">
         <div class="auth-container">
-            <!-- Left Section - Form -->
             <div class="auth-section">
                 <div class="tab-toggle">
                     <button class="tab-btn active visible" onclick="switchTab('login')">Login</button>
                     <button class="tab-btn visible" onclick="switchTab('register')">Register</button>
                 </div>
 
-                <!-- Login Form -->
                 <div id="login" class="tab-content active">
                     <h2 class="auth-title">Welcome Back</h2>
                     <p class="auth-description">Sign in to your StepUp account to access your orders and preferences.</p>
@@ -538,121 +520,72 @@
                             <a onclick="switchTab('forgot-password'); return false;">Forgot your password?</a>
                         </div>
                     </form>
-                    <div class="divider">
-                        <span class="divider-text">or continue with</span>
-                    </div>
+                    <div class="divider"><span class="divider-text">or continue with</span></div>
                     <div class="social-login">
                         <button class="social-btn">Google</button>
                         <button class="social-btn">Facebook</button>
                     </div>
-                    <div class="form-footer">
-                        Don't have an account? <a onclick="switchTab('register'); return false;">Create one</a>
-                    </div>
+                    <div class="form-footer">Don't have an account? <a onclick="switchTab('register'); return false;">Create one</a></div>
                 </div>
 
-                <!-- Forgot Password Form -->
                 <div id="forgot-password" class="tab-content">
                     <h2 class="auth-title">Reset Password</h2>
                     <p class="auth-description">Enter your email address and we'll send you a link to reset your password.</p>
                     <form onsubmit="handleForgotPassword(event)">
-                        <div class="form-group">
-                            <label for="forgot-email">Email Address</label>
-                            <input type="email" id="forgot-email" placeholder="your@email.com" required>
-                        </div>
+                        <div class="form-group"><label for="forgot-email">Email Address</label><input type="email" id="forgot-email" placeholder="your@email.com" required></div>
                         <button type="submit" class="btn btn-primary">Send Reset Link</button>
-                        <div class="form-footer">
-                            <a onclick="switchTab('login'); return false;">Back to Login</a>
-                        </div>
+                        <div class="form-footer"><a onclick="switchTab('login'); return false;">Back to Login</a></div>
                     </form>
                 </div>
 
-                <!-- Verify Code Form -->
                 <div id="verify-code" class="tab-content">
                     <h2 class="auth-title">Verify Code</h2>
                     <p class="auth-description">Enter the verification code sent to your email address.</p>
                     <form onsubmit="handleVerifyCode(event)">
-                        <div class="form-group">
-                            <label for="verify-code-input">Verification Code</label>
-                            <input type="text" id="verify-code-input" placeholder="000000" maxlength="6" required>
-                        </div>
+                        <div class="form-group"><label for="verify-code-input">Verification Code</label><input type="text" id="verify-code-input" placeholder="000000" maxlength="6" required></div>
                         <button type="submit" class="btn btn-primary">Verify Code</button>
-                        <div class="form-footer">
-                            Didn't receive the code? <a onclick="switchTab('forgot-password'); return false;">Resend</a>
-                        </div>
+                        <div class="form-footer">Didn't receive the code? <a onclick="switchTab('forgot-password'); return false;">Resend</a></div>
                     </form>
                 </div>
 
-                <!-- Reset Password Form -->
                 <div id="reset-password" class="tab-content">
                     <h2 class="auth-title">Create New Password</h2>
                     <p class="auth-description">Enter your new password below.</p>
                     <form onsubmit="handleResetPassword(event)">
-                        <div class="form-group">
-                            <label for="new-password">New Password</label>
-                            <input type="password" id="new-password" placeholder="Create a strong password" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="confirm-new-password">Confirm Password</label>
-                            <input type="password" id="confirm-new-password" placeholder="Confirm your password" required>
-                        </div>
+                        <div class="form-group"><label for="new-password">New Password</label><input type="password" id="new-password" placeholder="Create a strong password" required></div>
+                        <div class="form-group"><label for="confirm-new-password">Confirm Password</label><input type="password" id="confirm-new-password" placeholder="Confirm your password" required></div>
                         <button type="submit" class="btn btn-primary">Reset Password</button>
-                        <div class="form-footer">
-                            <a onclick="switchTab('login'); return false;">Back to Login</a>
-                        </div>
+                        <div class="form-footer"><a onclick="switchTab('login'); return false;">Back to Login</a></div>
                     </form>
                 </div>
 
-                <!-- Register Form -->
                 <div id="register" class="tab-content">
                     <h2 class="auth-title">Join StepUp</h2>
                     <p class="auth-description">Create your account to start shopping premium athletic footwear.</p>
                     <form onsubmit="handleRegister(event)">
                         <div class="form-row">
-                            <div class="form-group">
-                                <label for="register-first">First Name</label>
-                                <input type="text" id="register-first" placeholder="John" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="register-last">Last Name</label>
-                                <input type="text" id="register-last" placeholder="Doe" required>
-                            </div>
+                            <div class="form-group"><label for="register-first">First Name</label><input type="text" id="register-first" placeholder="John" required></div>
+                            <div class="form-group"><label for="register-last">Last Name</label><input type="text" id="register-last" placeholder="Doe" required></div>
                         </div>
-                        <div class="form-group">
-                            <label for="register-email">Email Address</label>
-                            <input type="email" id="register-email" placeholder="your@email.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="register-phone">Phone Number</label>
-                            <input type="tel" id="register-phone" placeholder="+853 0000 0000">
-                        </div>
-                        <div class="form-group">
-                            <label for="register-password">Password</label>
-                            <input type="password" id="register-password" placeholder="Create a strong password" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="register-confirm">Confirm Password</label>
-                            <input type="password" id="register-confirm" placeholder="Confirm your password" required>
-                        </div>
+                        <div class="form-group"><label for="register-email">Email Address</label><input type="email" id="register-email" placeholder="your@email.com" required></div>
+                        <div class="form-group"><label for="register-phone">Phone Number</label><input type="tel" id="register-phone" placeholder="+853 0000 0000"></div>
+                        <div class="form-group"><label for="register-password">Password</label><input type="password" id="register-password" placeholder="Create a strong password" required></div>
+                        <div class="form-group"><label for="register-confirm">Confirm Password</label><input type="password" id="register-confirm" placeholder="Confirm your password" required></div>
                         <div class="form-group checkbox-group">
                             <input type="checkbox" id="terms" required>
                             <label for="terms" style="margin: 0; text-transform: none; letter-spacing: normal;">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
                         </div>
                         <button type="submit" class="btn btn-primary">Create Account</button>
                     </form>
-                    <div class="divider">
-                        <span class="divider-text">or sign up with</span>
-                    </div>
+                    <div class="divider"><span class="divider-text">or sign up with</span></div>
                     <div class="social-login">
                         <button class="social-btn">Google</button>
                         <button class="social-btn">Facebook</button>
                     </div>
-                    <div class="form-footer">
-                        Already have an account? <a onclick="switchTab('login'); return false;">Sign in</a>
-                    </div>
+                    <div class="form-footer">Already have an account? <a onclick="switchTab('login'); return false;">Sign in</a></div>
                 </div>
             </div>
 
-            <!-- Right Section - Illustration -->
             <div class="illustration-section">
                 <div class="shoe-illustration">👟</div>
                 <div class="illustration-text">
@@ -664,29 +597,15 @@
     </div>
 
     <script>
-        // Helper functions for user token storage
-        function setUserToken(token) {
-            localStorage.setItem('userToken', token);
-        }
-        function getUserToken() {
-            return localStorage.getItem('userToken');
-        }
-        function clearUserToken() {
-            localStorage.removeItem('userToken');
-        }
+        // Helper functions
+        function setUserToken(token) { localStorage.setItem('userToken', token); }
+        function getUserToken() { return localStorage.getItem('userToken'); }
+        function clearUserToken() { localStorage.removeItem('userToken'); }
+        function setUserInfo(user) { localStorage.setItem('userInfo', JSON.stringify(user)); }
+        function getUserInfo() { const info = localStorage.getItem('userInfo'); return info ? JSON.parse(info) : null; }
+        function clearUserInfo() { localStorage.removeItem('userInfo'); }
 
-        function setUserInfo(user) {
-            localStorage.setItem('userInfo', JSON.stringify(user));
-        }
-        function getUserInfo() {
-            const info = localStorage.getItem('userInfo');
-            return info ? JSON.parse(info) : null;
-        }
-        function clearUserInfo() {
-            localStorage.removeItem('userInfo');
-        }
-
-        // Show logged-in user in header
+        // Show logged-in user in header (only if already logged in when this page loads, but we redirect anyway)
         function showUserInfo(user) {
             const userInfoDiv = document.getElementById('userInfo');
             const userAvatar = document.getElementById('userAvatar');
@@ -696,62 +615,57 @@
             userInfoDiv.classList.add('logged-in');
         }
 
-        // Check login status on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const token = getUserToken();
-            const user = getUserInfo();
-            if (token && user) {
-                showUserInfo(user);
-            }
-        });
+        // Redirect if already logged in (run immediately)
+        const existingToken = localStorage.getItem('userToken');
+        if (existingToken) {
+            fetch('/api/users/profile', { headers: { 'Authorization': `Bearer ${existingToken}` } })
+                .then(res => {
+                    if (res.ok) window.location.href = 'mainpage.html';
+                    else localStorage.removeItem('userToken');
+                })
+                .catch(() => {});
+        }
 
         // Register handler
         async function handleRegister(event) {
             event.preventDefault();
             const firstName = document.getElementById('register-first').value;
-const lastName = document.getElementById('register-last').value;
-const email = document.getElementById('register-email').value;
-const password = document.getElementById('register-password').value;
-const confirm = document.getElementById('register-confirm').value;
-const phone = document.getElementById('register-phone').value;
+            const lastName = document.getElementById('register-last').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirm = document.getElementById('register-confirm').value;
+            const phone = document.getElementById('register-phone').value;
 
-if (password !== confirm) {
-    alert('Passwords do not match');
-    return;
-}
+            if (password !== confirm) {
+                alert('Passwords do not match');
+                return;
+            }
 
-const name = `${firstName} ${lastName}`.trim();
+            const name = `${firstName} ${lastName}`.trim();
 
-try {
-    const response = await fetch('/api/users/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, firstName, lastName, phone })
-    });
-    // ... rest unchanged
+            try {
+                const response = await fetch('/api/users/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, firstName, lastName, phone })
+                });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error);
 
                 setUserToken(data.token);
                 setUserInfo(data.user);
 
-                // Store phone and other details for later use
                 const userData = {
-                    firstName,
-                    lastName,
-                    email,
-                    phone,
-                    street: '',
-                    city: '',
-                    state: '',
-                    postal: '',
-                    country: '',
+                    firstName, lastName, email, phone,
+                    street: '', city: '', state: '', postal: '', country: '',
                     notifications: 'enabled'
                 };
                 localStorage.setItem('userData', JSON.stringify(userData));
 
                 alert('Account created successfully!');
-                window.location.href = 'mainpage.html';
+                const redirectUrl = localStorage.getItem('redirectAfterLogin') || 'mainpage.html';
+                localStorage.removeItem('redirectAfterLogin');
+                window.location.href = redirectUrl;
             } catch (err) {
                 alert(err.message);
             }
@@ -775,36 +689,33 @@ try {
                 setUserToken(data.token);
                 setUserInfo(data.user);
 
-                // Store userData for other pages (like checkout auto-fill)
                 const nameParts = data.user.name.split(' ');
                 const userData = {
                     firstName: nameParts[0] || '',
                     lastName: nameParts.slice(1).join(' ') || '',
                     email: data.user.email,
                     phone: '',
-                    street: '',
-                    city: '',
-                    state: '',
-                    postal: '',
-                    country: '',
+                    street: '', city: '', state: '', postal: '', country: '',
                     notifications: 'enabled'
                 };
                 localStorage.setItem('userData', JSON.stringify(userData));
 
                 alert('Login successful!');
-                window.location.href = 'mainpage.html';
+                const redirectUrl = localStorage.getItem('redirectAfterLogin') || 'mainpage.html';
+                localStorage.removeItem('redirectAfterLogin');
+                window.location.href = redirectUrl;
             } catch (err) {
                 alert(err.message);
             }
         }
 
-        // Logout function
+        // Logout function (only used if user somehow already logged in on this page – but we redirect anyway)
         function logout() {
             clearUserToken();
             clearUserInfo();
             localStorage.removeItem('userData');
             const userInfoDiv = document.getElementById('userInfo');
-            userInfoDiv.classList.remove('logged-in');
+            if (userInfoDiv) userInfoDiv.classList.remove('logged-in');
             alert('Logged out successfully');
             window.location.href = 'mainpage.html';
         }
@@ -819,7 +730,6 @@ try {
 
             document.getElementById(tabName).classList.add('active');
 
-            // For login/register tabs, highlight the clicked button
             if (tabName === 'login' || tabName === 'register') {
                 const mainTabs = document.querySelectorAll('.tab-btn.visible');
                 mainTabs.forEach(tab => {
@@ -828,7 +738,6 @@ try {
                     }
                 });
             } else {
-                // For other tabs, remove active from main tabs
                 const mainTabs = document.querySelectorAll('.tab-btn.visible');
                 mainTabs.forEach(tab => tab.classList.remove('active'));
             }
@@ -838,8 +747,6 @@ try {
         function handleForgotPassword(event) {
             event.preventDefault();
             const email = document.getElementById('forgot-email').value;
-            // In a real implementation, you would call an API to send a reset email
-            // For now, just simulate
             alert(`Password reset link sent to ${email}`);
             switchTab('verify-code');
         }
@@ -861,14 +768,13 @@ try {
             const confirmPassword = document.getElementById('confirm-new-password').value;
             if (newPassword === confirmPassword) {
                 alert('Password reset successfully!');
-                // In a real app, you would call an API to update the password
                 switchTab('login');
             } else {
                 alert('Passwords do not match');
             }
         }
 
-        // Cookie functions (backward compatibility, though we rely on localStorage)
+        // Cookie functions (backward compatibility)
         function setCookie(name, value, days) {
             const date = new Date();
             date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));

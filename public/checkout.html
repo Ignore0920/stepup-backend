@@ -619,14 +619,15 @@
             const total = subtotal + shipping;
 
             const orderData = {
-                orderId: 'ORD-' + Date.now(),
-                customer: { firstName, lastName, email, phone, street, city, state, postal, country },
-                items,
-                subtotal,
-                shipping,
-                total,
-                status: 'pending'
-            };
+    orderId: 'ORD-' + Date.now(),
+    customer: { firstName, lastName, email, phone, street, city, state, postal, country },
+    items,
+    subtotal,
+    shipping,
+    total,
+    status: 'pending',
+    paymentMethod: paymentMethodType   // <-- add this
+};
 
             try {
                 const response = await fetch('/api/orders', {

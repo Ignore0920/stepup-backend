@@ -303,25 +303,27 @@ app.post('/api/orders', async (req, res) => {
             productId: item.id // map frontend's 'id' to productId
         }));
 
-        const order = new Order({
-            orderId: orderData.orderId,
-            customer: {
-                firstName: orderData.customer.firstName,
-                lastName: orderData.customer.lastName,
-                email: orderData.customer.email,
-                phone: orderData.customer.phone,
-                street: orderData.customer.street,
-                city: orderData.customer.city,
-                state: orderData.customer.state,
-                postal: orderData.customer.postal,
-                country: orderData.customer.country
-            },
-            items: cleanedItems,
-            subtotal: orderData.subtotal,
-            shipping: orderData.shipping,
-            total: orderData.total,
-            status: orderData.status || 'pending'
-        });
+        // Inside POST /api/orders
+const order = new Order({
+    orderId: orderData.orderId,
+    customer: {
+        firstName: orderData.customer.firstName,
+        lastName: orderData.customer.lastName,
+        email: orderData.customer.email,
+        phone: orderData.customer.phone,
+        street: orderData.customer.street,
+        city: orderData.customer.city,
+        state: orderData.customer.state,
+        postal: orderData.customer.postal,
+        country: orderData.customer.country
+    },
+    items: cleanedItems,
+    subtotal: orderData.subtotal,
+    shipping: orderData.shipping,
+    total: orderData.total,
+    status: orderData.status || 'pending',
+    paymentMethod: orderData.paymentMethod || 'credit'  // <-- new
+});
 
         await order.save();
         res.status(201).json({ success: true, order });

@@ -348,6 +348,8 @@
             <div class="order-detail-row">
                 <span class="order-detail-label">Order ID:</span> ${order.orderId}<br>
                 <span class="order-detail-label">Date:</span> ${new Date(order.createdAt).toLocaleString()}<br>
+                <span class="order-detail-label">Payment Method:</span> 
+    ${order.paymentMethod === 'credit' ? 'Credit Card' : 'Digital Wallet'}
                 <span class="order-detail-label">Status:</span> <span class="badge badge-${order.status}">${order.status}</span>
             </div>
             <div class="order-detail-row">
@@ -442,19 +444,20 @@
             alert('No data to export');
             return;
         }
-        const headers = ['Order ID', 'Date', 'Customer Name', 'Email', 'Address', 'Products', 'Subtotal', 'Shipping', 'Total', 'Status'];
-        const rows = filteredOrders.map(o => [
-            o.orderId,
-            new Date(o.createdAt).toLocaleString(),
-            `${o.customer.firstName} ${o.customer.lastName}`,
-            o.customer.email,
-            `${o.customer.street}, ${o.customer.city}, ${o.customer.state || ''} ${o.customer.postal || ''}, ${o.customer.country}`,
-            o.items.map(i => `${i.name}${i.size ? ` (${i.size})` : ''} x${i.quantity}`).join('; '),
-            o.subtotal,
-            o.shipping,
-            o.total,
-            o.status
-        ]);
+        const headers = ['Order ID', 'Date', 'Customer Name', 'Email', 'Address', 'Products', 'Subtotal', 'Shipping', 'Total', 'Status', 'Payment Method'];
+const rows = filteredOrders.map(o => [
+    o.orderId,
+    new Date(o.createdAt).toLocaleString(),
+    `${o.customer.firstName} ${o.customer.lastName}`,
+    o.customer.email,
+    `${o.customer.street}, ${o.customer.city}, ${o.customer.state || ''} ${o.customer.postal || ''}, ${o.customer.country}`,
+    o.items.map(i => `${i.name}${i.size ? ` (${i.size})` : ''} x${i.quantity}`).join('; '),
+    o.subtotal,
+    o.shipping,
+    o.total,
+    o.status,
+    o.paymentMethod === 'credit' ? 'Credit Card' : 'Digital Wallet'
+]);
         const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
         const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');

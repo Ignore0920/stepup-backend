@@ -29,6 +29,11 @@ console.log('🚀 StepUp Backend Starting...');
 console.log('📦 Node Version:', process.version);
 console.log('🔧 Environment:', process.env.NODE_ENV || 'development');
 
+// Helper to check DB connection
+function isMongoConnected() {
+    return mongoose.connection.readyState === 1;
+}
+
 // Test route
 app.get('/test', (req, res) => {
     res.json({ message: 'Server is working!', timestamp: new Date().toISOString() });
@@ -46,7 +51,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'mainpage.html'));
 });
 
-// API information endpoint (optional)
+// API information endpoint
 app.get('/api/info', (req, res) => {
     const dbStatus = mongoose.connection.readyState;
     res.json({
@@ -106,6 +111,10 @@ app.get('/api/admin/verify', async (req, res) => {
 
 // ============ User Authentication (Public) ============
 app.post('/api/users/register', async (req, res) => {
+    // Ensure database is connected before processing
+    if (!isMongoConnected()) {
+        return res.status(503).json({ error: 'Database not ready. Please try again in a moment.' });
+    }
     try {
         const { name, email, password, firstName, lastName, phone } = req.body;
         console.log('Registration attempt:', { name, email, firstName, lastName });
@@ -121,11 +130,18 @@ app.post('/api/users/register', async (req, res) => {
         res.status(201).json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, firstName: user.firstName, lastName: user.lastName, phone: user.phone } });
     } catch (err) {
         console.error('Registration error:', err);
+        // Handle duplicate key error (MongoDB error code 11000)
+        if (err.code === 11000) {
+            return res.status(400).json({ error: 'Email already registered' });
+        }
         res.status(500).json({ error: 'Server error', details: err.message });
     }
 });
 
 app.post('/api/users/login', async (req, res) => {
+    if (!isMongoConnected()) {
+        return res.status(503).json({ error: 'Database not ready. Please try again.' });
+    }
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
@@ -145,7 +161,6 @@ app.post('/api/users/login', async (req, res) => {
 });
 
 // ============ User Profile (Authenticated) ============
-// Middleware to verify user token
 const verifyUserToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ error: 'No token provided' });
@@ -161,7 +176,6 @@ const verifyUserToken = async (req, res, next) => {
     }
 };
 
-// Get current user profile
 app.get('/api/users/profile', verifyUserToken, async (req, res) => {
     try {
         const user = req.user;
@@ -191,7 +205,6 @@ app.get('/api/users/profile', verifyUserToken, async (req, res) => {
     }
 });
 
-// Update user profile
 app.put('/api/users/profile', verifyUserToken, async (req, res) => {
     try {
         const user = req.user;
@@ -286,45 +299,37 @@ app.delete('/api/products/:id', async (req, res) => {
 // ============ Order Routes (Public) ============
 const Order = require('./models/Order');
 
-// Create a new order (public, no auth needed)
 app.post('/api/orders', async (req, res) => {
     try {
         const orderData = req.body;
-
-        // Validate required fields
         if (!orderData.orderId || !orderData.customer?.firstName || !orderData.customer?.email || !orderData.items?.length) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
-
-        // Clean items: ensure price is a number and productId is saved (if present)
         const cleanedItems = orderData.items.map(item => ({
             ...item,
             price: typeof item.price === 'string' ? parseFloat(item.price.replace('MOP $', '')) : item.price,
-            productId: item.id // map frontend's 'id' to productId
+            productId: item.id
         }));
-
-        // Inside POST /api/orders
-const order = new Order({
-    orderId: orderData.orderId,
-    customer: {
-        firstName: orderData.customer.firstName,
-        lastName: orderData.customer.lastName,
-        email: orderData.customer.email,
-        phone: orderData.customer.phone,
-        street: orderData.customer.street,
-        city: orderData.customer.city,
-        state: orderData.customer.state,
-        postal: orderData.customer.postal,
-        country: orderData.customer.country
-    },
-    items: cleanedItems,
-    subtotal: orderData.subtotal,
-    shipping: orderData.shipping,
-    total: orderData.total,
-    status: orderData.status || 'pending',
-    paymentMethod: orderData.paymentMethod || 'credit'  // <-- new
-});
-
+        const order = new Order({
+            orderId: orderData.orderId,
+            customer: {
+                firstName: orderData.customer.firstName,
+                lastName: orderData.customer.lastName,
+                email: orderData.customer.email,
+                phone: orderData.customer.phone,
+                street: orderData.customer.street,
+                city: orderData.customer.city,
+                state: orderData.customer.state,
+                postal: orderData.customer.postal,
+                country: orderData.customer.country
+            },
+            items: cleanedItems,
+            subtotal: orderData.subtotal,
+            shipping: orderData.shipping,
+            total: orderData.total,
+            status: orderData.status || 'pending',
+            paymentMethod: orderData.paymentMethod || 'credit'
+        });
         await order.save();
         res.status(201).json({ success: true, order });
     } catch (err) {
@@ -400,7 +405,7 @@ app.delete('/api/admins/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
-// ============ Seed Default Products (Admin only, one‑time) ============
+// ============ Seed Default Products (Admin only) ============
 app.post('/api/admin/seed-products', verifyAdminToken, async (req, res) => {
     try {
         const defaultProducts = [
@@ -415,7 +420,6 @@ app.post('/api/admin/seed-products', verifyAdminToken, async (req, res) => {
             { name: 'New Balance 990v6', brand: 'New Balance', model: '990v6', sizeRange: '8-14', price: 189.99, stock: 22, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OISFcGUaRzULPMhv.jpg', tag: '', collection: 'Running' },
             { name: 'Converse One Star', brand: 'Converse', model: 'One Star', sizeRange: '5-13', price: 149.99, stock: 60, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OqEvWuXBAyHMsEtW.jpg', tag: '', collection: 'Casual' }
         ];
-
         let inserted = 0, skipped = 0;
         for (const prod of defaultProducts) {
             const exists = await Product.findOne({ name: prod.name, brand: prod.brand });
@@ -434,7 +438,6 @@ app.post('/api/admin/seed-products', verifyAdminToken, async (req, res) => {
 });
 
 // ============ Inventory Management (Admin only) ============
-// Get all products
 app.get('/api/admin/inventory/products', verifyAdminToken, async (req, res) => {
     try {
         const products = await Product.find().sort({ createdAt: -1 });
@@ -445,7 +448,6 @@ app.get('/api/admin/inventory/products', verifyAdminToken, async (req, res) => {
     }
 });
 
-// Get a single product by ID
 app.get('/api/admin/inventory/products/:id', verifyAdminToken, async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
@@ -457,20 +459,13 @@ app.get('/api/admin/inventory/products/:id', verifyAdminToken, async (req, res) 
     }
 });
 
-// Create a new product (with all fields)
 app.post('/api/admin/inventory/products', verifyAdminToken, async (req, res) => {
     try {
         const { name, brand, model, sizeRange, price, stock, image, tag, collection } = req.body;
-        // Validate required fields
         if (!name || !brand || !model || !sizeRange || price === undefined || stock === undefined) {
             return res.status(400).json({ error: 'Missing required fields: name, brand, model, sizeRange, price, stock' });
         }
-        const product = new Product({
-            name, brand, model, sizeRange, price, stock,
-            image: image || '',
-            tag: tag || '',
-            collection: collection || 'Casual'
-        });
+        const product = new Product({ name, brand, model, sizeRange, price, stock, image: image || '', tag: tag || '', collection: collection || 'Casual' });
         await product.save();
         res.status(201).json({ success: true, product });
     } catch (err) {
@@ -479,7 +474,6 @@ app.post('/api/admin/inventory/products', verifyAdminToken, async (req, res) => 
     }
 });
 
-// Update a product (all fields allowed)
 app.put('/api/admin/inventory/products/:id', verifyAdminToken, async (req, res) => {
     try {
         const { name, brand, model, sizeRange, price, stock, image, tag, collection } = req.body;
@@ -502,7 +496,6 @@ app.put('/api/admin/inventory/products/:id', verifyAdminToken, async (req, res) 
     }
 });
 
-// Delete a product
 app.delete('/api/admin/inventory/products/:id', verifyAdminToken, async (req, res) => {
     try {
         const product = await Product.findByIdAndDelete(req.params.id);
@@ -515,7 +508,6 @@ app.delete('/api/admin/inventory/products/:id', verifyAdminToken, async (req, re
 });
 
 // ============ Order Management (Admin only) ============
-// Get all orders
 app.get('/api/admin/orders', verifyAdminToken, async (req, res) => {
     try {
         const orders = await Order.find().sort({ createdAt: -1 });
@@ -526,7 +518,6 @@ app.get('/api/admin/orders', verifyAdminToken, async (req, res) => {
     }
 });
 
-// Get single order
 app.get('/api/admin/orders/:id', verifyAdminToken, async (req, res) => {
     try {
         const order = await Order.findById(req.params.id);
@@ -538,16 +529,11 @@ app.get('/api/admin/orders/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
-// Update order status
 app.put('/api/admin/orders/:id', verifyAdminToken, async (req, res) => {
     try {
         const { status } = req.body;
         if (!status) return res.status(400).json({ error: 'Status required' });
-        const order = await Order.findByIdAndUpdate(
-            req.params.id,
-            { status, updatedAt: Date.now() },
-            { new: true }
-        );
+        const order = await Order.findByIdAndUpdate(req.params.id, { status, updatedAt: Date.now() }, { new: true });
         if (!order) return res.status(404).json({ error: 'Order not found' });
         res.json({ success: true, order });
     } catch (err) {
@@ -556,14 +542,9 @@ app.put('/api/admin/orders/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
-// Cancel order (set status to cancelled)
 app.delete('/api/admin/orders/:id', verifyAdminToken, async (req, res) => {
     try {
-        const order = await Order.findByIdAndUpdate(
-            req.params.id,
-            { status: 'cancelled', updatedAt: Date.now() },
-            { new: true }
-        );
+        const order = await Order.findByIdAndUpdate(req.params.id, { status: 'cancelled', updatedAt: Date.now() }, { new: true });
         if (!order) return res.status(404).json({ error: 'Order not found' });
         res.json({ success: true, message: 'Order cancelled', order });
     } catch (err) {
@@ -573,7 +554,6 @@ app.delete('/api/admin/orders/:id', verifyAdminToken, async (req, res) => {
 });
 
 // ============ User Management (Admin only) ============
-// Get all users
 app.get('/api/admin/users', verifyAdminToken, async (req, res) => {
     try {
         const users = await User.find().select('-password').sort({ createdAt: -1 });
@@ -584,13 +564,10 @@ app.get('/api/admin/users', verifyAdminToken, async (req, res) => {
     }
 });
 
-// Create new user (admin only)
 app.post('/api/admin/users', verifyAdminToken, async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        if (!name || !email || !password) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
+        if (!name || !email || !password) return res.status(400).json({ error: 'Missing required fields' });
         const existing = await User.findOne({ email });
         if (existing) return res.status(400).json({ error: 'Email already exists' });
         const user = new User({ name, email, password });
@@ -604,7 +581,6 @@ app.post('/api/admin/users', verifyAdminToken, async (req, res) => {
     }
 });
 
-// Update user (admin only)
 app.put('/api/admin/users/:id', verifyAdminToken, async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -623,7 +599,6 @@ app.put('/api/admin/users/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
-// Delete user (admin only)
 app.delete('/api/admin/users/:id', verifyAdminToken, async (req, res) => {
     try {
         const user = await User.findByIdAndDelete(req.params.id);
@@ -635,57 +610,54 @@ app.delete('/api/admin/users/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
-// ============ Start Server ============
+// ============ Start Server – ONLY after database is connected ============
 const port = process.env.PORT || 5000;
-const server = app.listen(port, '0.0.0.0', () => {
-    console.log(`✅ Server is running on port ${port}`);
-    console.log(`📍 Local: http://localhost:${port}`);
-    console.log(`📊 Health: http://localhost:${port}/health`);
-    console.log(`📝 API: http://localhost:${port}/api/products`);
-    console.log(`🧪 Test: http://localhost:${port}/test`);
-});
-
-// Connect to MongoDB
 const dbURI = process.env.MONGO_URI;
+
 if (!dbURI) {
-    console.error('⚠️  WARNING: MONGO_URI is not defined in environment variables');
-    console.log('💡 Database features will not work until MONGO_URI is set');
-} else {
-    console.log('🔄 Connecting to MongoDB...');
-    mongoose.connect(dbURI)
-        .then(async () => {
-            console.log('✅ Connected to StepUp Database');
-            const adminCount = await Admin.countDocuments();
-            if (adminCount === 0) {
-                const defaultAdmin = new Admin({ username: 'admin', password: 'admin123' });
-                await defaultAdmin.save();
-                console.log('✅ Default admin created: username = admin, password = admin123');
-            }
-        })
-        .catch(err => {
-            console.error('❌ Database connection error:', err.message);
-        });
+    console.error('❌ MONGO_URI is not defined in environment variables. Server cannot start.');
+    process.exit(1);
 }
+
+console.log('🔄 Connecting to MongoDB...');
+mongoose.connect(dbURI)
+    .then(async () => {
+        console.log('✅ Connected to StepUp Database');
+        
+        // Create default admin if none exists
+        const adminCount = await Admin.countDocuments();
+        if (adminCount === 0) {
+            const defaultAdmin = new Admin({ username: 'admin', password: 'admin123' });
+            await defaultAdmin.save();
+            console.log('✅ Default admin created: username = admin, password = admin123');
+        }
+        
+        // Start the server only after successful DB connection
+        app.listen(port, '0.0.0.0', () => {
+            console.log(`✅ Server is running on port ${port}`);
+            console.log(`📍 Local: http://localhost:${port}`);
+            console.log(`📊 Health: http://localhost:${port}/health`);
+            console.log(`📝 API: http://localhost:${port}/api/products`);
+            console.log(`🧪 Test: http://localhost:${port}/test`);
+        });
+    })
+    .catch(err => {
+        console.error('❌ Database connection error:', err.message);
+        console.error('💡 Please check your MONGO_URI in .env file');
+        process.exit(1);
+    });
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
     console.log('👋 Shutting down...');
-    server.close(async () => {
-        if (mongoose.connection.readyState === 1) {
-            await mongoose.connection.close();
-            console.log('✅ MongoDB connection closed');
-        }
-        process.exit(0);
-    });
+    await mongoose.connection.close();
+    console.log('✅ MongoDB connection closed');
+    process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
     console.log('👋 Shutting down...');
-    server.close(async () => {
-        if (mongoose.connection.readyState === 1) {
-            await mongoose.connection.close();
-            console.log('✅ MongoDB connection closed');
-        }
-        process.exit(0);
-    });
+    await mongoose.connection.close();
+    console.log('✅ MongoDB connection closed');
+    process.exit(0);
 });

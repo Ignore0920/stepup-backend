@@ -466,7 +466,7 @@
             }
         }
     </style>
-<script type='text/javascript' src='https://private-us-east-1.manuscdn.com/FgnhjE8MbGICoTl50NvBisIEvGCXodwV1NwabVf3WnjAaNBwU4uruBaCD-jxT-XKZHwcjNZa2NJQw6Vfsx1KlMckV3LLPZDQ3h6UgSturqfp3FU1a9lIbyYzXBkMeRWF_H1i_Hfex0BGio9970cxux1fhUvI45fHf3UeDAFmmcqUigVSDDw7-gsSQPPmv6D8-ouqVTiotjCE4FCykZ_u5nGyouG4E4RyGcgJMjlSQIF0jspnMdSzfHTUa5eJAf562UpXeiRfKWIXm1gtqTFhusG5aALSPf2s0EPPQ9-lzw86F3BgvGDvBiEgrAES1x-waVz07I9QlWYXeUPSpuxTasf_X7o0JW_fKRSI71xrd-vEYROenJPqaQNsBe5mOM872vAsO2vHDqEecgdtNo8IWg15ayT1ovNRCCyEpUFDBIxzqQ-P3F7zSuNzo4DuiGaHGZU_O_kbiA3O5L9tDYdtA5c-MjURbO0lZ_x1GkEJM4LFlx42dv17gVH4VmX_6_hq0mM38p2Izd3Zb6itrBXT5QtSeLShCzQM0wseo3lIVJ0PL-aKdSlI_JgsDk_qh7NgqOFhyff7MwMlctEl9z5M_q-THj5KUYX3_NojFOeR2jlfRbVO9AvZeXzZm3ujlD8goDLxlFdNsorSdLokXkG9kLugBTcoao0fd3D0lvLEG31K70L3q5NCFTx7Cl4DjUXEBiJPtI_hMB6jDxdexGf74N_ew9tOu_FtS2xE2bn__gVqCLB6t_jvJQ6JrGwYNYEtoT-Qje-ATnmQPg7e9_6igqTZwccMpuYZuTdM9ZaMxy4BigT05IxEgQd7o-o_p2bjIFi5Q6ZVQ05F_O7Faklmx-ghRhhVJgCObjSJfJ3QoP6fLoyY0-X9YTRmHotQaGF2M6FpwVH1QMhVp_3MkRGwq9BY2g4uTv48_vvSCf8GvKS_yrNIzSiwDsMcvylxF4TGqNI7UdZ7eXJ8cyAa0LrJjzFbJRwGpYj1lOSHdrvz6CtTA7I4Iz7tankYnevE_2M8l3z2NhHRZZ3_3RdY3mtYycmQNM--1w4ibzZbEJ_xR3wvUMe4z-9ZqH5Zolzst-YyZhmUl5deIfbiE6424msvsUIgdgjGqk4yLo_3zZamYuDV-h8zTqNUNV9A2RWnTX_DqSO6J9H43rQIyenPsXxYwpowh22pKQBbGNC1W_18hnsNreFFObifPYEA5Ro0J9wHEqLqOsG5aME4V9DWndD84Kj290lnY_lffLsXok4m5XNXP3QxSnmPtZr9g8tyODsWxFH0MBsXqch0uEv7YYTA2kf5NhnxeMysQuDCnfO2Sc89i3lt0z2aqs7vagt_gJcGBQLPJuOpNwVzETRaCjy1wneoWFLO2MFxzTcDs-LwENFQuE_vledMn-NuxmvMuyrgrVcnQ3c-q4tvxyyMxjO8VstbYlmLcZXRxA1xQR6SHUoMXz5hL2ELp1Jd6cWvV_X542ZwhWrehDLZ_FFB0hndpeQ7R5ekQjO_vtF6vFFgNv1ZGYOYQjh6uQmZeTEP2SEm6mPa5DvdZ4jF6ySRWlsepN4P9poonATH_Ly_ypwTaf_BOEON47iHQrQl7Ij3kLkKt2sztJB1lpAEfqpG4oECDL8Akl-6-renGVI'></script></head>
+</head>
 <body>
     <!-- Header -->
     <header>
@@ -693,142 +693,148 @@
     </div>
 
     <script>
-        // LocalStorage Management Functions
-        function saveToLocalStorage(key, value) {
-            localStorage.setItem(key, JSON.stringify(value));
+        // --- JWT & Backend Integration ---
+        const API_BASE = ''; // Use relative URLs to same origin (your server)
+        
+        // Helper: get stored JWT token
+        function getAuthToken() {
+            return localStorage.getItem('userToken');
         }
 
-        function getFromLocalStorage(key, defaultValue = null) {
-            const item = localStorage.getItem(key);
-            return item ? JSON.parse(item) : defaultValue;
-        }
-
-        // Cookie Management Functions
-        function getCookie(name) {
-            const nameEQ = name + "=";
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                let cookie = cookies[i].trim();
-                if (cookie.indexOf(nameEQ) === 0) {
-                    return decodeURIComponent(cookie.substring(nameEQ.length));
-                }
+        // Helper: set auth header for fetch
+        function authFetch(url, options = {}) {
+            const token = getAuthToken();
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
             }
-            return null;
+            return fetch(url, { ...options, headers });
         }
 
-        function deleteCookie(name) {
-            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-        }
-
-        // Update cart badge
+        // Update cart badge from localStorage (cart is still client-side)
         function updateCartBadge() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
             const badge = document.getElementById('cartBadge');
-            if (badge) {
-                badge.textContent = totalItems;
+            if (badge) badge.textContent = totalItems;
+        }
+
+        // Load user profile from backend and populate UI
+        async function loadUserProfile() {
+            try {
+                const res = await authFetch('/api/users/profile');
+                if (!res.ok) {
+                    if (res.status === 401) {
+                        // Token invalid or expired
+                        logout();
+                        return;
+                    }
+                    throw new Error('Failed to load profile');
+                }
+                const data = await res.json();
+                const user = data.user;
+                
+                // Update header
+                const name = user.name || (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email.split('@')[0]);
+                document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+                document.getElementById('userName').textContent = name;
+                
+                // Update profile fields
+                document.getElementById('firstName').textContent = user.firstName || '-';
+                document.getElementById('lastName').textContent = user.lastName || '-';
+                document.getElementById('email').textContent = user.email || '-';
+                document.getElementById('phone').textContent = user.phone || '-';
+                
+                // Update address fields
+                document.getElementById('street').textContent = user.street || '-';
+                document.getElementById('city').textContent = user.city || '-';
+                document.getElementById('state').textContent = user.state || '-';
+                document.getElementById('postal').textContent = user.postal || '-';
+                document.getElementById('country').textContent = user.country || '-';
+                
+                // Update settings (notifications - stored locally for now, but we can keep a local flag)
+                const notifications = localStorage.getItem('emailNotifications') || 'enabled';
+                document.getElementById('notifications').textContent = notifications === 'enabled' ? 'Enabled' : 'Disabled';
+                
+                // Also store a local copy for quick editing
+                localStorage.setItem('userData', JSON.stringify(user));
+            } catch (err) {
+                console.error('Load profile error:', err);
+                alert('Could not load account data. Please try again.');
             }
         }
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            checkLoginStatus();
-            loadAllData();
-            loadOrders();
-            updateCartBadge();
-        });
-
-        // Check if user is logged in
-        function checkLoginStatus() {
-            // Check multiple storage methods for maximum compatibility
-            const sessionEmail = sessionStorage.getItem('userEmail');
-            const sessionName = sessionStorage.getItem('userName');
-            const sessionLoggedIn = sessionStorage.getItem('isLoggedIn');
+        // Save profile edits to backend
+        async function saveProfile() {
+            const firstName = document.getElementById('editFirstName').value;
+            const lastName = document.getElementById('editLastName').value;
+            const email = document.getElementById('editEmail').value;
+            const phone = document.getElementById('editPhone').value;
             
-            const localEmail = localStorage.getItem('userEmail');
-            const localName = localStorage.getItem('userName');
-            const localLoggedIn = localStorage.getItem('isLoggedIn');
-            
-            const cookieEmail = getCookie('userEmail');
-            const cookieName = getCookie('userName');
-            const cookieLoggedIn = getCookie('isLoggedIn');
-            
-            console.log('SessionStorage - Email:', sessionEmail);
-            console.log('LocalStorage - Email:', localEmail);
-            console.log('Cookies - Email:', cookieEmail);
-            
-            // Try to get user info from any available storage
-            const userEmail = sessionEmail || localEmail || cookieEmail;
-            const userName = sessionName || localName || cookieName;
-            const isLoggedIn = sessionLoggedIn || localLoggedIn || cookieLoggedIn;
-            
-            console.log('Final - Email:', userEmail, 'LoggedIn:', isLoggedIn);
-            
-            if (!userEmail || !isLoggedIn) {
-                console.log('User not logged in, redirecting...');
-                alert('Please log in to access your account');
-                window.location.href = 'loginregister.html';
-                return;
+            try {
+                const res = await authFetch('/api/users/profile', {
+                    method: 'PUT',
+                    body: JSON.stringify({ firstName, lastName, phone, email })  // email may be updated, backend allows it
+                });
+                if (!res.ok) throw new Error('Update failed');
+                
+                await loadUserProfile(); // refresh UI
+                document.getElementById('profileView').style.display = 'block';
+                document.getElementById('profileEdit').classList.remove('active');
+                showSuccessMessage('profileSuccess');
+            } catch (err) {
+                console.error(err);
+                alert('Failed to update profile. Please try again.');
             }
-
-            console.log('User logged in as:', userName);
-            showUserInfo(userName || userEmail.split('@')[0]);
         }
 
-        // Show user info in header
-        function showUserInfo(name) {
-            const userInfo = document.getElementById('userInfo');
-            const userAvatar = document.getElementById('userAvatar');
-            const userNameEl = document.getElementById('userName');
+        // Save address edits to backend
+        async function saveAddress() {
+            const street = document.getElementById('editStreet').value;
+            const city = document.getElementById('editCity').value;
+            const state = document.getElementById('editState').value;
+            const postal = document.getElementById('editPostal').value;
+            const country = document.getElementById('editCountry').value;
             
-            userAvatar.textContent = name.charAt(0).toUpperCase();
-            userNameEl.textContent = name;
+            try {
+                const res = await authFetch('/api/users/profile', {
+                    method: 'PUT',
+                    body: JSON.stringify({ street, city, state, postal, country })
+                });
+                if (!res.ok) throw new Error('Update failed');
+                
+                await loadUserProfile();
+                document.getElementById('addressView').style.display = 'block';
+                document.getElementById('addressEdit').classList.remove('active');
+                showSuccessMessage('addressSuccess');
+            } catch (err) {
+                console.error(err);
+                alert('Failed to update address. Please try again.');
+            }
         }
 
-        // Load all data from LocalStorage
-        function loadAllData() {
-            const userData = getFromLocalStorage('userData', {
-                firstName: getCookie('userName') || '',
-                lastName: '',
-                email: getCookie('userEmail') || '',
-                phone: '',
-                street: '',
-                city: '',
-                state: '',
-                postal: '',
-                country: '',
-                notifications: 'enabled'
-            });
-
-            // Load profile
-            document.getElementById('firstName').textContent = userData.firstName || '-';
-            document.getElementById('lastName').textContent = userData.lastName || '-';
-            document.getElementById('email').textContent = userData.email || '-';
-            document.getElementById('phone').textContent = userData.phone || '-';
-
-            // Load address
-            document.getElementById('street').textContent = userData.street || '-';
-            document.getElementById('city').textContent = userData.city || '-';
-            document.getElementById('state').textContent = userData.state || '-';
-            document.getElementById('postal').textContent = userData.postal || '-';
-            document.getElementById('country').textContent = userData.country || '-';
-
-            // Load settings
-            document.getElementById('notifications').textContent = userData.notifications === 'enabled' ? 'Enabled' : 'Disabled';
+        // Save settings (notifications) – stored locally for now, backend may extend later
+        function saveSettings() {
+            const notifications = document.getElementById('editNotifications').value;
+            localStorage.setItem('emailNotifications', notifications);
+            document.getElementById('notifications').textContent = notifications === 'enabled' ? 'Enabled' : 'Disabled';
+            document.getElementById('settingsView').style.display = 'block';
+            document.getElementById('settingsEdit').classList.remove('active');
+            showSuccessMessage('settingsSuccess');
         }
 
-        // Load orders from LocalStorage
+        // Load orders from localStorage (or could be extended to fetch from backend)
         function loadOrders() {
-            const orders = getFromLocalStorage('userOrders', []);
-
+            const orders = JSON.parse(localStorage.getItem('userOrders')) || [];
             const ordersBody = document.getElementById('ordersBody');
             ordersBody.innerHTML = '';
-
             if (orders.length === 0) {
                 ordersBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No orders yet</td></tr>';
                 return;
             }
-
             orders.forEach(order => {
                 const row = document.createElement('tr');
                 const statusClass = `status-${order.status}`;
@@ -843,44 +849,62 @@
             });
         }
 
-        // Switch sections
+        // Check login status using JWT token, redirect if not authenticated
+        async function checkLoginStatus() {
+            const token = getAuthToken();
+            if (!token) {
+                // No token, redirect to login
+                alert('Please log in to access your account.');
+                window.location.href = 'loginregister.html';
+                return false;
+            }
+            // Optionally verify token with backend (we'll just try to load profile, it will fail if invalid)
+            try {
+                const res = await authFetch('/api/users/profile');
+                if (!res.ok) {
+                    // Token invalid
+                    localStorage.removeItem('userToken');
+                    localStorage.removeItem('userInfo');
+                    alert('Session expired. Please log in again.');
+                    window.location.href = 'loginregister.html';
+                    return false;
+                }
+                return true;
+            } catch (err) {
+                console.error('Auth check error:', err);
+                window.location.href = 'loginregister.html';
+                return false;
+            }
+        }
+
+        // Initialize page
+        async function initPage() {
+            const isAuthenticated = await checkLoginStatus();
+            if (!isAuthenticated) return;
+            
+            await loadUserProfile();
+            loadOrders();
+            updateCartBadge();
+        }
+
+        // --- UI helper functions (non‑backend) ---
         function switchSection(sectionName) {
             const sections = document.querySelectorAll('.content-section');
             sections.forEach(section => section.classList.remove('active'));
-
             const buttons = document.querySelectorAll('.menu-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
-
             document.getElementById(sectionName).classList.add('active');
             event.target.classList.add('active');
         }
 
-        // Profile Edit Functions
         function startEditProfile() {
-            const userData = getFromLocalStorage('userData', {});
+            const userData = JSON.parse(localStorage.getItem('userData')) || {};
             document.getElementById('editFirstName').value = userData.firstName || '';
             document.getElementById('editLastName').value = userData.lastName || '';
             document.getElementById('editEmail').value = userData.email || '';
             document.getElementById('editPhone').value = userData.phone || '';
-
             document.getElementById('profileView').style.display = 'none';
             document.getElementById('profileEdit').classList.add('active');
-        }
-
-        function saveProfile() {
-            const userData = getFromLocalStorage('userData', {});
-            userData.firstName = document.getElementById('editFirstName').value;
-            userData.lastName = document.getElementById('editLastName').value;
-            userData.email = document.getElementById('editEmail').value;
-            userData.phone = document.getElementById('editPhone').value;
-
-            saveToLocalStorage('userData', userData);
-            loadAllData();
-
-            document.getElementById('profileView').style.display = 'block';
-            document.getElementById('profileEdit').classList.remove('active');
-
-            showSuccessMessage('profileSuccess');
         }
 
         function cancelEditProfile() {
@@ -888,34 +912,15 @@
             document.getElementById('profileEdit').classList.remove('active');
         }
 
-        // Address Edit Functions
         function startEditAddress() {
-            const userData = getFromLocalStorage('userData', {});
+            const userData = JSON.parse(localStorage.getItem('userData')) || {};
             document.getElementById('editStreet').value = userData.street || '';
             document.getElementById('editCity').value = userData.city || '';
             document.getElementById('editState').value = userData.state || '';
             document.getElementById('editPostal').value = userData.postal || '';
             document.getElementById('editCountry').value = userData.country || '';
-
             document.getElementById('addressView').style.display = 'none';
             document.getElementById('addressEdit').classList.add('active');
-        }
-
-        function saveAddress() {
-            const userData = getFromLocalStorage('userData', {});
-            userData.street = document.getElementById('editStreet').value;
-            userData.city = document.getElementById('editCity').value;
-            userData.state = document.getElementById('editState').value;
-            userData.postal = document.getElementById('editPostal').value;
-            userData.country = document.getElementById('editCountry').value;
-
-            saveToLocalStorage('userData', userData);
-            loadAllData();
-
-            document.getElementById('addressView').style.display = 'block';
-            document.getElementById('addressEdit').classList.remove('active');
-
-            showSuccessMessage('addressSuccess');
         }
 
         function cancelEditAddress() {
@@ -923,26 +928,11 @@
             document.getElementById('addressEdit').classList.remove('active');
         }
 
-        // Settings Edit Functions
         function startEditSettings() {
-            const userData = getFromLocalStorage('userData', {});
-            document.getElementById('editNotifications').value = userData.notifications || 'enabled';
-
+            const notifications = localStorage.getItem('emailNotifications') || 'enabled';
+            document.getElementById('editNotifications').value = notifications;
             document.getElementById('settingsView').style.display = 'none';
             document.getElementById('settingsEdit').classList.add('active');
-        }
-
-        function saveSettings() {
-            const userData = getFromLocalStorage('userData', {});
-            userData.notifications = document.getElementById('editNotifications').value;
-
-            saveToLocalStorage('userData', userData);
-            loadAllData();
-
-            document.getElementById('settingsView').style.display = 'block';
-            document.getElementById('settingsEdit').classList.remove('active');
-
-            showSuccessMessage('settingsSuccess');
         }
 
         function cancelEditSettings() {
@@ -950,43 +940,29 @@
             document.getElementById('settingsEdit').classList.remove('active');
         }
 
-        // Show success message
         function showSuccessMessage(elementId) {
             const element = document.getElementById(elementId);
             element.classList.add('show');
-            setTimeout(() => {
-                element.classList.remove('show');
-            }, 3000);
+            setTimeout(() => element.classList.remove('show'), 3000);
         }
 
-        // Action handlers
         function viewOrder(orderId) {
             alert('Order details for ' + orderId + ' coming soon!');
         }
 
+        // Logout: clear all stored user data and redirect
         function logout() {
-            // Clear SessionStorage
-            sessionStorage.removeItem('userEmail');
-            sessionStorage.removeItem('userName');
-            sessionStorage.removeItem('isLoggedIn');
-            
-            // Clear LocalStorage
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('userInfo');
             localStorage.removeItem('userData');
-            localStorage.removeItem('userOrders');
-            
-            // Clear Cookies
-            deleteCookie('userEmail');
-            deleteCookie('userName');
-            deleteCookie('isLoggedIn');
-            
-            console.log('All user data cleared');
-            
+            // Optionally keep cart? We'll keep cart but clear user-specific items
+            sessionStorage.clear();
             alert('Logged out successfully');
             window.location.href = 'mainpage.html';
         }
+
+        // Run initialization when DOM is ready
+        document.addEventListener('DOMContentLoaded', initPage);
     </script>
 </body>
 </html>

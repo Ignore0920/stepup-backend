@@ -15,6 +15,10 @@ const User = require('./models/User');
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'stepup_admin_secret_key_change_in_production';
 
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
+const Forecast = require('./models/Forecast');
+
 // Middleware
 app.use(cors({
     origin: '*',
@@ -606,6 +610,159 @@ app.delete('/api/admin/users/:id', verifyAdminToken, async (req, res) => {
         res.json({ success: true, message: 'User deleted' });
     } catch (err) {
         console.error('Error deleting user:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ============ Dashboard Analytics (Admin only) ============
+
+// Overall stats
+app.get('/api/admin/dashboard/stats', verifyAdminToken, async (req, res) => {
+    try {
+        const totalOrders = await Order.countDocuments();
+        const totalRevenueAgg = await Order.aggregate([{ $group: { _id: null, total: { $sum: '$total' } } }]);
+        const totalRevenue = totalRevenueAgg.length ? totalRevenueAgg[0].total : 0;
+        const totalUsers = await User.countDocuments();
+        const totalProducts = await Product.countDocuments();
+        res.json({
+            success: true,
+            totalRevenue,
+            totalOrders,
+            totalUsers,
+            totalProducts
+        });
+    } catch (err) {
+        console.error('Stats error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Sales timeline (last 30 days, grouped by day)
+app.get('/api/admin/dashboard/sales-timeline', verifyAdminToken, async (req, res) => {
+    try {
+        const days = parseInt(req.query.days) || 30;
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+        startDate.setHours(0, 0, 0, 0);
+
+        const pipeline = [
+            { $match: { createdAt: { $gte: startDate } } },
+            {
+                $group: {
+                    _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+                    total: { $sum: '$total' }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ];
+        const results = await Order.aggregate(pipeline);
+        const data = results.map(item => ({ date: item._id, total: item.total }));
+        res.json({ success: true, data });
+    } catch (err) {
+        console.error('Sales timeline error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Top products by quantity sold
+app.get('/api/admin/dashboard/top-products', verifyAdminToken, async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 5;
+        const pipeline = [
+            { $unwind: '$items' },
+            {
+                $group: {
+                    _id: { name: '$items.name', brand: '$items.brand' },
+                    totalQuantity: { $sum: '$items.quantity' },
+                    totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } }
+                }
+            },
+            { $sort: { totalQuantity: -1 } },
+            { $limit: limit },
+            {
+                $project: {
+                    _id: 0,
+                    name: '$_id.name',
+                    brand: '$_id.brand',
+                    totalQuantity: 1,
+                    totalRevenue: 1
+                }
+            }
+        ];
+        const results = await Order.aggregate(pipeline);
+        res.json({ success: true, data: results });
+    } catch (err) {
+        console.error('Top products error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Recent orders
+app.get('/api/admin/dashboard/recent-orders', verifyAdminToken, async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const orders = await Order.find()
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .select('orderId createdAt customer total status');
+        res.json({ success: true, data: orders });
+    } catch (err) {
+        console.error('Recent orders error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Get current forecast data
+app.get('/api/admin/dashboard/forecast', verifyAdminToken, async (req, res) => {
+    try {
+        const forecast = await Forecast.find().sort({ date: 1 });
+        const data = forecast.map(f => ({ date: f.date.toISOString().slice(0,10), value: f.value }));
+        res.json({ success: true, data });
+    } catch (err) {
+        console.error('Forecast fetch error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Upload forecast CSV
+app.post('/api/admin/dashboard/upload-forecast', verifyAdminToken, upload.single('forecast'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+        const csv = req.file.buffer.toString('utf-8');
+        const lines = csv.split('\n').filter(line => line.trim() !== '');
+        if (lines.length < 2) return res.status(400).json({ error: 'CSV must have at least header and one data row' });
+
+        // Expect header: date,forecast_sales (case insensitive)
+        const headers = lines[0].toLowerCase().split(',');
+        const dateIdx = headers.findIndex(h => h.includes('date'));
+        const salesIdx = headers.findIndex(h => h.includes('forecast') || h.includes('sales'));
+        if (dateIdx === -1 || salesIdx === -1) {
+            return res.status(400).json({ error: 'CSV must have columns: date and forecast_sales' });
+        }
+
+        const parsed = [];
+        for (let i = 1; i < lines.length; i++) {
+            const cols = lines[i].split(',');
+            if (cols.length < 2) continue;
+            const dateStr = cols[dateIdx].trim();
+            const valueStr = cols[salesIdx].trim();
+            if (!dateStr || !valueStr) continue;
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) continue;
+            const value = parseFloat(valueStr);
+            if (isNaN(value)) continue;
+            parsed.push({ date, value });
+        }
+
+        if (parsed.length === 0) return res.status(400).json({ error: 'No valid data rows found' });
+
+        // Replace all existing forecast data
+        await Forecast.deleteMany({});
+        await Forecast.insertMany(parsed);
+        res.json({ success: true, message: `Uploaded ${parsed.length} forecast points` });
+    } catch (err) {
+        console.error('Forecast upload error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });

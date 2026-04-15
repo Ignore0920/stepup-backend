@@ -767,6 +767,78 @@ app.post('/api/admin/dashboard/upload-forecast', verifyAdminToken, upload.single
     }
 });
 
+// Linear regression: given array of [x, y] points, returns { slope, intercept }
+function linearRegression(points) {
+    const n = points.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    for (let i = 0; i < n; i++) {
+        const x = points[i][0];
+        const y = points[i][1];
+        sumX += x;
+        sumY += y;
+        sumXY += x * y;
+        sumX2 += x * x;
+    }
+    const denominator = (n * sumX2 - sumX * sumX);
+    if (denominator === 0) return { slope: 0, intercept: sumY / n };
+    const slope = (n * sumXY - sumX * sumY) / denominator;
+    const intercept = (sumY - slope * sumX) / n;
+    return { slope, intercept };
+}
+
+// Auto-forecast based on historical sales
+app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res) => {
+    try {
+        const forecastDays = parseInt(req.query.days) || 7;
+        const historyDays = 30;
+
+        // 1. Fetch actual sales for the last 'historyDays' days
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - historyDays);
+        startDate.setHours(0, 0, 0, 0);
+
+        const pipeline = [
+            { $match: { createdAt: { $gte: startDate } } },
+            {
+                $group: {
+                    _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+                    total: { $sum: '$total' }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ];
+        const results = await Order.aggregate(pipeline);
+        
+        if (results.length < 3) {
+            return res.json({ success: true, data: [], message: 'Not enough data for forecasting' });
+        }
+
+        // 2. Convert to numerical points (x = day index, y = sales)
+        const points = results.map((item, idx) => [idx, item.total]);
+        const { slope, intercept } = linearRegression(points);
+
+        // 3. Generate forecast for next 'forecastDays' days
+        const lastIndex = points.length - 1;
+        const forecast = [];
+        const today = new Date();
+        for (let i = 1; i <= forecastDays; i++) {
+            const futureX = lastIndex + i;
+            const predictedValue = slope * futureX + intercept;
+            const forecastDate = new Date(today);
+            forecastDate.setDate(today.getDate() + i);
+            forecast.push({
+                date: forecastDate.toISOString().slice(0, 10),
+                value: Math.max(0, predictedValue) // ensure non-negative
+            });
+        }
+
+        res.json({ success: true, data: forecast });
+    } catch (err) {
+        console.error('Auto-forecast error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // ============ Start Server – ONLY after database is connected ============
 const port = process.env.PORT || 5000;
 const dbURI = process.env.MONGO_URI;

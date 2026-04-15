@@ -169,15 +169,6 @@
             background: #2ecc71;
         }
 
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c0392b;
-        }
-
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -205,24 +196,6 @@
             margin-top: 1rem;
         }
 
-        .upload-area {
-            border: 2px dashed #e5e5e5;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            border-radius: 8px;
-        }
-
-        .upload-area:hover {
-            border-color: #262626;
-            background: #fafafa;
-        }
-
-        .upload-area input {
-            display: none;
-        }
-
         .forecast-legend {
             margin-top: 1rem;
             font-size: 0.8rem;
@@ -239,6 +212,22 @@
         .legend-forecast {
             color: #e74c3c;
             font-weight: 600;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+            justify-content: flex-end;
+        }
+
+        .mode-toggle label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            cursor: pointer;
         }
 
         @media (max-width: 768px) {
@@ -295,26 +284,39 @@
                 <h3 class="card-title">Sales Trend & Forecast</h3>
                 <button class="btn export-btn" id="exportSalesBtn">📊 Export Sales Data</button>
             </div>
+
+            <!-- Toggle between Auto and Manual forecast -->
+            <div class="mode-toggle">
+                <label>
+                    <input type="radio" name="forecastMode" value="auto" checked> 🤖 Auto Forecast (ML)
+                </label>
+                <label>
+                    <input type="radio" name="forecastMode" value="upload"> 📁 Manual Upload
+                </label>
+            </div>
+
             <div class="chart-container">
                 <canvas id="salesChart"></canvas>
             </div>
             <div class="forecast-legend">
                 <span class="legend-actual">● Actual Sales</span>
-                <span class="legend-forecast">● Forecast (Uploaded)</span>
+                <span class="legend-forecast" id="forecastLegendLabel">● Forecast (Auto ML)</span>
             </div>
-            <div style="margin-top: 1rem; text-align: center;">
+
+            <!-- Manual upload section (only shown when manual mode is active) -->
+            <div id="manualUploadSection" style="margin-top: 1rem; text-align: center; display: none;">
                 <label class="btn btn-secondary" style="display: inline-block; cursor: pointer;">
                     📁 Upload Forecast CSV
                     <input type="file" id="forecastFile" accept=".csv" style="display: none;">
                 </label>
                 <span id="uploadStatus" style="margin-left: 1rem; font-size: 0.8rem;"></span>
-            </div>
-            <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #666; text-align: center;">
-                CSV format: date,forecast_sales (date as YYYY-MM-DD, sales as number)
+                <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #666;">
+                    CSV format: date,forecast_sales (date as YYYY-MM-DD, sales as number)
+                </div>
             </div>
         </div>
 
-        <!-- Top Products & Recent Orders (2 columns) -->
+        <!-- Top Products & Recent Orders -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
             <div class="card">
                 <div class="card-header">
@@ -343,7 +345,7 @@
     </main>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
     // Admin token check
     const token = localStorage.getItem('adminToken');
@@ -369,10 +371,10 @@
         window.location.href = 'admin-login.html';
     }
 
-    // Global chart instances
     let salesChart, productsChart;
+    let currentForecastMode = 'auto';   // 'auto' or 'upload'
 
-    // Fetch dashboard data
+    // Fetch dashboard stats
     async function fetchDashboardStats() {
         try {
             const res = await fetch('/api/admin/dashboard/stats', {
@@ -384,14 +386,13 @@
                 document.getElementById('totalOrders').innerText = data.totalOrders;
                 document.getElementById('totalUsers').innerText = data.totalUsers;
                 document.getElementById('totalProducts').innerText = data.totalProducts;
-            } else {
-                console.error('Stats error:', data.error);
             }
         } catch (err) {
             console.error('Failed to fetch stats:', err);
         }
     }
 
+    // Fetch actual sales timeline (always needed)
     async function fetchSalesTimeline() {
         try {
             const res = await fetch('/api/admin/dashboard/sales-timeline?period=day&days=30', {
@@ -410,37 +411,7 @@
         return null;
     }
 
-    async function fetchForecast() {
-        try {
-            const res = await fetch('/api/admin/dashboard/forecast', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if (res.ok && data.data && data.data.length) {
-                const forecastDates = data.data.map(f => f.date);
-                const forecastValues = data.data.map(f => f.value);
-                if (salesChart && forecastDates.length) {
-                    // Overlay forecast on existing chart
-                    salesChart.data.datasets.push({
-                        label: 'Forecast',
-                        data: forecastValues,
-                        borderColor: '#e74c3c',
-                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                        borderWidth: 2,
-                        fill: false,
-                        tension: 0.1,
-                        pointRadius: 3
-                    });
-                    salesChart.update();
-                }
-                return { forecastDates, forecastValues };
-            }
-        } catch (err) {
-            console.error('Failed to fetch forecast:', err);
-        }
-        return null;
-    }
-
+    // Render the base sales chart (actual sales only)
     function renderSalesChart(labels, actualData) {
         const ctx = document.getElementById('salesChart').getContext('2d');
         if (salesChart) salesChart.destroy();
@@ -472,6 +443,90 @@
         });
     }
 
+    // Add or replace forecast dataset on the existing chart
+    function addForecastToChart(dates, values, label, isDashed = true) {
+        if (!salesChart) return;
+        // Remove existing forecast dataset if any (keep only actual)
+        if (salesChart.data.datasets.length > 1) {
+            salesChart.data.datasets.pop();
+        }
+        const newDataset = {
+            label: label,
+            data: values,
+            borderColor: '#e74c3c',
+            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+            borderWidth: 2,
+            fill: false,
+            tension: 0.1,
+            pointRadius: 3
+        };
+        if (isDashed) newDataset.borderDash = [5, 5];
+        salesChart.data.datasets.push(newDataset);
+        salesChart.update();
+    }
+
+    // Auto-forecast (ML) from backend
+    async function fetchAutoForecast() {
+        try {
+            const res = await fetch('/api/admin/dashboard/auto-forecast?days=7', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok && data.data && data.data.length) {
+                const forecastDates = data.data.map(f => f.date);
+                const forecastValues = data.data.map(f => f.value);
+                addForecastToChart(forecastDates, forecastValues, 'Auto Forecast (ML)', true);
+                document.getElementById('forecastLegendLabel').innerHTML = '● Forecast (Auto ML)';
+                return true;
+            } else {
+                // Not enough data or error
+                console.warn('Auto-forecast not available:', data.message);
+                return false;
+            }
+        } catch (err) {
+            console.error('Auto-forecast error:', err);
+            return false;
+        }
+    }
+
+    // Manually uploaded forecast
+    async function fetchUploadedForecast() {
+        try {
+            const res = await fetch('/api/admin/dashboard/forecast', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok && data.data && data.data.length) {
+                const forecastDates = data.data.map(f => f.date);
+                const forecastValues = data.data.map(f => f.value);
+                addForecastToChart(forecastDates, forecastValues, 'Uploaded Forecast', false);
+                document.getElementById('forecastLegendLabel').innerHTML = '● Forecast (Uploaded)';
+                return true;
+            } else {
+                // No uploaded forecast
+                if (salesChart && salesChart.data.datasets.length > 1) {
+                    salesChart.data.datasets.pop();
+                    salesChart.update();
+                }
+                document.getElementById('forecastLegendLabel').innerHTML = '● No forecast loaded';
+                return false;
+            }
+        } catch (err) {
+            console.error('Uploaded forecast error:', err);
+            return false;
+        }
+    }
+
+    // Main forecast loader based on current mode
+    async function loadForecast() {
+        if (currentForecastMode === 'auto') {
+            await fetchAutoForecast();
+        } else {
+            await fetchUploadedForecast();
+        }
+    }
+
+    // Top products bar chart
     async function fetchTopProducts() {
         try {
             const res = await fetch('/api/admin/dashboard/top-products?limit=5', {
@@ -482,12 +537,10 @@
                 const labels = data.data.map(p => p.name);
                 const quantities = data.data.map(p => p.totalQuantity);
                 renderProductsChart(labels, quantities);
-                return { labels, quantities };
             }
         } catch (err) {
             console.error('Failed to fetch top products:', err);
         }
-        return null;
     }
 
     function renderProductsChart(labels, quantities) {
@@ -507,13 +560,12 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                }
+                plugins: { legend: { display: false } }
             }
         });
     }
 
+    // Recent orders table
     async function fetchRecentOrders() {
         try {
             const res = await fetch('/api/admin/dashboard/recent-orders?limit=10', {
@@ -535,12 +587,10 @@
                         </tr>
                     `).join('');
                 }
-                return data.data;
             }
         } catch (err) {
             console.error('Failed to fetch recent orders:', err);
         }
-        return [];
     }
 
     // Export functions
@@ -605,11 +655,10 @@
         URL.revokeObjectURL(url);
     }
 
-    // File upload for forecast
+    // Manual forecast upload
     async function uploadForecast(file) {
         const formData = new FormData();
         formData.append('forecast', file);
-
         try {
             const res = await fetch('/api/admin/dashboard/upload-forecast', {
                 method: 'POST',
@@ -620,13 +669,41 @@
             if (res.ok) {
                 document.getElementById('uploadStatus').innerText = '✓ Forecast uploaded successfully';
                 setTimeout(() => document.getElementById('uploadStatus').innerText = '', 3000);
-                // Refresh forecast on chart
-                await fetchForecast();
+                // If currently in manual mode, refresh the forecast
+                if (currentForecastMode === 'upload') {
+                    await loadForecast();
+                }
             } else {
                 document.getElementById('uploadStatus').innerText = '✗ Error: ' + (data.error || 'Upload failed');
             }
         } catch (err) {
             document.getElementById('uploadStatus').innerText = '✗ Network error';
+        }
+    }
+
+    // Toggle between forecast modes
+    function initModeToggle() {
+        const radios = document.querySelectorAll('input[name="forecastMode"]');
+        const manualSection = document.getElementById('manualUploadSection');
+        radios.forEach(radio => {
+            radio.addEventListener('change', async (e) => {
+                if (e.target.checked) {
+                    currentForecastMode = e.target.value;
+                    if (currentForecastMode === 'auto') {
+                        manualSection.style.display = 'none';
+                        await loadForecast();
+                    } else {
+                        manualSection.style.display = 'block';
+                        await loadForecast();
+                    }
+                }
+            });
+        });
+        // Set initial visibility
+        if (currentForecastMode === 'auto') {
+            manualSection.style.display = 'none';
+        } else {
+            manualSection.style.display = 'block';
         }
     }
 
@@ -639,15 +716,16 @@
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length) {
             uploadForecast(e.target.files[0]);
-            fileInput.value = ''; // allow re-upload same file
+            fileInput.value = '';
         }
     });
 
-    // Initial load
+    // Initialisation
     (async function init() {
         await fetchDashboardStats();
-        await fetchSalesTimeline();
-        await fetchForecast();
+        await fetchSalesTimeline();      // draws actual sales chart
+        initModeToggle();
+        await loadForecast();            // loads the default auto-forecast
         await fetchTopProducts();
         await fetchRecentOrders();
     })();

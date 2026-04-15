@@ -614,6 +614,14 @@ app.delete('/api/admin/users/:id', verifyAdminToken, async (req, res) => {
 
 // ============ Dashboard Analytics (Admin only) ============
 
+// Helper: format a Date as YYYY-MM-DD in local time (no timezone shift)
+function formatLocalDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 // Overall stats
 app.get('/api/admin/dashboard/stats', verifyAdminToken, async (req, res) => {
     try {
@@ -635,26 +643,30 @@ app.get('/api/admin/dashboard/stats', verifyAdminToken, async (req, res) => {
     }
 });
 
-// Sales timeline (last 30 days, grouped by day)
+// Sales timeline (last 30 days, grouped by local date – no UTC shift)
 app.get('/api/admin/dashboard/sales-timeline', verifyAdminToken, async (req, res) => {
     try {
         const days = parseInt(req.query.days) || 30;
         const startDate = new Date();
-        startDate.setDate(startDate.getDate() - days);
         startDate.setHours(0, 0, 0, 0);
+        startDate.setDate(startDate.getDate() - days);
 
-        const pipeline = [
-            { $match: { createdAt: { $gte: startDate } } },
-            {
-                $group: {
-                    _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-                    total: { $sum: '$total' }
-                }
-            },
-            { $sort: { _id: 1 } }
-        ];
-        const results = await Order.aggregate(pipeline);
-        const data = results.map(item => ({ date: item._id, total: item.total }));
+        const orders = await Order.find({ createdAt: { $gte: startDate } }).select('total createdAt');
+        
+        // Group by local date (YYYY-MM-DD in server's timezone)
+        const salesByLocalDate = new Map();
+        orders.forEach(order => {
+            const localDate = new Date(order.createdAt);
+            localDate.setHours(0, 0, 0, 0);
+            const dateStr = formatLocalDate(localDate);
+            const current = salesByLocalDate.get(dateStr) || 0;
+            salesByLocalDate.set(dateStr, current + order.total);
+        });
+
+        const data = Array.from(salesByLocalDate.entries())
+            .map(([date, total]) => ({ date, total }))
+            .sort((a, b) => a.date.localeCompare(b.date));
+
         res.json({ success: true, data });
     } catch (err) {
         console.error('Sales timeline error:', err);
@@ -710,7 +722,7 @@ app.get('/api/admin/dashboard/recent-orders', verifyAdminToken, async (req, res)
     }
 });
 
-// Get current forecast data
+// Get current forecast data (manual upload)
 app.get('/api/admin/dashboard/forecast', verifyAdminToken, async (req, res) => {
     try {
         const forecast = await Forecast.find().sort({ date: 1 });
@@ -782,15 +794,7 @@ function linearRegression(points) {
     return { slope, intercept };
 }
 
-// Helper: format a Date as YYYY-MM-DD in local time (no timezone shift)
-function formatLocalDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
-
-// Auto-forecast – with option to include today
+// Auto-forecast – with option to include today, using local time
 app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res) => {
     try {
         const forecastDays = parseInt(req.query.days) || 7;
@@ -818,7 +822,7 @@ app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res)
             .sort((a, b) => a.date.localeCompare(b.date));
 
         if (results.length < 3) {
-            return res.json({ success: true, data: [], message: 'Not enough data for forecasting' });
+            return res.json({ success: true, data: [], message: 'Not enough data for forecasting (need at least 3 days of sales)' });
         }
 
         const points = results.map((item, idx) => [idx, item.total]);
@@ -828,7 +832,7 @@ app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res)
 
         const todayLocal = new Date();
         todayLocal.setHours(0, 0, 0, 0);
-        let startOffset = includeToday ? 0 : 1; // 0 = today, 1 = tomorrow
+        const startOffset = includeToday ? 0 : 1; // 0 = today, 1 = tomorrow
         for (let i = startOffset; i < startOffset + forecastDays; i++) {
             const futureX = lastIndex + i;
             let predictedValue = slope * futureX + intercept;

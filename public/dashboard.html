@@ -11,19 +11,23 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: 'Montserrat', sans-serif;
             background-color: #f9f9f9;
             color: #262626;
             line-height: 1.6;
         }
+
         h1, h2, h3 {
             font-family: 'Playfair Display', serif;
         }
+
         .admin-wrapper {
             display: flex;
             min-height: 100vh;
         }
+
         .sidebar {
             width: 250px;
             background-color: #262626;
@@ -34,12 +38,14 @@
             top: 0;
             height: 100vh;
         }
+
         .sidebar h2 {
             font-size: 1.5rem;
             border-bottom: 1px solid #444;
             padding-bottom: 20px;
             margin-top: 0;
         }
+
         .sidebar nav a {
             display: block;
             color: #bbb;
@@ -50,6 +56,7 @@
             letter-spacing: 1px;
             transition: 0.3s;
         }
+
         .sidebar nav a:hover,
         .sidebar nav a.active {
             color: white;
@@ -57,21 +64,25 @@
             border-left: 3px solid white;
             padding-left: 10px;
         }
+
         hr {
             margin: 20px 0;
             border-color: #444;
         }
+
         .main-content {
             flex-grow: 1;
             padding: 40px;
             overflow-y: auto;
         }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
+
         .stat-card {
             background: #fff;
             padding: 1.5rem;
@@ -79,17 +90,20 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
+
         .stat-value {
             font-size: 2rem;
             font-weight: 700;
             color: #262626;
         }
+
         .stat-label {
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: #999;
         }
+
         .card {
             background: #fff;
             border: 1px solid #e5e5e5;
@@ -97,6 +111,7 @@
             padding: 1.5rem;
             margin-bottom: 2rem;
         }
+
         .card-header {
             display: flex;
             justify-content: space-between;
@@ -105,10 +120,12 @@
             flex-wrap: wrap;
             gap: 1rem;
         }
+
         .card-title {
             font-size: 1.25rem;
             font-weight: 600;
         }
+
         .btn {
             padding: 0.6rem 1.2rem;
             font-size: 0.8rem;
@@ -120,32 +137,40 @@
             letter-spacing: 0.05em;
             border-radius: 4px;
         }
+
         .btn-primary {
             background: #262626;
             color: #fff;
         }
+
         .btn-primary:hover {
             background: #404040;
         }
+
         .btn-secondary {
             background: #fff;
             color: #262626;
             border: 1px solid #262626;
         }
+
         .btn-secondary:hover {
             background: #f5f5f5;
         }
+
         .export-btn {
             background: #27ae60;
             color: white;
         }
+
         .export-btn:hover {
             background: #2ecc71;
         }
+
         .data-table {
             width: 100%;
             border-collapse: collapse;
         }
+
         .data-table th {
             text-align: left;
             padding: 0.75rem;
@@ -155,16 +180,19 @@
             border-bottom: 2px solid #262626;
             background: #fafafa;
         }
+
         .data-table td {
             padding: 0.75rem;
             border-bottom: 1px solid #f0f0f0;
             font-size: 0.9rem;
         }
+
         .chart-container {
             position: relative;
             height: 300px;
             margin-top: 1rem;
         }
+
         .forecast-legend {
             margin-top: 1rem;
             font-size: 0.8rem;
@@ -172,21 +200,26 @@
             gap: 1rem;
             justify-content: center;
         }
+
         .legend-actual {
             color: #262626;
             font-weight: 600;
         }
+
         .legend-forecast {
             color: #e74c3c;
             font-weight: 600;
         }
+
         .mode-toggle {
             display: flex;
             gap: 1rem;
             align-items: center;
             margin-bottom: 1rem;
             justify-content: flex-end;
+            flex-wrap: wrap;
         }
+
         .mode-toggle label {
             display: flex;
             align-items: center;
@@ -194,6 +227,7 @@
             font-size: 0.85rem;
             cursor: pointer;
         }
+
         .refresh-bar {
             display: flex;
             justify-content: flex-end;
@@ -201,6 +235,32 @@
             margin-bottom: 1rem;
             align-items: center;
         }
+
+        .forecast-table-container {
+            margin-top: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .forecast-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+        }
+
+        .forecast-table th, .forecast-table td {
+            padding: 0.75rem;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .forecast-table th {
+            background: #fafafa;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 padding: 20px;
@@ -229,32 +289,21 @@
     <main class="main-content">
         <h1>Dashboard</h1>
 
+        <!-- Stats Cards -->
         <div class="stats-grid" id="statsGrid">
-            <div class="stat-card">
-                <div class="stat-value" id="totalRevenue">--</div>
-                <div class="stat-label">Total Revenue (MOP)</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="totalOrders">--</div>
-                <div class="stat-label">Total Orders</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="totalUsers">--</div>
-                <div class="stat-label">Registered Users</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="totalProducts">--</div>
-                <div class="stat-label">Products in Inventory</div>
-            </div>
+            <div class="stat-card"><div class="stat-value" id="totalRevenue">--</div><div class="stat-label">Total Revenue (MOP)</div></div>
+            <div class="stat-card"><div class="stat-value" id="totalOrders">--</div><div class="stat-label">Total Orders</div></div>
+            <div class="stat-card"><div class="stat-value" id="totalUsers">--</div><div class="stat-label">Registered Users</div></div>
+            <div class="stat-card"><div class="stat-value" id="totalProducts">--</div><div class="stat-label">Products in Inventory</div></div>
         </div>
 
+        <!-- Sales Chart + Forecast -->
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Sales Trend & Forecast</h3>
                 <button class="btn export-btn" id="exportSalesBtn">📊 Export Sales Data</button>
             </div>
 
-            <!-- Refresh and auto‑refresh controls -->
             <div class="refresh-bar">
                 <label style="display: flex; align-items: center; gap: 0.5rem;">
                     <input type="checkbox" id="autoRefreshCheckbox" checked> Auto-refresh (every 60 min)
@@ -262,17 +311,10 @@
                 <button class="btn btn-secondary" id="manualRefreshBtn">🔄 Refresh Now</button>
             </div>
 
-            <!-- Forecast mode toggle -->
             <div class="mode-toggle">
-                <label>
-                    <input type="radio" name="forecastMode" value="auto" checked> 🤖 Auto Forecast (ML)
-                </label>
-                <label>
-                    <input type="radio" name="forecastMode" value="upload"> 📁 Manual Upload
-                </label>
-                <label style="margin-left: 1rem;">
-                    <input type="checkbox" id="includeTodayCheckbox"> 📅 Include today in forecast
-                </label>
+                <label><input type="radio" name="forecastMode" value="auto" checked> 🤖 Auto Forecast (ML)</label>
+                <label><input type="radio" name="forecastMode" value="upload"> 📁 Manual Upload</label>
+                <label style="margin-left: 1rem;"><input type="checkbox" id="includeTodayCheckbox"> 📅 Include today in forecast</label>
             </div>
 
             <div class="chart-container">
@@ -283,6 +325,7 @@
                 <span class="legend-forecast" id="forecastLegendLabel">● Forecast (Auto ML)</span>
             </div>
 
+            <!-- Manual upload section -->
             <div id="manualUploadSection" style="margin-top: 1rem; text-align: center; display: none;">
                 <label class="btn btn-secondary" style="display: inline-block; cursor: pointer;">
                     📁 Upload Forecast CSV
@@ -293,17 +336,32 @@
                     CSV format: date,forecast_sales (date as YYYY-MM-DD, sales as number)
                 </div>
             </div>
+
+            <!-- Forecast Values Table -->
+            <div class="forecast-table-container">
+                <div class="card-header" style="margin-bottom: 0;">
+                    <h3 class="card-title">📋 Forecast Values (Next 7 Days)</h3>
+                    <button class="btn export-btn" id="exportForecastBtn">📥 Export Forecast Table</button>
+                </div>
+                <table class="forecast-table" id="forecastTable">
+                    <thead>
+                        <tr><th>Date</th><th>Forecasted Sales (MOP)</th><th>Forecast Source</th></tr>
+                    </thead>
+                    <tbody id="forecastTableBody">
+                        <tr><td colspan="3" style="text-align:center;">Loading forecast...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
+        <!-- Top Products & Recent Orders -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Top Selling Products</h3>
                     <button class="btn export-btn" id="exportProductsBtn">Export</button>
                 </div>
-                <div class="chart-container" style="height: 300px;">
-                    <canvas id="productsChart"></canvas>
-                </div>
+                <div class="chart-container" style="height: 300px;"><canvas id="productsChart"></canvas></div>
             </div>
             <div class="card">
                 <div class="card-header">
@@ -311,12 +369,8 @@
                     <button class="btn export-btn" id="exportOrdersBtn">Export</button>
                 </div>
                 <table class="data-table" id="recentOrdersTable">
-                    <thead>
-                        <tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Total</th><th>Status</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
-                    </tbody>
+                    <thead><tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
+                    <tbody><tr><td colspan="5" style="text-align:center;">Loading...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -346,6 +400,7 @@
 
     let salesChart, productsChart;
     let currentForecastMode = 'auto';
+    let currentForecastData = []; // stores { date, value }
     let refreshInterval = null;
 
     // Fetch dashboard stats
@@ -422,7 +477,24 @@
         salesChart.update();
     }
 
-    // Auto-forecast with optional "include today"
+    // Update the forecast table
+    function updateForecastTable(forecastArray, sourceLabel) {
+        const tbody = document.getElementById('forecastTableBody');
+        if (!forecastArray || forecastArray.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No forecast data available</td></tr>';
+            return;
+        }
+        tbody.innerHTML = forecastArray.map(item => `
+            <tr>
+                <td>${item.date}</td>
+                <td>MOP ${item.value.toFixed(2)}</td>
+                <td>${sourceLabel}</td>
+            </tr>
+        `).join('');
+        currentForecastData = forecastArray;
+    }
+
+    // Auto-forecast
     async function fetchAutoForecast() {
         const includeToday = document.getElementById('includeTodayCheckbox').checked;
         let url = '/api/admin/dashboard/auto-forecast?days=7';
@@ -435,17 +507,21 @@
                 const forecastValues = data.data.map(f => f.value);
                 addForecastToChart(forecastDates, forecastValues, 'Auto Forecast (ML)', true);
                 document.getElementById('forecastLegendLabel').innerHTML = '● Forecast (Auto ML)';
+                updateForecastTable(data.data, 'Auto ML');
                 return true;
             } else {
                 console.warn('Auto-forecast not available:', data.message);
+                updateForecastTable([], 'Auto ML');
                 return false;
             }
         } catch (err) {
             console.error('Auto-forecast error:', err);
+            updateForecastTable([], 'Auto ML');
             return false;
         }
     }
 
+    // Manual uploaded forecast
     async function fetchUploadedForecast() {
         try {
             const res = await fetch('/api/admin/dashboard/forecast', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -455,6 +531,7 @@
                 const forecastValues = data.data.map(f => f.value);
                 addForecastToChart(forecastDates, forecastValues, 'Uploaded Forecast', false);
                 document.getElementById('forecastLegendLabel').innerHTML = '● Forecast (Uploaded)';
+                updateForecastTable(data.data, 'Manual Upload');
                 return true;
             } else {
                 if (salesChart && salesChart.data.datasets.length > 1) {
@@ -462,10 +539,12 @@
                     salesChart.update();
                 }
                 document.getElementById('forecastLegendLabel').innerHTML = '● No forecast loaded';
+                updateForecastTable([], 'Manual Upload');
                 return false;
             }
         } catch (err) {
             console.error('Uploaded forecast error:', err);
+            updateForecastTable([], 'Manual Upload');
             return false;
         }
     }
@@ -475,6 +554,18 @@
         else await fetchUploadedForecast();
     }
 
+    // Export forecast table to CSV
+    function exportForecastToCSV() {
+        if (currentForecastData.length === 0) {
+            alert('No forecast data to export');
+            return;
+        }
+        const headers = ['Date', 'Forecasted Sales (MOP)', 'Source'];
+        const rows = currentForecastData.map(item => [item.date, item.value.toFixed(2), currentForecastMode === 'auto' ? 'Auto ML' : 'Manual Upload']);
+        downloadCSV(headers, rows, 'forecast_values.csv');
+    }
+
+    // Top products & recent orders (unchanged)
     async function fetchTopProducts() {
         try {
             const res = await fetch('/api/admin/dashboard/top-products?limit=5', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -519,7 +610,7 @@
         } catch (err) { console.error('Recent orders error:', err); }
     }
 
-    // Export functions (unchanged)
+    // Export helpers
     async function exportSalesToCSV() {
         const res = await fetch('/api/admin/dashboard/sales-timeline?period=day&days=30', { headers: { 'Authorization': `Bearer ${token}` } });
         const data = await res.json();
@@ -563,6 +654,7 @@
         URL.revokeObjectURL(url);
     }
 
+    // Manual forecast upload
     async function uploadForecast(file) {
         const formData = new FormData();
         formData.append('forecast', file);
@@ -577,6 +669,7 @@
         } catch (err) { document.getElementById('uploadStatus').innerText = '✗ Network error'; }
     }
 
+    // Toggle forecast mode
     function initModeToggle() {
         const radios = document.querySelectorAll('input[name="forecastMode"]');
         const manualSection = document.getElementById('manualUploadSection');
@@ -593,7 +686,7 @@
         manualSection.style.display = 'none';
     }
 
-    // Auto-refresh logic
+    // Auto-refresh
     function startAutoRefresh() {
         if (refreshInterval) clearInterval(refreshInterval);
         const autoRefresh = document.getElementById('autoRefreshCheckbox').checked;
@@ -605,10 +698,11 @@
                 await loadForecast();
                 await fetchTopProducts();
                 await fetchRecentOrders();
-            }, 60 * 60 * 1000); // every hour
+            }, 60 * 60 * 1000);
         }
     }
 
+    // Event listeners
     document.getElementById('autoRefreshCheckbox').addEventListener('change', startAutoRefresh);
     document.getElementById('manualRefreshBtn').addEventListener('click', async () => {
         await fetchDashboardStats();
@@ -618,12 +712,13 @@
         await fetchRecentOrders();
     });
     document.getElementById('includeTodayCheckbox').addEventListener('change', loadForecast);
-
     document.getElementById('exportSalesBtn').addEventListener('click', exportSalesToCSV);
     document.getElementById('exportProductsBtn').addEventListener('click', exportTopProductsToCSV);
     document.getElementById('exportOrdersBtn').addEventListener('click', exportRecentOrdersToCSV);
+    document.getElementById('exportForecastBtn').addEventListener('click', exportForecastToCSV);
     document.getElementById('forecastFile').addEventListener('change', (e) => { if (e.target.files.length) uploadForecast(e.target.files[0]); e.target.value = ''; });
 
+    // Initial load
     (async function init() {
         await fetchDashboardStats();
         await fetchSalesTimeline();

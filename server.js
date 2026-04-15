@@ -790,53 +790,49 @@ function formatLocalDate(date) {
     return `${year}-${month}-${day}`;
 }
 
-// ============ Auto-forecast using local time (no UTC offset) ============
+// Auto-forecast – with option to include today
 app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res) => {
     try {
         const forecastDays = parseInt(req.query.days) || 7;
+        const includeToday = req.query.includeToday === 'true';
         const historyDays = 30;
 
-        // 1. Fetch all orders from the last `historyDays` days (local midnight)
+        // Fetch orders from last `historyDays` days (local midnight)
         const startDate = new Date();
         startDate.setHours(0, 0, 0, 0);
         startDate.setDate(startDate.getDate() - historyDays);
 
-        const orders = await Order.find({
-            createdAt: { $gte: startDate }
-        }).select('total createdAt');
+        const orders = await Order.find({ createdAt: { $gte: startDate } }).select('total createdAt');
 
-        // 2. Group by local date (YYYY-MM-DD in server's timezone)
+        // Group by local date
         const salesByLocalDate = new Map();
         orders.forEach(order => {
             const localDate = new Date(order.createdAt);
             localDate.setHours(0, 0, 0, 0);
             const dateStr = formatLocalDate(localDate);
-            const current = salesByLocalDate.get(dateStr) || 0;
-            salesByLocalDate.set(dateStr, current + order.total);
+            salesByLocalDate.set(dateStr, (salesByLocalDate.get(dateStr) || 0) + order.total);
         });
 
-        // 3. Convert to sorted array
         const results = Array.from(salesByLocalDate.entries())
             .map(([date, total]) => ({ date, total }))
             .sort((a, b) => a.date.localeCompare(b.date));
 
         if (results.length < 3) {
-            return res.json({ success: true, data: [], message: 'Not enough data for forecasting (need at least 3 days of sales)' });
+            return res.json({ success: true, data: [], message: 'Not enough data for forecasting' });
         }
 
-        // 4. Linear regression on [index, sales]
         const points = results.map((item, idx) => [idx, item.total]);
         const { slope, intercept } = linearRegression(points);
-
-        // 5. Forecast next `forecastDays` days (starting from tomorrow local time)
         const lastIndex = points.length - 1;
         const forecast = [];
+
         const todayLocal = new Date();
         todayLocal.setHours(0, 0, 0, 0);
-        for (let i = 1; i <= forecastDays; i++) {
+        let startOffset = includeToday ? 0 : 1; // 0 = today, 1 = tomorrow
+        for (let i = startOffset; i < startOffset + forecastDays; i++) {
             const futureX = lastIndex + i;
             let predictedValue = slope * futureX + intercept;
-            predictedValue = Math.max(0, predictedValue); // no negative sales
+            predictedValue = Math.max(0, predictedValue);
             const forecastDate = new Date(todayLocal);
             forecastDate.setDate(todayLocal.getDate() + i);
             forecast.push({

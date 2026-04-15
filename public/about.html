@@ -6,7 +6,6 @@
     <title>About Us - StepUp</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* (keep all existing styles) */
         * {
             margin: 0;
             padding: 0;
@@ -95,6 +94,7 @@
         .user-icon-btn {
             font-size: 20px;
             text-decoration: none;
+            color: #262626;
         }
 
         .container {
@@ -309,7 +309,7 @@
             <div class="logo" onclick="window.location.href='mainpage.html'" style="cursor: pointer;">STEPUP</div>
             <nav>
                 <a href="mainpage.html">Home</a>
-                <a href="products.html">Shop</a> <!-- FIXED: now points to products.html -->
+                <a href="products.html">Shop</a>
                 <a href="about.html" style="font-weight: 700; border-bottom: 2px solid #262626; padding-bottom: 5px;">About</a>
             </nav>
             <div class="nav-right">
@@ -397,12 +397,11 @@
                 </ul>
             </section>
 
-
             <!-- CTA Section -->
             <section class="cta-section">
                 <h2>Ready to Step Up?</h2>
                 <p>Explore our full collection of premium athletic footwear and find your perfect pair today.</p>
-                <a href="products.html" class="cta-btn">Shop Now</a> <!-- FIXED: now points to products.html -->
+                <a href="products.html" class="cta-btn">Shop Now</a>
             </section>
         </div>
     </main>
@@ -423,6 +422,13 @@
                 badge.textContent = totalItems;
             }
         }
+
+        // Also listen for storage events to update badge if cart changes in another tab
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'cart') {
+                updateCartBadge();
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', function() {
             updateCartBadge();

@@ -115,7 +115,6 @@ app.get('/api/admin/verify', async (req, res) => {
 
 // ============ User Authentication (Public) ============
 app.post('/api/users/register', async (req, res) => {
-    // Ensure database is connected before processing
     if (!isMongoConnected()) {
         return res.status(503).json({ error: 'Database not ready. Please try again in a moment.' });
     }
@@ -134,7 +133,6 @@ app.post('/api/users/register', async (req, res) => {
         res.status(201).json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, firstName: user.firstName, lastName: user.lastName, phone: user.phone } });
     } catch (err) {
         console.error('Registration error:', err);
-        // Handle duplicate key error (MongoDB error code 11000)
         if (err.code === 11000) {
             return res.status(400).json({ error: 'Email already registered' });
         }
@@ -733,7 +731,6 @@ app.post('/api/admin/dashboard/upload-forecast', verifyAdminToken, upload.single
         const lines = csv.split('\n').filter(line => line.trim() !== '');
         if (lines.length < 2) return res.status(400).json({ error: 'CSV must have at least header and one data row' });
 
-        // Expect header: date,forecast_sales (case insensitive)
         const headers = lines[0].toLowerCase().split(',');
         const dateIdx = headers.findIndex(h => h.includes('date'));
         const salesIdx = headers.findIndex(h => h.includes('forecast') || h.includes('sales'));
@@ -757,7 +754,6 @@ app.post('/api/admin/dashboard/upload-forecast', verifyAdminToken, upload.single
 
         if (parsed.length === 0) return res.status(400).json({ error: 'No valid data rows found' });
 
-        // Replace all existing forecast data
         await Forecast.deleteMany({});
         await Forecast.insertMany(parsed);
         res.json({ success: true, message: `Uploaded ${parsed.length} forecast points` });
@@ -767,7 +763,7 @@ app.post('/api/admin/dashboard/upload-forecast', verifyAdminToken, upload.single
     }
 });
 
-// Linear regression: given array of [x, y] points, returns { slope, intercept }
+// ============ Helper: Linear regression ============
 function linearRegression(points) {
     const n = points.length;
     let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
@@ -786,49 +782,66 @@ function linearRegression(points) {
     return { slope, intercept };
 }
 
-// Auto-forecast based on historical sales
+// Helper: format a Date as YYYY-MM-DD in local time (no timezone shift)
+function formatLocalDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// ============ Auto-forecast using local time (no UTC offset) ============
 app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res) => {
     try {
         const forecastDays = parseInt(req.query.days) || 7;
         const historyDays = 30;
 
-        // 1. Fetch actual sales for the last 'historyDays' days
+        // 1. Fetch all orders from the last `historyDays` days (local midnight)
         const startDate = new Date();
-        startDate.setDate(startDate.getDate() - historyDays);
         startDate.setHours(0, 0, 0, 0);
+        startDate.setDate(startDate.getDate() - historyDays);
 
-        const pipeline = [
-            { $match: { createdAt: { $gte: startDate } } },
-            {
-                $group: {
-                    _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-                    total: { $sum: '$total' }
-                }
-            },
-            { $sort: { _id: 1 } }
-        ];
-        const results = await Order.aggregate(pipeline);
-        
+        const orders = await Order.find({
+            createdAt: { $gte: startDate }
+        }).select('total createdAt');
+
+        // 2. Group by local date (YYYY-MM-DD in server's timezone)
+        const salesByLocalDate = new Map();
+        orders.forEach(order => {
+            const localDate = new Date(order.createdAt);
+            localDate.setHours(0, 0, 0, 0);
+            const dateStr = formatLocalDate(localDate);
+            const current = salesByLocalDate.get(dateStr) || 0;
+            salesByLocalDate.set(dateStr, current + order.total);
+        });
+
+        // 3. Convert to sorted array
+        const results = Array.from(salesByLocalDate.entries())
+            .map(([date, total]) => ({ date, total }))
+            .sort((a, b) => a.date.localeCompare(b.date));
+
         if (results.length < 3) {
-            return res.json({ success: true, data: [], message: 'Not enough data for forecasting' });
+            return res.json({ success: true, data: [], message: 'Not enough data for forecasting (need at least 3 days of sales)' });
         }
 
-        // 2. Convert to numerical points (x = day index, y = sales)
+        // 4. Linear regression on [index, sales]
         const points = results.map((item, idx) => [idx, item.total]);
         const { slope, intercept } = linearRegression(points);
 
-        // 3. Generate forecast for next 'forecastDays' days
+        // 5. Forecast next `forecastDays` days (starting from tomorrow local time)
         const lastIndex = points.length - 1;
         const forecast = [];
-        const today = new Date();
+        const todayLocal = new Date();
+        todayLocal.setHours(0, 0, 0, 0);
         for (let i = 1; i <= forecastDays; i++) {
             const futureX = lastIndex + i;
-            const predictedValue = slope * futureX + intercept;
-            const forecastDate = new Date(today);
-            forecastDate.setDate(today.getDate() + i);
+            let predictedValue = slope * futureX + intercept;
+            predictedValue = Math.max(0, predictedValue); // no negative sales
+            const forecastDate = new Date(todayLocal);
+            forecastDate.setDate(todayLocal.getDate() + i);
             forecast.push({
-                date: forecastDate.toISOString().slice(0, 10),
-                value: Math.max(0, predictedValue) // ensure non-negative
+                date: formatLocalDate(forecastDate),
+                value: predictedValue
             });
         }
 
@@ -853,7 +866,6 @@ mongoose.connect(dbURI)
     .then(async () => {
         console.log('✅ Connected to StepUp Database');
         
-        // Create default admin if none exists
         const adminCount = await Admin.countDocuments();
         if (adminCount === 0) {
             const defaultAdmin = new Admin({ username: 'admin', password: 'admin123' });
@@ -861,7 +873,6 @@ mongoose.connect(dbURI)
             console.log('✅ Default admin created: username = admin, password = admin123');
         }
         
-        // Start the server only after successful DB connection
         app.listen(port, '0.0.0.0', () => {
             console.log(`✅ Server is running on port ${port}`);
             console.log(`📍 Local: http://localhost:${port}`);

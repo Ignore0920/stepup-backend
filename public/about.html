@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us - StepUp</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -14,57 +14,101 @@
 
         body {
             font-family: 'Montserrat', sans-serif;
-            background-color: #FAFAF8;
+            background-color: #ffffff;
             color: #262626;
             line-height: 1.6;
         }
 
-        header {
-            background-color: #FAFAF8;
-            border-bottom: 1px solid #262626;
-            padding: 20px 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
         }
 
-        .header-container {
-            max-width: 1200px;
+        .container {
+            max-width: 1280px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 2rem;
+        }
+
+        /* Navigation Header - matches mainpage */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .header-content {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 0;
         }
 
         .logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 28px;
-            font-weight: 900;
-            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             cursor: pointer;
+        }
+
+        .logo-box {
+            width: 40px;
+            height: 40px;
+            background-color: #262626;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            letter-spacing: 0.05em;
         }
 
         nav {
             display: flex;
-            gap: 30px;
+            gap: 2rem;
         }
 
         nav a {
             text-decoration: none;
             color: #262626;
-            font-weight: 500;
-            transition: opacity 0.3s ease;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: color 0.3s;
         }
 
         nav a:hover {
-            opacity: 0.7;
+            color: #666666;
         }
 
         .nav-right {
             display: flex;
-            gap: 20px;
             align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-right button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #262626;
+            font-size: 1.25rem;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-right button:hover {
+            color: #666666;
         }
 
         .cart-badge {
@@ -83,26 +127,27 @@
             font-weight: 600;
         }
 
-        button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 20px;
-            position: relative;
-        }
-
         .user-icon-btn {
-            font-size: 20px;
             text-decoration: none;
             color: #262626;
+            font-size: 1.25rem;
+            transition: color 0.3s;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
+        .user-icon-btn:hover {
+            color: #666666;
         }
 
+        @media (max-width: 768px) {
+            nav {
+                display: none;
+            }
+            .container {
+                padding: 0 1rem;
+            }
+        }
+
+        /* About Page Specific Styles */
         .breadcrumb {
             padding: 20px 0;
             font-size: 14px;
@@ -112,7 +157,6 @@
         .breadcrumb a {
             color: #262626;
             text-decoration: none;
-            margin: 0 5px;
         }
 
         .breadcrumb a:hover {
@@ -129,15 +173,13 @@
         }
 
         .about-hero h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 48px;
+            font-size: 3.5rem;
             font-weight: 900;
             margin-bottom: 20px;
-            letter-spacing: 1px;
         }
 
         .about-hero p {
-            font-size: 18px;
+            font-size: 1.125rem;
             color: #666;
             max-width: 600px;
             margin: 0 auto;
@@ -148,16 +190,16 @@
         }
 
         .about-section h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 36px;
+            font-size: 2.5rem;
             font-weight: 900;
             margin-bottom: 30px;
             border-bottom: 3px solid #262626;
             padding-bottom: 15px;
+            display: inline-block;
         }
 
         .about-section p {
-            font-size: 16px;
+            font-size: 1rem;
             line-height: 1.8;
             margin-bottom: 20px;
             color: #555;
@@ -179,7 +221,7 @@
         }
 
         .value-card:hover {
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
             transform: translateY(-5px);
         }
 
@@ -189,13 +231,13 @@
         }
 
         .value-card h3 {
-            font-size: 20px;
+            font-size: 1.25rem;
             margin-bottom: 10px;
             font-weight: 600;
         }
 
         .value-card p {
-            font-size: 14px;
+            font-size: 0.875rem;
             color: #666;
             margin: 0;
         }
@@ -219,7 +261,7 @@
             width: 150px;
             height: 150px;
             border-radius: 50%;
-            background-color: #e5e5e5;
+            background-color: #f0f0f0;
             margin: 0 auto 15px;
             display: flex;
             align-items: center;
@@ -228,96 +270,186 @@
         }
 
         .team-member h3 {
-            font-size: 18px;
+            font-size: 1.125rem;
             margin-bottom: 5px;
             font-weight: 600;
         }
 
         .team-member p {
-            font-size: 14px;
+            font-size: 0.875rem;
             color: #666;
-            margin: 0;
         }
 
         .cta-section {
             background-color: #262626;
-            color: #FAFAF8;
+            color: #ffffff;
             padding: 60px 20px;
             text-align: center;
             margin-top: 80px;
+            border-radius: 8px;
         }
 
         .cta-section h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 36px;
+            font-size: 2.5rem;
             margin-bottom: 20px;
         }
 
         .cta-section p {
-            font-size: 16px;
+            font-size: 1rem;
             margin-bottom: 30px;
             color: #ddd;
         }
 
         .cta-btn {
             display: inline-block;
-            background-color: #FAFAF8;
+            background-color: #ffffff;
             color: #262626;
             padding: 15px 40px;
             text-decoration: none;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
             transition: all 0.3s ease;
-            border: 2px solid #FAFAF8;
+            border: 2px solid #ffffff;
         }
 
         .cta-btn:hover {
             background-color: transparent;
-            color: #FAFAF8;
+            color: #ffffff;
         }
 
+        /* Footer - matches mainpage */
         footer {
-            background-color: #262626;
-            color: #FAFAF8;
-            padding: 40px 0;
-            text-align: center;
-            border-top: 1px solid #444;
+            background-color: #f5f5f5;
+            border-top: 1px solid #e5e5e5;
+            padding: 3rem 0;
+            margin-top: 3rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3rem;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .footer-section-brand .logo-box {
+            width: 32px;
+            height: 32px;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section-brand .brand-name {
+            font-weight: bold;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .footer-section-brand p {
+            font-size: 0.875rem;
+            color: #666666;
+            line-height: 1.6;
+        }
+
+        .footer-section h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            color: #262626;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-section ul li a {
+            color: #666666;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.3s;
+        }
+
+        .footer-section ul li a:hover {
+            color: #262626;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #666666;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .social-links a {
+            color: #666666;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: #262626;
         }
 
         @media (max-width: 768px) {
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            .social-links {
+                justify-content: center;
+            }
             .about-hero h1 {
-                font-size: 32px;
+                font-size: 2.5rem;
             }
-
             .about-section h2 {
-                font-size: 24px;
-            }
-
-            nav {
-                gap: 15px;
-            }
-
-            nav a {
-                font-size: 14px;
+                font-size: 1.75rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
+    <!-- Header - matches mainpage -->
     <header>
-        <div class="header-container">
-            <div class="logo" onclick="window.location.href='mainpage.html'" style="cursor: pointer;">STEPUP</div>
-            <nav>
-                <a href="mainpage.html">Home</a>
-                <a href="products.html">Shop</a>
-                <a href="about.html" style="font-weight: 700; border-bottom: 2px solid #262626; padding-bottom: 5px;">About</a>
-            </nav>
-            <div class="nav-right">
-                <button title="Shopping Cart" onclick="window.location.href='shopping-cart.html'" style="position: relative;">
-                    🛒
-                    <span class="cart-badge" id="cartBadge">0</span>
-                </button>
-                <a href="account.html" class="user-icon-btn" title="User Account">👤</a>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo" onclick="window.location.href='mainpage.html'">
+                    <div class="logo-box">S</div>
+                    <div class="logo-text">STEPUP</div>
+                </div>
+                <nav>
+                    <a href="mainpage.html#shop">Shop</a>
+                    <a href="mainpage.html#collections">Collections</a>
+                    <a href="mainpage.html#brands">Brands</a>
+                    <a href="about.html" style="font-weight: 700; color: #262626;">About</a>
+                </nav>
+                <div class="nav-right">
+                    <button title="Shopping Cart" onclick="window.location.href='shopping-cart.html'" style="position: relative;">
+                        🛒
+                        <span class="cart-badge" id="cartBadge">0</span>
+                    </button>
+                    <a href="account.html" class="user-icon-btn" title="User Account">👤</a>
+                </div>
             </div>
         </div>
     </header>
@@ -326,8 +458,7 @@
         <div class="container">
             <!-- Breadcrumb -->
             <div class="breadcrumb">
-                <a href="mainpage.html">Home</a> /
-                <span>About Us</span>
+                <a href="mainpage.html">Home</a> / <span>About Us</span>
             </div>
 
             <!-- Hero Section -->
@@ -406,10 +537,51 @@
         </div>
     </main>
 
-    <!-- Footer -->
+    <!-- Footer - matches mainpage -->
     <footer>
         <div class="container">
-            <p>&copy; 2026 StepUp - Premium Men's Athletic Footwear. All rights reserved.</p>
+            <div class="footer-grid">
+                <div class="footer-section-brand">
+                    <div class="logo-box">S</div>
+                    <div class="brand-name">STEPUP</div>
+                    <p>Your destination for premium footwear and athletic gear. We believe in quality, style, and comfort for every step of your journey.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Shop</h4>
+                    <ul>
+                        <li><a href="products.html">New Arrivals</a></li>
+                        <li><a href="products.html">Best Sellers</a></li>
+                        <li><a href="mainpage.html#collections">Collections</a></li>
+                        <li><a href="products.html">Sale</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Press</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 StepUp. All rights reserved.</span>
+                <div class="social-links">
+                    <a href="#">Facebook</a>
+                    <a href="#">Instagram</a>
+                    <a href="#">Twitter</a>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -423,7 +595,7 @@
             }
         }
 
-        // Also listen for storage events to update badge if cart changes in another tab
+        // Listen for storage changes (cart updates in other tabs)
         window.addEventListener('storage', function(e) {
             if (e.key === 'cart') {
                 updateCartBadge();

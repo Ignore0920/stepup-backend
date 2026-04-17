@@ -558,101 +558,104 @@
         }
 
         async function completeCheckout() {
-            const firstName = document.getElementById('checkoutFirstName').value.trim();
-            const lastName = document.getElementById('checkoutLastName').value.trim();
-            const email = document.getElementById('checkoutEmail').value.trim();
-            const phone = document.getElementById('checkoutPhone').value.trim();
-            const street = document.getElementById('checkoutStreet').value.trim();
-            const city = document.getElementById('checkoutCity').value.trim();
-            const state = document.getElementById('checkoutState').value.trim();
-            const postal = document.getElementById('checkoutPostal').value.trim();
-            const country = document.getElementById('checkoutCountry').value;
+    const firstName = document.getElementById('checkoutFirstName').value.trim();
+    const lastName = document.getElementById('checkoutLastName').value.trim();
+    const email = document.getElementById('checkoutEmail').value.trim();
+    const phone = document.getElementById('checkoutPhone').value.trim();
+    const street = document.getElementById('checkoutStreet').value.trim();
+    const city = document.getElementById('checkoutCity').value.trim();
+    const state = document.getElementById('checkoutState').value.trim();
+    const postal = document.getElementById('checkoutPostal').value.trim();
+    const country = document.getElementById('checkoutCountry').value;
 
-            if (!firstName || !lastName || !email || !street || !city || !country) {
-                alert('Please fill in all required fields');
-                return;
-            }
+    if (!firstName || !lastName || !email || !street || !city || !country) {
+        alert('Please fill in all required fields');
+        return;
+    }
 
-            const paymentMethod = document.querySelector('.payment-option.selected');
-            const paymentMethodType = paymentMethod ? (paymentMethod.textContent.toLowerCase().includes('credit') ? 'credit' : 'wallet') : 'credit';
-            let cardLast4 = '', cardExpiry = '', cardHolderName = '';
+    const paymentMethod = document.querySelector('.payment-option.selected');
+    const paymentMethodType = paymentMethod ? (paymentMethod.textContent.toLowerCase().includes('credit') ? 'credit' : 'wallet') : 'credit';
+    let cardLast4 = '', cardExpiry = '', cardHolderName = '';
 
-            if (paymentMethodType === 'credit') {
-                const cardNumberInput = document.getElementById('cardNumber');
-                if (cardNumberInput && cardNumberInput.value) {
-                    const raw = cardNumberInput.value.replace(/\s/g, '');
-                    if (raw.length > 4) cardLast4 = raw.slice(-4);
-                }
-                const expiryInput = document.getElementById('cardExpiry');
-                if (expiryInput) cardExpiry = expiryInput.value;
-                const holderInput = document.getElementById('cardHolderName');
-                if (holderInput) cardHolderName = holderInput.value;
-            }
-
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            if (cart.length === 0) {
-                alert('Your cart is empty!');
-                return;
-            }
-
-            let subtotal = 0;
-            const items = cart.map(item => {
-                const price = parseFloat(item.price.replace('MOP $', '')) || 0;
-                subtotal += price * item.quantity;
-                return {
-                    id: item.id,
-                    name: item.name,
-                    brand: item.brand,
-                    price: price,
-                    quantity: item.quantity,
-                    size: item.size,
-                    image: item.image
-                };
-            });
-
-            const shippingRadio = document.querySelector('input[name="shipping"]:checked');
-            let shipping = 0;
-            if (shippingRadio) {
-                if (shippingRadio.value === 'express') shipping = 15.00;
-                else if (shippingRadio.value === 'overnight') shipping = 30.00;
-            }
-            const total = subtotal + shipping;
-
-            const orderData = {
-    orderId: 'ORD-' + Date.now(),
-    customer: { firstName, lastName, email, phone, street, city, state, postal, country },
-    items,
-    subtotal,
-    shipping,
-    total,
-    status: 'pending',
-    paymentMethod: paymentMethodType   // <-- add this
-};
-
-            try {
-                const response = await fetch('/api/orders', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(orderData)
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Order submission failed');
-
-                // Update user profile with the entered info (for future checkouts)
-                await updateUserProfile(
-                    { firstName, lastName, phone, street, city, state, postal, country },
-                    { cardLast4, cardExpiry, cardHolderName, paymentMethodType }
-                );
-
-                localStorage.removeItem('cart');
-                alert('Thank you for your purchase! Your order has been confirmed.');
-                window.location.href = 'mainpage.html';
-            } catch (err) {
-                console.error('Checkout error:', err);
-                alert('There was a problem processing your order. Please try again.');
-            }
+    if (paymentMethodType === 'credit') {
+        const cardNumberInput = document.getElementById('cardNumber');
+        if (cardNumberInput && cardNumberInput.value) {
+            const raw = cardNumberInput.value.replace(/\s/g, '');
+            if (raw.length > 4) cardLast4 = raw.slice(-4);
         }
+        const expiryInput = document.getElementById('cardExpiry');
+        if (expiryInput) cardExpiry = expiryInput.value;
+        const holderInput = document.getElementById('cardHolderName');
+        if (holderInput) cardHolderName = holderInput.value;
+    }
 
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    if (cart.length === 0) {
+        alert('Your cart is empty!');
+        return;
+    }
+
+    let subtotal = 0;
+    const items = cart.map(item => {
+        const price = parseFloat(item.price.replace('MOP $', '')) || 0;
+        subtotal += price * item.quantity;
+        return {
+            id: item.id,
+            name: item.name,
+            brand: item.brand,
+            price: price,
+            quantity: item.quantity,
+            size: item.size,
+            image: item.image
+        };
+    });
+
+    const shippingRadio = document.querySelector('input[name="shipping"]:checked');
+    let shipping = 0;
+    if (shippingRadio) {
+        if (shippingRadio.value === 'express') shipping = 15.00;
+        else if (shippingRadio.value === 'overnight') shipping = 30.00;
+    }
+    const total = subtotal + shipping;
+
+    const orderData = {
+        orderId: 'ORD-' + Date.now(),
+        customer: { firstName, lastName, email, phone, street, city, state, postal, country },
+        items,
+        subtotal,
+        shipping,
+        total,
+        status: 'pending',
+        paymentMethod: paymentMethodType
+    };
+
+    const token = localStorage.getItem('userToken');   // 获取用户 token
+
+    try {
+        const response = await fetch('/api/orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token ? `Bearer ${token}` : ''   // 携带 token
+            },
+            body: JSON.stringify(orderData)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Order submission failed');
+
+        await updateUserProfile(
+            { firstName, lastName, phone, street, city, state, postal, country },
+            { cardLast4, cardExpiry, cardHolderName, paymentMethodType }
+        );
+
+        localStorage.removeItem('cart');
+        alert('Thank you for your purchase! Your order has been confirmed.');
+        window.location.href = 'mainpage.html';
+    } catch (err) {
+        console.error('Checkout error:', err);
+        alert('There was a problem processing your order. Please try again.');
+    }
+}
         // ========== Initialization ==========
         document.addEventListener('DOMContentLoaded', async () => {
             const isLoggedIn = await checkLoginAndLoadProfile();

@@ -266,16 +266,12 @@
                     <div class="success-message" id="settingsSuccess">Settings updated successfully!</div>
                     <div id="settingsView">
                         <div class="profile-grid">
-                            <div class="profile-item"><div class="profile-label">Password</div><div class="profile-value">••••••••</div></div>
-                            <div class="profile-item"><div class="profile-label">Email Notifications</div><div class="profile-value" id="notifications">-</div></div>
+                             <div class="profile-item"><div class="profile-label">Password</div><div class="profile-value">••••••••</div></div>
+                             <div class="profile-item"><div class="profile-label">Email Notifications</div><div class="profile-value" id="notifications">-</div></div>
                         </div>
-                        <button class="edit-btn" onclick="startEditSettings()">Edit Settings</button>
-                    </div>
-                    <div id="settingsEdit" class="edit-form">
-                        <div class="form-group"><label class="profile-label">Email Notifications</label><select id="editNotifications" style="width: 100%; padding: 0.875rem 1rem; border: 1px solid #e5e5e5; font-family: 'Montserrat', sans-serif;"><option value="enabled">Enabled</option><option value="disabled">Disabled</option></select></div>
-                        <button class="save-btn" onclick="saveSettings()">Save Changes</button>
-                        <button class="cancel-btn" onclick="cancelEditSettings()">Cancel</button>
-                    </div>
+    <!-- 新增的 Reset Password 按钮 -->
+                    <button class="edit-btn" onclick="simulateResetPassword()" style="margin-right: 0.5rem;">Reset Password</button>
+                    <button class="edit-btn" onclick="startEditSettings()">Edit Settings</button>
                 </div>
             </div>
         </div>

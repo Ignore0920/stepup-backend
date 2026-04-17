@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Account - StepUp</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- (CSS unchanged – keep existing styles) -->
     <style>
-        /* All existing CSS remains exactly the same */
+        /* 原有样式完全保留 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; background-color: #fafaf8; color: #262626; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
@@ -60,6 +59,7 @@
         .order-id { font-weight: 600; color: #262626; }
         .order-status { display: inline-block; padding: 0.375rem 0.75rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
         .status-pending { background-color: #fff3cd; color: #856404; }
+        .status-processing { background-color: #d1ecf1; color: #0c5460; }
         .status-shipped { background-color: #d1ecf1; color: #0c5460; }
         .status-delivered { background-color: #d4edda; color: #155724; }
         .status-cancelled { background-color: #f8d7da; color: #721c24; }
@@ -68,6 +68,72 @@
         .empty-state { text-align: center; padding: 3rem 1rem; color: #666666; }
         .success-message { background-color: #d4edda; border: 1px solid #4caf50; color: #155724; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; display: none; }
         .success-message.show { display: block; }
+
+        /* 新增：订单详情模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+        .modal-content {
+            background: #fff;
+            padding: 2rem;
+            width: 90%;
+            max-width: 700px;
+            border-radius: 8px;
+            position: relative;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.2s;
+        }
+        .close-modal:hover {
+            color: #262626;
+        }
+        .order-detail-row {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+        }
+        .order-detail-label {
+            font-weight: 700;
+            min-width: 120px;
+            display: inline-block;
+        }
+        .order-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
+        .order-items-table th,
+        .order-items-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .order-items-table th {
+            background-color: #fafafa;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         @media (max-width: 768px) {
             .account-container { grid-template-columns: 1fr; }
             .profile-grid { grid-template-columns: 1fr; }
@@ -125,7 +191,7 @@
 
             <!-- Content Area -->
             <div class="content-area">
-                <!-- Profile Section (unchanged) -->
+                <!-- Profile Section -->
                 <div id="profile" class="content-section active">
                     <h2 class="section-title">Personal Information</h2>
                     <div class="success-message" id="profileSuccess">Profile updated successfully!</div>
@@ -148,7 +214,7 @@
                     </div>
                 </div>
 
-                <!-- Orders Section – MODIFIED to fetch real data -->
+                <!-- Orders Section -->
                 <div id="orders" class="content-section">
                     <h2 class="section-title">Order History</h2>
                     <div id="ordersContent">
@@ -169,7 +235,7 @@
                     </div>
                 </div>
 
-                <!-- Addresses Section (unchanged) -->
+                <!-- Addresses Section -->
                 <div id="addresses" class="content-section">
                     <h2 class="section-title">Saved Addresses</h2>
                     <div class="success-message" id="addressSuccess">Address updated successfully!</div>
@@ -194,7 +260,7 @@
                     </div>
                 </div>
 
-                <!-- Settings Section (unchanged) -->
+                <!-- Settings Section -->
                 <div id="settings" class="content-section">
                     <h2 class="section-title">Account Settings</h2>
                     <div class="success-message" id="settingsSuccess">Settings updated successfully!</div>
@@ -212,6 +278,15 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div id="orderDetailModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeOrderModal()">&times;</span>
+            <h2 id="modalOrderTitle" style="font-family: 'Playfair Display', serif; margin-bottom: 1.5rem; border-bottom: 2px solid #e5e5e5; padding-bottom: 0.5rem;">Order Details</h2>
+            <div id="orderDetailContent">Loading...</div>
         </div>
     </div>
 
@@ -277,13 +352,13 @@
             }
         }
 
-        // ========== UPDATED: Load orders from backend ==========
+        // 加载用户订单历史
         async function loadOrders() {
             const ordersBody = document.getElementById('ordersBody');
             ordersBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Loading orders...</td></tr>';
             
             try {
-                const res = await authFetch('/api/users/orders');   // Endpoint returning user's orders
+                const res = await authFetch('/api/users/orders');
                 if (!res.ok) {
                     if (res.status === 401) { logout(); return; }
                     throw new Error('Failed to fetch orders');
@@ -316,7 +391,6 @@
             }
         }
 
-        // Simple escape
         function escapeHtml(str) {
             if (!str) return '';
             return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
@@ -407,7 +481,7 @@
             if (!isAuthenticated) return;
             
             await loadUserProfile();
-            await loadOrders();   // now fetches real orders
+            await loadOrders();
             updateCartBadge();
         }
 
@@ -470,10 +544,88 @@
             setTimeout(() => element.classList.remove('show'), 3000);
         }
 
-        function viewOrder(orderId) {
-            // Placeholder – can be extended to show order details modal
-            alert('Order details for ' + orderId + ' coming soon!');
+        // 查看订单详情
+        async function viewOrder(orderId) {
+            const modal = document.getElementById('orderDetailModal');
+            const contentDiv = document.getElementById('orderDetailContent');
+            const titleEl = document.getElementById('modalOrderTitle');
+            
+            modal.style.display = 'flex';
+            contentDiv.innerHTML = '<p style="text-align: center; padding: 2rem;">Loading order details...</p>';
+
+            try {
+                const res = await authFetch(`/api/users/orders/${orderId}`);
+                if (!res.ok) {
+                    if (res.status === 403) throw new Error('Access denied');
+                    if (res.status === 404) throw new Error('Order not found');
+                    throw new Error('Failed to load order');
+                }
+                const data = await res.json();
+                const order = data.order;
+                
+                titleEl.innerText = `Order ${order.orderId}`;
+                
+                let itemsHtml = '';
+                order.items.forEach(item => {
+                    itemsHtml += `
+                        <tr>
+                            <td>${escapeHtml(item.name)}</td>
+                            <td>${item.size || 'N/A'}</td>
+                            <td>${item.quantity}</td>
+                            <td>MOP ${item.price.toFixed(2)}</td>
+                            <td>MOP ${(item.price * item.quantity).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                contentDiv.innerHTML = `
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">Order ID:</span> ${escapeHtml(order.orderId)}<br>
+                        <span class="order-detail-label">Date:</span> ${new Date(order.createdAt).toLocaleString()}<br>
+                        <span class="order-detail-label">Status:</span> <span class="order-status status-${order.status}">${order.status}</span><br>
+                        <span class="order-detail-label">Payment Method:</span> ${order.paymentMethod === 'credit' ? 'Credit Card' : 'Digital Wallet'}
+                    </div>
+                    <div class="order-detail-row">
+                        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 0.5rem;">Shipping Address</h3>
+                        <p>
+                            ${escapeHtml(order.customer.firstName)} ${escapeHtml(order.customer.lastName)}<br>
+                            ${escapeHtml(order.customer.street)}<br>
+                            ${escapeHtml(order.customer.city)}, ${escapeHtml(order.customer.state || '')} ${escapeHtml(order.customer.postal || '')}<br>
+                            ${escapeHtml(order.customer.country)}<br>
+                            <strong>Phone:</strong> ${escapeHtml(order.customer.phone)}<br>
+                            <strong>Email:</strong> ${escapeHtml(order.customer.email)}
+                        </p>
+                    </div>
+                    <div class="order-detail-row">
+                        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 0.5rem;">Order Items</h3>
+                        <table class="order-items-table">
+                            <thead>
+                                <tr><th>Product</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+                            </thead>
+                            <tbody>
+                                ${itemsHtml}
+                            </tbody>
+                        </table>
+                        <div style="text-align: right; margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid #eee;">
+                            <p><strong>Subtotal:</strong> MOP ${order.subtotal.toFixed(2)}</p>
+                            <p><strong>Shipping:</strong> ${order.shipping === 0 ? 'Free' : 'MOP ' + order.shipping.toFixed(2)}</p>
+                            <p style="font-size: 1.2rem;"><strong>Total:</strong> MOP ${order.total.toFixed(2)}</p>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                contentDiv.innerHTML = `<p style="color: #e74c3c; text-align: center; padding: 2rem;">Error: ${escapeHtml(err.message)}</p>`;
+            }
         }
+
+        function closeOrderModal() {
+            document.getElementById('orderDetailModal').style.display = 'none';
+        }
+
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('orderDetailModal');
+            if (e.target === modal) closeOrderModal();
+        });
 
         function logout() {
             localStorage.removeItem('userToken');

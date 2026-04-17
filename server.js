@@ -11,13 +11,14 @@ const Admin = require('./models/Admin');
 const Product = require('./models/Product');
 const Category = require('./models/Category');
 const User = require('./models/User');
+const Order = require('./models/Order');
+const Forecast = require('./models/Forecast');
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'stepup_admin_secret_key_change_in_production';
 
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
-const Forecast = require('./models/Forecast');
 
 // Middleware
 app.use(cors({
@@ -33,29 +34,24 @@ console.log('🚀 StepUp Backend Starting...');
 console.log('📦 Node Version:', process.version);
 console.log('🔧 Environment:', process.env.NODE_ENV || 'development');
 
-// Helper to check DB connection
 function isMongoConnected() {
     return mongoose.connection.readyState === 1;
 }
 
-// Test route
 app.get('/test', (req, res) => {
     res.json({ message: 'Server is working!', timestamp: new Date().toISOString() });
 });
 
-// Health check
 app.get('/health', (req, res) => {
     const dbStatus = mongoose.connection.readyState;
     const dbStatusText = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' }[dbStatus] || 'unknown';
     res.status(200).json({ status: 'OK', message: 'Server is running', database: dbStatusText, timestamp: new Date().toISOString() });
 });
 
-// Serve mainpage.html at the root
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'mainpage.html'));
 });
 
-// API information endpoint
 app.get('/api/info', (req, res) => {
     const dbStatus = mongoose.connection.readyState;
     res.json({
@@ -79,7 +75,7 @@ app.get('/api/info', (req, res) => {
     });
 });
 
-// ============ Admin Authentication Routes ============
+// ============ Admin Authentication ============
 app.post('/api/admin/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -113,7 +109,7 @@ app.get('/api/admin/verify', async (req, res) => {
     }
 });
 
-// ============ User Authentication (Public) ============
+// ============ User Authentication ============
 app.post('/api/users/register', async (req, res) => {
     if (!isMongoConnected()) {
         return res.status(503).json({ error: 'Database not ready. Please try again in a moment.' });
@@ -162,7 +158,7 @@ app.post('/api/users/login', async (req, res) => {
     }
 });
 
-// ============ User Profile (Authenticated) ============
+// ============ User Profile Middleware ============
 const verifyUserToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ error: 'No token provided' });
@@ -231,15 +227,13 @@ app.put('/api/users/profile', verifyUserToken, async (req, res) => {
     }
 });
 
-// ============ User Order History (Authenticated) ============
+// ============ User Orders (Authenticated) ============
 app.get('/api/users/orders', verifyUserToken, async (req, res) => {
     try {
-        // 根据当前登录用户的 email 查询订单（因为订单模型中存了 customer.email）
         const userEmail = req.user.email;
         const orders = await Order.find({ 'customer.email': userEmail })
-            .sort({ createdAt: -1 })           // 最新订单在前
-            .select('orderId createdAt total status items');  // 只返回前端需要的字段
-
+            .sort({ createdAt: -1 })
+            .select('orderId createdAt total status items');
         res.json({ success: true, orders });
     } catch (err) {
         console.error('Error fetching user orders:', err);
@@ -247,7 +241,22 @@ app.get('/api/users/orders', verifyUserToken, async (req, res) => {
     }
 });
 
-// ============ Product Routes (Public) ============
+// 新增：获取单个用户订单详情
+app.get('/api/users/orders/:id', verifyUserToken, async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+        if (order.customer.email !== req.user.email) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+        res.json({ success: true, order });
+    } catch (err) {
+        console.error('Error fetching order detail:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ============ Product Routes ============
 app.get('/api/products/:id', async (req, res) => {
     try {
         if (mongoose.connection.readyState !== 1) return res.status(503).json({ error: "Database not connected" });
@@ -315,8 +324,6 @@ app.delete('/api/products/:id', async (req, res) => {
 });
 
 // ============ Order Routes (Public) ============
-const Order = require('./models/Order');
-
 app.post('/api/orders', async (req, res) => {
     try {
         const orderData = req.body;
@@ -356,7 +363,7 @@ app.post('/api/orders', async (req, res) => {
     }
 });
 
-// ============ Middleware to verify admin token ============
+// ============ Admin Middleware ============
 const verifyAdminToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ error: 'No token provided' });
@@ -372,7 +379,7 @@ const verifyAdminToken = async (req, res, next) => {
     }
 };
 
-// ============ Admin Management (Admin only) ============
+// ============ Admin Management ============
 app.get('/api/admins', verifyAdminToken, async (req, res) => {
     try {
         const admins = await Admin.find().select('-password');
@@ -423,7 +430,7 @@ app.delete('/api/admins/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
-// ============ Seed Default Products (Admin only) ============
+// ============ Seed Default Products ============
 app.post('/api/admin/seed-products', verifyAdminToken, async (req, res) => {
     try {
         const defaultProducts = [
@@ -455,7 +462,7 @@ app.post('/api/admin/seed-products', verifyAdminToken, async (req, res) => {
     }
 });
 
-// ============ Inventory Management (Admin only) ============
+// ============ Inventory Management ============
 app.get('/api/admin/inventory/products', verifyAdminToken, async (req, res) => {
     try {
         const products = await Product.find().sort({ createdAt: -1 });
@@ -525,7 +532,7 @@ app.delete('/api/admin/inventory/products/:id', verifyAdminToken, async (req, re
     }
 });
 
-// ============ Order Management (Admin only) ============
+// ============ Order Management (Admin) ============
 app.get('/api/admin/orders', verifyAdminToken, async (req, res) => {
     try {
         const orders = await Order.find().sort({ createdAt: -1 });
@@ -571,7 +578,7 @@ app.delete('/api/admin/orders/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
-// ============ User Management (Admin only) ============
+// ============ User Management (Admin) ============
 app.get('/api/admin/users', verifyAdminToken, async (req, res) => {
     try {
         const users = await User.find().select('-password').sort({ createdAt: -1 });
@@ -628,9 +635,7 @@ app.delete('/api/admin/users/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
-// ============ Dashboard Analytics (Admin only) ============
-
-// Helper: format a Date as YYYY-MM-DD in local time (no timezone shift)
+// ============ Dashboard Analytics ============
 function formatLocalDate(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -638,7 +643,6 @@ function formatLocalDate(date) {
     return `${year}-${month}-${day}`;
 }
 
-// Overall stats
 app.get('/api/admin/dashboard/stats', verifyAdminToken, async (req, res) => {
     try {
         const totalOrders = await Order.countDocuments();
@@ -659,7 +663,6 @@ app.get('/api/admin/dashboard/stats', verifyAdminToken, async (req, res) => {
     }
 });
 
-// Sales timeline (last 30 days, grouped by local date – no UTC shift)
 app.get('/api/admin/dashboard/sales-timeline', verifyAdminToken, async (req, res) => {
     try {
         const days = parseInt(req.query.days) || 30;
@@ -669,7 +672,6 @@ app.get('/api/admin/dashboard/sales-timeline', verifyAdminToken, async (req, res
 
         const orders = await Order.find({ createdAt: { $gte: startDate } }).select('total createdAt');
         
-        // Group by local date (YYYY-MM-DD in server's timezone)
         const salesByLocalDate = new Map();
         orders.forEach(order => {
             const localDate = new Date(order.createdAt);
@@ -690,7 +692,6 @@ app.get('/api/admin/dashboard/sales-timeline', verifyAdminToken, async (req, res
     }
 });
 
-// Top products by quantity sold
 app.get('/api/admin/dashboard/top-products', verifyAdminToken, async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 5;
@@ -723,7 +724,6 @@ app.get('/api/admin/dashboard/top-products', verifyAdminToken, async (req, res) 
     }
 });
 
-// Recent orders
 app.get('/api/admin/dashboard/recent-orders', verifyAdminToken, async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
@@ -738,7 +738,6 @@ app.get('/api/admin/dashboard/recent-orders', verifyAdminToken, async (req, res)
     }
 });
 
-// Get current forecast data (manual upload)
 app.get('/api/admin/dashboard/forecast', verifyAdminToken, async (req, res) => {
     try {
         const forecast = await Forecast.find().sort({ date: 1 });
@@ -750,7 +749,6 @@ app.get('/api/admin/dashboard/forecast', verifyAdminToken, async (req, res) => {
     }
 });
 
-// Upload forecast CSV
 app.post('/api/admin/dashboard/upload-forecast', verifyAdminToken, upload.single('forecast'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
@@ -791,7 +789,6 @@ app.post('/api/admin/dashboard/upload-forecast', verifyAdminToken, upload.single
     }
 });
 
-// ============ Helper: Linear regression ============
 function linearRegression(points) {
     const n = points.length;
     let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
@@ -810,21 +807,18 @@ function linearRegression(points) {
     return { slope, intercept };
 }
 
-// Auto-forecast – with option to include today, using local time
 app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res) => {
     try {
         const forecastDays = parseInt(req.query.days) || 7;
         const includeToday = req.query.includeToday === 'true';
         const historyDays = 30;
 
-        // Fetch orders from last `historyDays` days (local midnight)
         const startDate = new Date();
         startDate.setHours(0, 0, 0, 0);
         startDate.setDate(startDate.getDate() - historyDays);
 
         const orders = await Order.find({ createdAt: { $gte: startDate } }).select('total createdAt');
 
-        // Group by local date
         const salesByLocalDate = new Map();
         orders.forEach(order => {
             const localDate = new Date(order.createdAt);
@@ -848,7 +842,7 @@ app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res)
 
         const todayLocal = new Date();
         todayLocal.setHours(0, 0, 0, 0);
-        const startOffset = includeToday ? 0 : 1; // 0 = today, 1 = tomorrow
+        const startOffset = includeToday ? 0 : 1;
         for (let i = startOffset; i < startOffset + forecastDays; i++) {
             const futureX = lastIndex + i;
             let predictedValue = slope * futureX + intercept;
@@ -868,7 +862,7 @@ app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res)
     }
 });
 
-// ============ Start Server – ONLY after database is connected ============
+// ============ Start Server ============
 const port = process.env.PORT || 5000;
 const dbURI = process.env.MONGO_URI;
 
@@ -903,7 +897,6 @@ mongoose.connect(dbURI)
         process.exit(1);
     });
 
-// Graceful shutdown
 process.on('SIGINT', async () => {
     console.log('👋 Shutting down...');
     await mongoose.connection.close();

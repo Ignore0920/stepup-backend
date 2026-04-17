@@ -5,6 +5,7 @@ const path = require('path');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const XLSX = require('xlsx'); // 引入 xlsx 模块
 
 // Models
 const Admin = require('./models/Admin');
@@ -18,7 +19,7 @@ const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'stepup_admin_secret_key_change_in_production';
 
 const multer = require('multer');
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage() }); // 只定义一次
 
 // Middleware
 app.use(cors({
@@ -39,7 +40,6 @@ function isMongoConnected() {
     return mongoose.connection.readyState === 1;
 }
 
-// 辅助函数：从 Authorization 头解析 token 并获取用户 ID（用于非强制登录接口）
 function getUserIdFromToken(req) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -50,13 +50,14 @@ function getUserIdFromToken(req) {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         console.log(`🔐 Token decoded, userId: ${decoded.id}`);
-        return decoded.id; // 用户注册/登录时 payload 中存的是 id
+        return decoded.id;
     } catch (err) {
         console.log('🔐 Token verification failed:', err.message);
         return null;
     }
 }
 
+// ---------- 基础路由 ----------
 app.get('/test', (req, res) => {
     res.json({ message: 'Server is working!', timestamp: new Date().toISOString() });
 });
@@ -94,7 +95,7 @@ app.get('/api/info', (req, res) => {
     });
 });
 
-// ============ Admin Authentication ============
+// ============ 管理员认证 ============
 app.post('/api/admin/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -128,48 +129,33 @@ app.get('/api/admin/verify', async (req, res) => {
     }
 });
 
-// ============ User Authentication ============
+// ============ 用户认证 ============
 app.post('/api/users/register', async (req, res) => {
-    if (!isMongoConnected()) {
-        return res.status(503).json({ error: 'Database not ready. Please try again in a moment.' });
-    }
+    if (!isMongoConnected()) return res.status(503).json({ error: 'Database not ready' });
     try {
         const { name, email, password, firstName, lastName, phone } = req.body;
-        console.log('Registration attempt:', { name, email, firstName, lastName });
         const existing = await User.findOne({ email });
         if (existing) return res.status(400).json({ error: 'Email already registered' });
         const user = new User({ name, email, password, firstName, lastName, phone });
         await user.save();
-        const token = jwt.sign(
-            { id: user._id, email: user.email, role: 'user' },
-            JWT_SECRET,
-            { expiresIn: '7d' }
-        );
+        const token = jwt.sign({ id: user._id, email: user.email, role: 'user' }, JWT_SECRET, { expiresIn: '7d' });
         res.status(201).json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, firstName: user.firstName, lastName: user.lastName, phone: user.phone } });
     } catch (err) {
         console.error('Registration error:', err);
-        if (err.code === 11000) {
-            return res.status(400).json({ error: 'Email already registered' });
-        }
+        if (err.code === 11000) return res.status(400).json({ error: 'Email already registered' });
         res.status(500).json({ error: 'Server error', details: err.message });
     }
 });
 
 app.post('/api/users/login', async (req, res) => {
-    if (!isMongoConnected()) {
-        return res.status(503).json({ error: 'Database not ready. Please try again.' });
-    }
+    if (!isMongoConnected()) return res.status(503).json({ error: 'Database not ready' });
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
         if (!user) return res.status(401).json({ error: 'Invalid email or password' });
         const isMatch = await user.comparePassword(password);
         if (!isMatch) return res.status(401).json({ error: 'Invalid email or password' });
-        const token = jwt.sign(
-            { id: user._id, email: user.email, role: 'user' },
-            JWT_SECRET,
-            { expiresIn: '7d' }
-        );
+        const token = jwt.sign({ id: user._id, email: user.email, role: 'user' }, JWT_SECRET, { expiresIn: '7d' });
         res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email } });
     } catch (err) {
         console.error('Login error:', err);
@@ -177,7 +163,7 @@ app.post('/api/users/login', async (req, res) => {
     }
 });
 
-// ============ User Profile Middleware ============
+// ============ 用户中间件 ============
 const verifyUserToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ error: 'No token provided' });
@@ -199,21 +185,9 @@ app.get('/api/users/profile', verifyUserToken, async (req, res) => {
         res.json({
             success: true,
             user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                phone: user.phone,
-                street: user.street,
-                city: user.city,
-                state: user.state,
-                postal: user.postal,
-                country: user.country,
-                cardLast4: user.cardLast4,
-                cardExpiry: user.cardExpiry,
-                cardHolderName: user.cardHolderName,
-                paymentMethodType: user.paymentMethodType
+                id: user._id, name: user.name, email: user.email, firstName: user.firstName, lastName: user.lastName,
+                phone: user.phone, street: user.street, city: user.city, state: user.state, postal: user.postal, country: user.country,
+                cardLast4: user.cardLast4, cardExpiry: user.cardExpiry, cardHolderName: user.cardHolderName, paymentMethodType: user.paymentMethodType
             }
         });
     } catch (err) {
@@ -246,12 +220,10 @@ app.put('/api/users/profile', verifyUserToken, async (req, res) => {
     }
 });
 
-// ============ User Orders (Authenticated) ============
+// ============ 用户订单 ============
 app.get('/api/users/orders', verifyUserToken, async (req, res) => {
     try {
-        const orders = await Order.find({ userId: req.user._id })
-            .sort({ createdAt: -1 })
-            .select('orderId createdAt total status items');
+        const orders = await Order.find({ userId: req.user._id }).sort({ createdAt: -1 }).select('orderId createdAt total status items');
         console.log(`📦 Found ${orders.length} orders for user ${req.user.email}`);
         res.json({ success: true, orders });
     } catch (err) {
@@ -274,7 +246,7 @@ app.get('/api/users/orders/:id', verifyUserToken, async (req, res) => {
     }
 });
 
-// ============ Product Routes ============
+// ============ 商品路由 ============
 app.get('/api/products/:id', async (req, res) => {
     try {
         if (mongoose.connection.readyState !== 1) return res.status(503).json({ error: "Database not connected" });
@@ -290,7 +262,6 @@ app.get('/api/products/:id', async (req, res) => {
 app.post('/api/products', async (req, res) => {
     try {
         if (mongoose.connection.readyState !== 1) return res.status(503).json({ error: "Database not connected" });
-        console.log("📦 Data received:", req.body);
         const requiredFields = ['name', 'brand', 'price'];
         const missingFields = requiredFields.filter(field => req.body[field] === undefined);
         if (missingFields.length > 0) {
@@ -341,7 +312,7 @@ app.delete('/api/products/:id', async (req, res) => {
     }
 });
 
-// ============ Order Routes (Public) ============
+// ============ 订单创建 ============
 app.post('/api/orders', async (req, res) => {
     try {
         const orderData = req.body;
@@ -389,7 +360,7 @@ app.post('/api/orders', async (req, res) => {
     }
 });
 
-// ============ Admin Middleware ============
+// ============ 管理员中间件 ============
 const verifyAdminToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ error: 'No token provided' });
@@ -405,7 +376,7 @@ const verifyAdminToken = async (req, res, next) => {
     }
 };
 
-// ============ Admin Management ============
+// ============ 管理员管理 ============
 app.get('/api/admins', verifyAdminToken, async (req, res) => {
     try {
         const admins = await Admin.find().select('-password');
@@ -456,20 +427,20 @@ app.delete('/api/admins/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
-// ============ Seed Default Products ============
+// ============ 种子数据 ============
 app.post('/api/admin/seed-products', verifyAdminToken, async (req, res) => {
     try {
         const defaultProducts = [
-            { name: 'Nike Air Max 270', brand: 'Nike', model: 'Air Max 270', sizeRange: '7-13', price: 189.99, stock: 50, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663381436063/lOZOEbUZRBkODyvf.png', tag: 'FEATURED', collection: 'Casual' },
-            { name: 'Nike Elite Runner Pro', brand: 'Nike', model: 'Elite Runner Pro', sizeRange: '8-12', price: 229.99, stock: 45, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/LBUPnoswZhcidJkY.png', tag: 'PREMIUM', collection: 'Running' },
-            { name: 'Nike Comfort Walk Plus', brand: 'Nike', model: 'Comfort Walk Plus', sizeRange: '6-11', price: 159.99, stock: 30, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/oNmiTuSXqeoDCyvh.jpeg', tag: 'NEW', collection: 'Casual' },
-            { name: 'Nike Urban Flex Sneaker', brand: 'Nike', model: 'Urban Flex', sizeRange: '7-12', price: 179.99, stock: 25, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/WPMbFctvNLFtqdqv.png', tag: 'NEW', collection: 'Casual' },
-            { name: 'Nike Classic Trainer', brand: 'Nike', model: 'Classic Trainer', sizeRange: '6-15', price: 149.99, stock: 40, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/jtJqPMOhRFGrvlBZ.png', tag: '', collection: 'Training' },
-            { name: 'Jordan 1 Retro', brand: 'Jordan', model: '1 Retro', sizeRange: '7-14', price: 249.99, stock: 20, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/HZDiSqxfpxfavVAe.jpg', tag: 'NEW', collection: 'Basketball' },
-            { name: 'Adidas Ultra Boost', brand: 'Adidas', model: 'Ultra Boost', sizeRange: '6-13', price: 239.99, stock: 35, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/XHAmwqukAvqToiZo.png', tag: 'TRENDING', collection: 'Running' },
-            { name: 'Puma RS-X', brand: 'Puma', model: 'RS-X', sizeRange: '7-12', price: 169.99, stock: 28, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/EAhzJUEkqDjgMWwe.jpg', tag: 'SALE', collection: 'Casual' },
-            { name: 'New Balance 990v6', brand: 'New Balance', model: '990v6', sizeRange: '8-14', price: 189.99, stock: 22, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OISFcGUaRzULPMhv.jpg', tag: '', collection: 'Running' },
-            { name: 'Converse One Star', brand: 'Converse', model: 'One Star', sizeRange: '5-13', price: 149.99, stock: 60, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OqEvWuXBAyHMsEtW.jpg', tag: '', collection: 'Casual' }
+            { name: 'Nike Air Max 270', brand: 'Nike', model: 'Air Max 270', sizeRange: '35-45', price: 189.99, stock: 50, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663381436063/lOZOEbUZRBkODyvf.png', tag: 'FEATURED', collection: 'Casual' },
+            { name: 'Nike Elite Runner Pro', brand: 'Nike', model: 'Elite Runner Pro', sizeRange: '35-45', price: 229.99, stock: 45, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/LBUPnoswZhcidJkY.png', tag: 'PREMIUM', collection: 'Running' },
+            { name: 'Nike Comfort Walk Plus', brand: 'Nike', model: 'Comfort Walk Plus', sizeRange: '35-45', price: 159.99, stock: 30, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/oNmiTuSXqeoDCyvh.jpeg', tag: 'NEW', collection: 'Casual' },
+            { name: 'Nike Urban Flex Sneaker', brand: 'Nike', model: 'Urban Flex', sizeRange: '35-45', price: 179.99, stock: 25, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/WPMbFctvNLFtqdqv.png', tag: 'NEW', collection: 'Casual' },
+            { name: 'Nike Classic Trainer', brand: 'Nike', model: 'Classic Trainer', sizeRange: '35-45', price: 149.99, stock: 40, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/jtJqPMOhRFGrvlBZ.png', tag: '', collection: 'Training' },
+            { name: 'Jordan 1 Retro', brand: 'Jordan', model: '1 Retro', sizeRange: '35-45', price: 249.99, stock: 20, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/HZDiSqxfpxfavVAe.jpg', tag: 'NEW', collection: 'Basketball' },
+            { name: 'Adidas Ultra Boost', brand: 'Adidas', model: 'Ultra Boost', sizeRange: '35-45', price: 239.99, stock: 35, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/XHAmwqukAvqToiZo.png', tag: 'TRENDING', collection: 'Running' },
+            { name: 'Puma RS-X', brand: 'Puma', model: 'RS-X', sizeRange: '35-45', price: 169.99, stock: 28, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/EAhzJUEkqDjgMWwe.jpg', tag: 'SALE', collection: 'Casual' },
+            { name: 'New Balance 990v6', brand: 'New Balance', model: '990v6', sizeRange: '35-45', price: 189.99, stock: 22, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OISFcGUaRzULPMhv.jpg', tag: '', collection: 'Running' },
+            { name: 'Converse One Star', brand: 'Converse', model: 'One Star', sizeRange: '35-45', price: 149.99, stock: 60, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OqEvWuXBAyHMsEtW.jpg', tag: '', collection: 'Casual' }
         ];
         let inserted = 0, skipped = 0;
         for (const prod of defaultProducts) {
@@ -488,7 +459,7 @@ app.post('/api/admin/seed-products', verifyAdminToken, async (req, res) => {
     }
 });
 
-// ============ Inventory Management ============
+// ============ 库存管理 ============
 app.get('/api/admin/inventory/products', verifyAdminToken, async (req, res) => {
     try {
         const products = await Product.find().sort({ createdAt: -1 });
@@ -558,10 +529,7 @@ app.delete('/api/admin/inventory/products/:id', verifyAdminToken, async (req, re
     }
 });
 
-// 批量导入商品 (CSV / Excel)
-const XLSX = require('xlsx');
-const upload = multer({ storage: multer.memoryStorage() }); // 若已有定义可复用
-
+// 批量导入商品 (CSV / Excel) - 修复重复 upload 声明
 app.post('/api/admin/inventory/import', verifyAdminToken, upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
@@ -571,16 +539,13 @@ app.post('/api/admin/inventory/import', verifyAdminToken, upload.single('file'),
         const fileBuffer = req.file.buffer;
         let rows = [];
 
-        // 根据文件扩展名决定解析方式
         const fileName = req.file.originalname.toLowerCase();
         if (fileName.endsWith('.csv')) {
-            // CSV 解析
             const csvString = fileBuffer.toString('utf-8');
             const workbook = XLSX.read(csvString, { type: 'string' });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
         } else {
-            // Excel 解析
             const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
@@ -590,39 +555,25 @@ app.post('/api/admin/inventory/import', verifyAdminToken, upload.single('file'),
             return res.status(400).json({ error: 'File must contain at least a header row and one data row' });
         }
 
-        // 第一行为表头，映射到数据库字段（不区分大小写，去除空格）
         const headers = rows[0].map(h => String(h).trim().toLowerCase());
-        const expectedFields = ['name', 'brand', 'model', 'sizerange', 'price', 'stock', 'image', 'tag', 'collection', 'description'];
-        
-        // 检查必需字段是否存在
         const missingRequired = ['name', 'brand', 'model', 'sizerange', 'price', 'stock'].filter(f => !headers.includes(f));
         if (missingRequired.length > 0) {
             return res.status(400).json({ error: `Missing required columns: ${missingRequired.join(', ')}` });
         }
 
-        let inserted = 0;
-        let updated = 0;
-        let errors = 0;
+        let inserted = 0, updated = 0, errors = 0;
 
-        // 从第二行开始处理数据
         for (let i = 1; i < rows.length; i++) {
             const row = rows[i];
-            if (!row || row.every(cell => cell === undefined || cell === null || String(cell).trim() === '')) {
-                continue; // 跳过空行
-            }
+            if (!row || row.every(cell => cell === undefined || cell === null || String(cell).trim() === '')) continue;
 
             try {
-                // 构建产品对象
                 const productData = {};
                 headers.forEach((header, idx) => {
                     let value = row[idx];
-                    if (value !== undefined && value !== null) {
-                        value = String(value).trim();
-                    } else {
-                        value = '';
-                    }
+                    if (value !== undefined && value !== null) value = String(value).trim();
+                    else value = '';
                     
-                    // 字段映射
                     if (header === 'sizerange') productData.sizeRange = value;
                     else if (header === 'price') productData.price = parseFloat(value) || 0;
                     else if (header === 'stock') productData.stock = parseInt(value) || 0;
@@ -633,26 +584,17 @@ app.post('/api/admin/inventory/import', verifyAdminToken, upload.single('file'),
                     else productData[header] = value;
                 });
 
-                // 验证必填字段
                 if (!productData.name || !productData.brand || !productData.model || !productData.sizeRange || isNaN(productData.price) || isNaN(productData.stock)) {
                     errors++;
                     continue;
                 }
 
-                // 检查是否已存在同名同品牌同型号的产品（作为更新依据）
-                const existing = await Product.findOne({ 
-                    name: productData.name, 
-                    brand: productData.brand, 
-                    model: productData.model 
-                });
-
+                const existing = await Product.findOne({ name: productData.name, brand: productData.brand, model: productData.model });
                 if (existing) {
-                    // 更新现有产品（覆盖除 _id 外的字段）
                     Object.assign(existing, productData);
                     await existing.save();
                     updated++;
                 } else {
-                    // 插入新产品
                     const newProduct = new Product(productData);
                     await newProduct.save();
                     inserted++;
@@ -663,20 +605,14 @@ app.post('/api/admin/inventory/import', verifyAdminToken, upload.single('file'),
             }
         }
 
-        res.json({ 
-            success: true, 
-            inserted, 
-            updated, 
-            errors,
-            total: rows.length - 1 
-        });
+        res.json({ success: true, inserted, updated, errors, total: rows.length - 1 });
     } catch (err) {
         console.error('Import error:', err);
         res.status(500).json({ error: 'Server error during import' });
     }
 });
 
-// ============ Order Management (Admin) ============
+// ============ 订单管理（管理员） ============
 app.get('/api/admin/orders', verifyAdminToken, async (req, res) => {
     try {
         const orders = await Order.find().sort({ createdAt: -1 });
@@ -722,32 +658,15 @@ app.delete('/api/admin/orders/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
-// ============ User Management (Admin) - 包含订单统计 ============
+// ============ 用户管理（管理员） ============
 app.get('/api/admin/users', verifyAdminToken, async (req, res) => {
     try {
         const users = await User.aggregate([
-            {
-                $lookup: {
-                    from: 'orders',
-                    localField: '_id',
-                    foreignField: 'userId',
-                    as: 'orders'
-                }
-            },
-            {
-                $addFields: {
-                    orderCount: { $size: '$orders' }
-                }
-            },
-            {
-                $project: {
-                    password: 0,
-                    orders: 0
-                }
-            },
+            { $lookup: { from: 'orders', localField: '_id', foreignField: 'userId', as: 'orders' } },
+            { $addFields: { orderCount: { $size: '$orders' } } },
+            { $project: { password: 0, orders: 0 } },
             { $sort: { createdAt: -1 } }
         ]);
-
         console.log(`👥 Admin fetched ${users.length} users, first user orderCount: ${users[0]?.orderCount || 0}`);
         res.json({ success: true, data: users });
     } catch (err) {
@@ -802,14 +721,11 @@ app.delete('/api/admin/users/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
-// ============ 数据迁移：修复旧订单缺少 userId ============
+// ============ 数据迁移：修复旧订单 userId ============
 app.post('/api/admin/migrate-orders-userid', verifyAdminToken, async (req, res) => {
     try {
-        // 查找所有 userId 为 null 或不存在该字段的订单
         const orders = await Order.find({ userId: { $exists: false } });
-        let updated = 0;
-        let skipped = 0;
-
+        let updated = 0, skipped = 0;
         for (const order of orders) {
             const email = order.customer?.email;
             if (email) {
@@ -828,18 +744,14 @@ app.post('/api/admin/migrate-orders-userid', verifyAdminToken, async (req, res) 
                 console.log(`⚠️ Order ${order.orderId} has no customer email`);
             }
         }
-
-        res.json({
-            success: true,
-            message: `Migration complete. Updated: ${updated}, Skipped: ${skipped}`
-        });
+        res.json({ success: true, message: `Migration complete. Updated: ${updated}, Skipped: ${skipped}` });
     } catch (err) {
         console.error('Migration error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// ============ Dashboard Analytics ============
+// ============ 仪表盘分析 ============
 function formatLocalDate(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -854,13 +766,7 @@ app.get('/api/admin/dashboard/stats', verifyAdminToken, async (req, res) => {
         const totalRevenue = totalRevenueAgg.length ? totalRevenueAgg[0].total : 0;
         const totalUsers = await User.countDocuments();
         const totalProducts = await Product.countDocuments();
-        res.json({
-            success: true,
-            totalRevenue,
-            totalOrders,
-            totalUsers,
-            totalProducts
-        });
+        res.json({ success: true, totalRevenue, totalOrders, totalUsers, totalProducts });
     } catch (err) {
         console.error('Stats error:', err);
         res.status(500).json({ error: 'Server error' });
@@ -873,22 +779,15 @@ app.get('/api/admin/dashboard/sales-timeline', verifyAdminToken, async (req, res
         const startDate = new Date();
         startDate.setHours(0, 0, 0, 0);
         startDate.setDate(startDate.getDate() - days);
-
         const orders = await Order.find({ createdAt: { $gte: startDate } }).select('total createdAt');
-        
         const salesByLocalDate = new Map();
         orders.forEach(order => {
             const localDate = new Date(order.createdAt);
             localDate.setHours(0, 0, 0, 0);
             const dateStr = formatLocalDate(localDate);
-            const current = salesByLocalDate.get(dateStr) || 0;
-            salesByLocalDate.set(dateStr, current + order.total);
+            salesByLocalDate.set(dateStr, (salesByLocalDate.get(dateStr) || 0) + order.total);
         });
-
-        const data = Array.from(salesByLocalDate.entries())
-            .map(([date, total]) => ({ date, total }))
-            .sort((a, b) => a.date.localeCompare(b.date));
-
+        const data = Array.from(salesByLocalDate.entries()).map(([date, total]) => ({ date, total })).sort((a, b) => a.date.localeCompare(b.date));
         res.json({ success: true, data });
     } catch (err) {
         console.error('Sales timeline error:', err);
@@ -901,24 +800,10 @@ app.get('/api/admin/dashboard/top-products', verifyAdminToken, async (req, res) 
         const limit = parseInt(req.query.limit) || 5;
         const pipeline = [
             { $unwind: '$items' },
-            {
-                $group: {
-                    _id: { name: '$items.name', brand: '$items.brand' },
-                    totalQuantity: { $sum: '$items.quantity' },
-                    totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } }
-                }
-            },
+            { $group: { _id: { name: '$items.name', brand: '$items.brand' }, totalQuantity: { $sum: '$items.quantity' }, totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } } } },
             { $sort: { totalQuantity: -1 } },
             { $limit: limit },
-            {
-                $project: {
-                    _id: 0,
-                    name: '$_id.name',
-                    brand: '$_id.brand',
-                    totalQuantity: 1,
-                    totalRevenue: 1
-                }
-            }
+            { $project: { _id: 0, name: '$_id.name', brand: '$_id.brand', totalQuantity: 1, totalRevenue: 1 } }
         ];
         const results = await Order.aggregate(pipeline);
         res.json({ success: true, data: results });
@@ -931,10 +816,7 @@ app.get('/api/admin/dashboard/top-products', verifyAdminToken, async (req, res) 
 app.get('/api/admin/dashboard/recent-orders', verifyAdminToken, async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
-        const orders = await Order.find()
-            .sort({ createdAt: -1 })
-            .limit(limit)
-            .select('orderId createdAt customer total status');
+        const orders = await Order.find().sort({ createdAt: -1 }).limit(limit).select('orderId createdAt customer total status');
         res.json({ success: true, data: orders });
     } catch (err) {
         console.error('Recent orders error:', err);
@@ -956,18 +838,13 @@ app.get('/api/admin/dashboard/forecast', verifyAdminToken, async (req, res) => {
 app.post('/api/admin/dashboard/upload-forecast', verifyAdminToken, upload.single('forecast'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-
         const csv = req.file.buffer.toString('utf-8');
         const lines = csv.split('\n').filter(line => line.trim() !== '');
         if (lines.length < 2) return res.status(400).json({ error: 'CSV must have at least header and one data row' });
-
         const headers = lines[0].toLowerCase().split(',');
         const dateIdx = headers.findIndex(h => h.includes('date'));
         const salesIdx = headers.findIndex(h => h.includes('forecast') || h.includes('sales'));
-        if (dateIdx === -1 || salesIdx === -1) {
-            return res.status(400).json({ error: 'CSV must have columns: date and forecast_sales' });
-        }
-
+        if (dateIdx === -1 || salesIdx === -1) return res.status(400).json({ error: 'CSV must have columns: date and forecast_sales' });
         const parsed = [];
         for (let i = 1; i < lines.length; i++) {
             const cols = lines[i].split(',');
@@ -981,9 +858,7 @@ app.post('/api/admin/dashboard/upload-forecast', verifyAdminToken, upload.single
             if (isNaN(value)) continue;
             parsed.push({ date, value });
         }
-
         if (parsed.length === 0) return res.status(400).json({ error: 'No valid data rows found' });
-
         await Forecast.deleteMany({});
         await Forecast.insertMany(parsed);
         res.json({ success: true, message: `Uploaded ${parsed.length} forecast points` });
@@ -997,14 +872,10 @@ function linearRegression(points) {
     const n = points.length;
     let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
     for (let i = 0; i < n; i++) {
-        const x = points[i][0];
-        const y = points[i][1];
-        sumX += x;
-        sumY += y;
-        sumXY += x * y;
-        sumX2 += x * x;
+        const x = points[i][0], y = points[i][1];
+        sumX += x; sumY += y; sumXY += x * y; sumX2 += x * x;
     }
-    const denominator = (n * sumX2 - sumX * sumX);
+    const denominator = n * sumX2 - sumX * sumX;
     if (denominator === 0) return { slope: 0, intercept: sumY / n };
     const slope = (n * sumXY - sumX * sumY) / denominator;
     const intercept = (sumY - slope * sumX) / n;
@@ -1016,13 +887,10 @@ app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res)
         const forecastDays = parseInt(req.query.days) || 7;
         const includeToday = req.query.includeToday === 'true';
         const historyDays = 30;
-
         const startDate = new Date();
         startDate.setHours(0, 0, 0, 0);
         startDate.setDate(startDate.getDate() - historyDays);
-
         const orders = await Order.find({ createdAt: { $gte: startDate } }).select('total createdAt');
-
         const salesByLocalDate = new Map();
         orders.forEach(order => {
             const localDate = new Date(order.createdAt);
@@ -1030,20 +898,12 @@ app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res)
             const dateStr = formatLocalDate(localDate);
             salesByLocalDate.set(dateStr, (salesByLocalDate.get(dateStr) || 0) + order.total);
         });
-
-        const results = Array.from(salesByLocalDate.entries())
-            .map(([date, total]) => ({ date, total }))
-            .sort((a, b) => a.date.localeCompare(b.date));
-
-        if (results.length < 3) {
-            return res.json({ success: true, data: [], message: 'Not enough data for forecasting (need at least 3 days of sales)' });
-        }
-
+        const results = Array.from(salesByLocalDate.entries()).map(([date, total]) => ({ date, total })).sort((a, b) => a.date.localeCompare(b.date));
+        if (results.length < 3) return res.json({ success: true, data: [], message: 'Not enough data' });
         const points = results.map((item, idx) => [idx, item.total]);
         const { slope, intercept } = linearRegression(points);
         const lastIndex = points.length - 1;
         const forecast = [];
-
         const todayLocal = new Date();
         todayLocal.setHours(0, 0, 0, 0);
         const startOffset = includeToday ? 0 : 1;
@@ -1053,12 +913,8 @@ app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res)
             predictedValue = Math.max(0, predictedValue);
             const forecastDate = new Date(todayLocal);
             forecastDate.setDate(todayLocal.getDate() + i);
-            forecast.push({
-                date: formatLocalDate(forecastDate),
-                value: predictedValue
-            });
+            forecast.push({ date: formatLocalDate(forecastDate), value: predictedValue });
         }
-
         res.json({ success: true, data: forecast });
     } catch (err) {
         console.error('Auto-forecast error:', err);
@@ -1066,7 +922,7 @@ app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res)
     }
 });
 
-// ============ Start Server ============
+// ============ 启动服务器 ============
 const port = process.env.PORT || 5000;
 const dbURI = process.env.MONGO_URI;
 
@@ -1079,14 +935,12 @@ console.log('🔄 Connecting to MongoDB...');
 mongoose.connect(dbURI)
     .then(async () => {
         console.log('✅ Connected to StepUp Database');
-        
         const adminCount = await Admin.countDocuments();
         if (adminCount === 0) {
             const defaultAdmin = new Admin({ username: 'admin', password: 'admin123' });
             await defaultAdmin.save();
             console.log('✅ Default admin created: username = admin, password = admin123');
         }
-        
         app.listen(port, '0.0.0.0', () => {
             console.log(`✅ Server is running on port ${port}`);
             console.log(`📍 Local: http://localhost:${port}`);

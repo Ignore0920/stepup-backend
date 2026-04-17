@@ -41,6 +41,8 @@
         .qty-input { width: 60px; height: 40px; border: none; border-left: 1px solid #e5e5e5; border-right: 1px solid #e5e5e5; text-align: center; font-size: 0.875rem; }
         .add-to-cart-btn { flex: 1; padding: 1rem; background-color: #262626; color: #ffffff; border: none; font-weight: 600; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
         .add-to-cart-btn:hover { opacity: 0.9; }
+        .back-link { display: inline-block; margin: 1.5rem 0 0.5rem; text-decoration: none; color: #262626; font-size: 0.875rem; font-weight: 500; border-bottom: 1px solid #262626; transition: color 0.3s, border-color 0.3s; }
+        .back-link:hover { color: #666666; border-bottom-color: #666666; }
         @media (max-width: 768px) { .product-section { grid-template-columns: 1fr; } .main-image { height: 400px; } .purchase-section { flex-direction: column; } .add-to-cart-btn { width: 100%; } nav { display: none; } }
     </style>
 </head>
@@ -54,7 +56,13 @@
             </div>
         </div>
     </header>
-    <div class="container"><div id="productDetail" class="product-detail-container"><div class="loading">Loading product...</div></div></div>
+
+    <div class="container">
+        <!-- Back to Products link -->
+        <a href="products.html" class="back-link">← Back to Products</a>
+        <div id="productDetail" class="product-detail-container"><div class="loading">Loading product...</div></div>
+    </div>
+
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const productId = urlParams.get('id');

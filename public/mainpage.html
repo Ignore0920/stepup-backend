@@ -104,6 +104,7 @@
             color: #262626;
             font-size: 1.25rem;
             transition: color 0.3s;
+            position: relative;
         }
 
         .nav-right button:hover {
@@ -526,6 +527,30 @@
             font-weight: 600;
         }
 
+        /* 热销徽章 */
+        .hot-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .sales-count {
+            display: inline-block;
+            margin-left: 0.5rem;
+            font-size: 0.75rem;
+            color: #999;
+            font-weight: 400;
+        }
+
         /* Collections Section */
         .collections-section {
             padding: 5rem 0;
@@ -825,15 +850,15 @@
 
                     <div class="stats">
                         <div class="stat">
-                            <div class="stat-number">500+</div>
+                            <div class="stat-number" id="statStyles">--</div>
                             <div class="stat-label">Premium Styles</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-number">50+</div>
+                            <div class="stat-number" id="statBrands">--</div>
                             <div class="stat-label">Top Brands</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-number">10K+</div>
+                            <div class="stat-number" id="statCustomers">--</div>
                             <div class="stat-label">Happy Customers</div>
                         </div>
                     </div>
@@ -891,16 +916,17 @@
         </div>
     </section>
 
-    <!-- Featured Products Section -->
+    <!-- Featured Products Section (热销产品 - 实时更新) -->
     <section class="featured-section" id="shop">
         <div class="container">
-            <h2 class="section-title">Featured Selection</h2>
+            <h2 class="section-title">🔥 Hot Selling</h2>
             <p class="section-description">
-                Handpicked premium athletic footwear representing the pinnacle of design and performance.
+                Our most popular styles based on real customer orders. Updated in real-time.
             </p>
 
             <div class="products-grid" id="featuredProductsGrid">
                 <!-- Products will be loaded dynamically -->
+                <div style="text-align: center; grid-column: 1/-1; padding: 2rem;">Loading hot products...</div>
             </div>
         </div>
     </section>
@@ -1047,38 +1073,6 @@
             { name: 'Premium', key: 'Training' }
         ];
 
-        // This static list is only used for updating collection counts – navigation uses dynamic links
-        const allProducts = [
-            { id: 1, name: 'Nike Air Max 270', brand: 'Nike', collection: 'Casual', price: 219.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/8hxfQKfVfXwjEqGD.jpg', link: '#', tag: '' },
-            { id: 2, name: 'Nike Classic Trainer', brand: 'Nike', collection: 'Running', price: 189.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/jtJqPMOhRFGrvlBZ.png', link: '#', tag: '' },
-            { id: 3, name: 'Nike Comfort Walk Plus', brand: 'Nike', collection: 'Casual', price: 199.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/4tFqKXJhKJfQKXfQ.jpg', link: '#', tag: '' },
-            { id: 4, name: 'Nike Elite Runner Pro', brand: 'Nike', collection: 'Running', price: 229.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/HNQhKJhJKJhKJhKJ.jpg', link: '#', tag: '' },
-            { id: 5, name: 'Nike Urban Flex Sneaker', brand: 'Nike', collection: 'Training', price: 209.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/KJhKJhKJhKJhKJhK.jpg', link: '#', tag: '' },
-            { id: 6, name: 'Jordan 1 Retro', brand: 'Jordan', collection: 'Basketball', price: 249.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/HZDiSqxfpxfavVAe.jpg', link: '#', tag: '' },
-            { id: 7, name: 'Adidas Ultra Boost', brand: 'Adidas', collection: 'Running', price: 239.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/XHAmwqukAvqToiZo.png', link: '#', tag: '' },
-            { id: 8, name: 'Puma RS-X', brand: 'Puma', collection: 'Casual', price: 169.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/EAhzJUEkqDjgMWwe.jpg', link: '#', tag: '' },
-            { id: 9, name: 'New Balance 990v6', brand: 'New Balance', collection: 'Training', price: 189.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OISFcGUaRzULPMhv.jpg', link: '#', tag: '' },
-            { id: 10, name: 'Converse One Star', brand: 'Converse', collection: 'Casual', price: 149.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OqEvWuXBAyHMsEtW.jpg', link: '#', tag: '' },
-            { id: 11, name: 'New Balance Classic Runner', brand: 'New Balance', collection: 'Casual', price: 189.99, image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663370729728/OISFcGUaRzULPMhv.jpg', link: '#', tag: '' }
-        ];
-
-        function getCollectionCount(collectionKey) {
-            return allProducts.filter(product => product.collection === collectionKey).length;
-        }
-
-        function updateCollectionCounts() {
-            collections.forEach(collection => {
-                const count = getCollectionCount(collection.key);
-                const countElements = document.querySelectorAll('.collection-count');
-                countElements.forEach(element => {
-                    const parent = element.closest('.collection-card');
-                    if (parent && parent.querySelector('.collection-name').textContent === collection.name) {
-                        element.textContent = count + ' Products';
-                    }
-                });
-            });
-        }
-
         function goToProductsWithFilter(collection) {
             sessionStorage.setItem('selectedCollection', collection);
             window.location.href = 'products.html';
@@ -1102,39 +1096,132 @@
             if (badge) badge.textContent = totalItems;
         }
 
-        async function loadFeaturedProducts() {
+        // 加载统计数据（产品总数、品牌数、用户数）
+        async function loadStats() {
             try {
-                const res = await fetch('/api/products');
+                const res = await fetch('/api/admin/dashboard/stats');
                 const data = await res.json();
                 if (data.success) {
-                    const products = data.data.slice(0, 8);
-                    const grid = document.getElementById('featuredProductsGrid');
-                    if (grid) {
-                        grid.innerHTML = products.map(p => `
-                            <div class="product-card" onclick="window.location.href='product-detail.html?id=${p._id}'" style="cursor: pointer;">
-                                <div style="position: relative;">
-                                    <div class="product-image" style="background-image: url('${p.image || 'https://via.placeholder.com/200?text=No+Image'}'); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
-                                    ${p.tag ? `<span class="product-tag">${p.tag}</span>` : ''}
-                                </div>
-                                <p class="product-brand">${p.brand}</p>
-                                <h3 class="product-name">${p.name}</h3>
-                                <div class="product-footer">
-                                    <span class="product-price">MOP $${p.price.toFixed(2)}</span>
-                                    <span style="cursor: pointer; font-size: 1.25rem;">→</span>
-                                </div>
-                            </div>
-                        `).join('');
+                    document.getElementById('statStyles').textContent = data.totalProducts || '500+';
+                    document.getElementById('statBrands').textContent = '50+'; // 固定或从后端获取
+                    document.getElementById('statCustomers').textContent = data.totalUsers || '10K+';
+                }
+            } catch (err) {
+                console.error('Failed to load stats:', err);
+                // 保持默认值
+                document.getElementById('statStyles').textContent = '500+';
+                document.getElementById('statBrands').textContent = '50+';
+                document.getElementById('statCustomers').textContent = '10K+';
+            }
+        }
+
+        // 加载热销产品（按销量排序）
+        async function loadHotProducts() {
+            const grid = document.getElementById('featuredProductsGrid');
+            grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 2rem;">Loading hot products...</div>';
+
+            try {
+                // 获取热销产品数据（按销量排序）
+                const res = await fetch('/api/admin/dashboard/top-products?limit=8');
+                const data = await res.json();
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    // 有销售数据，展示热销产品
+                    const hotProducts = data.data;
+                    
+                    // 获取完整产品信息（包含图片等）
+                    const productsRes = await fetch('/api/products');
+                    const productsData = await productsRes.json();
+                    
+                    if (productsData.success) {
+                        const allProducts = productsData.data;
+                        
+                        // 合并销量数据与产品详情
+                        const enrichedProducts = hotProducts.map(hotItem => {
+                            const product = allProducts.find(p => p.name === hotItem.name && p.brand === hotItem.brand);
+                            return {
+                                ...product,
+                                totalQuantity: hotItem.totalQuantity,
+                                totalRevenue: hotItem.totalRevenue
+                            };
+                        }).filter(p => p && p._id); // 过滤掉找不到的产品
+
+                        if (enrichedProducts.length > 0) {
+                            renderHotProducts(enrichedProducts);
+                        } else {
+                            // 如果没有匹配的产品，显示所有产品
+                            renderFallbackProducts(allProducts.slice(0, 8));
+                        }
+                    } else {
+                        renderFallbackMessage();
+                    }
+                } else {
+                    // 没有销售数据，显示普通产品
+                    const productsRes = await fetch('/api/products');
+                    const productsData = await productsRes.json();
+                    if (productsData.success) {
+                        renderFallbackProducts(productsData.data.slice(0, 8));
+                    } else {
+                        renderFallbackMessage();
                     }
                 }
             } catch (err) {
-                console.error('Failed to load featured products:', err);
+                console.error('Failed to load hot products:', err);
+                renderFallbackMessage();
             }
+        }
+
+        // 渲染热销产品
+        function renderHotProducts(products) {
+            const grid = document.getElementById('featuredProductsGrid');
+            grid.innerHTML = products.map((p, index) => `
+                <div class="product-card" onclick="window.location.href='product-detail.html?id=${p._id}'" style="cursor: pointer; position: relative;">
+                    <div style="position: relative;">
+                        <div class="product-image" style="background-image: url('${p.image || 'https://via.placeholder.com/200?text=No+Image'}'); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
+                        ${p.tag ? `<span class="product-tag">${p.tag}</span>` : ''}
+                        <span class="hot-badge">🔥 HOT #${index + 1}</span>
+                    </div>
+                    <p class="product-brand">${p.brand}</p>
+                    <h3 class="product-name">
+                        ${p.name}
+                        ${p.totalQuantity ? `<span class="sales-count">(${p.totalQuantity}+ sold)</span>` : ''}
+                    </h3>
+                    <div class="product-footer">
+                        <span class="product-price">MOP $${p.price.toFixed(2)}</span>
+                        <span style="cursor: pointer; font-size: 1.25rem;">→</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 降级显示普通产品
+        function renderFallbackProducts(products) {
+            const grid = document.getElementById('featuredProductsGrid');
+            grid.innerHTML = products.map(p => `
+                <div class="product-card" onclick="window.location.href='product-detail.html?id=${p._id}'" style="cursor: pointer;">
+                    <div style="position: relative;">
+                        <div class="product-image" style="background-image: url('${p.image || 'https://via.placeholder.com/200?text=No+Image'}'); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
+                        ${p.tag ? `<span class="product-tag">${p.tag}</span>` : ''}
+                    </div>
+                    <p class="product-brand">${p.brand}</p>
+                    <h3 class="product-name">${p.name}</h3>
+                    <div class="product-footer">
+                        <span class="product-price">MOP $${p.price.toFixed(2)}</span>
+                        <span style="cursor: pointer; font-size: 1.25rem;">→</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderFallbackMessage() {
+            const grid = document.getElementById('featuredProductsGrid');
+            grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 2rem;">No products available at the moment.</div>';
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             updateCartBadge();
-            updateCollectionCounts();
-            loadFeaturedProducts();
+            loadStats();
+            loadHotProducts();
         });
 
         window.addEventListener('storage', updateCartBadge);

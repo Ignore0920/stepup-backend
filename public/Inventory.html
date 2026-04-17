@@ -40,6 +40,8 @@
         .btn-remove:hover { background: #e74c3c; color: #fff; }
         .export-btn { background-color: #27ae60; color: white; border: none; }
         .export-btn:hover { background-color: #2ecc71; }
+        .import-label { background: #262626; color: white; cursor: pointer; display: inline-block; margin: 0; }
+        .import-label:hover { background: #404040; }
         @media (max-width: 768px) { .filter-group { min-width: 100%; } }
     </style>
 </head>
@@ -76,8 +78,8 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label>Size Range</label>
-                    <input type="text" id="sizeFilter" placeholder="e.g., 7-13">
+                    <label>Size Range (EU)</label>
+                    <input type="text" id="sizeFilter" placeholder="e.g., 35-45">
                 </div>
                 <div class="filter-group">
                     <label>Price Min ($)</label>
@@ -100,7 +102,7 @@
                 </div>
             </div>
 
-            <!-- Sort and Export -->
+            <!-- Sort and Export + Import -->
             <div class="sort-bar">
                 <div>
                     <label>Sort by: </label>
@@ -113,8 +115,12 @@
                         <option value="stock-desc">Stock (High to Low)</option>
                     </select>
                 </div>
-                <div>
+                <div style="display: flex; gap: 10px;">
                     <button class="btn export-btn" onclick="exportToExcel()">📊 Export to Excel</button>
+                    <label class="btn btn-primary import-label" style="display: inline-block;">
+                        📤 Import Products
+                        <input type="file" id="importFileInput" accept=".csv,.xlsx,.xls" style="display: none;" />
+                    </label>
                 </div>
             </div>
 
@@ -222,7 +228,7 @@
         const tbody = document.getElementById('shoeTableBody');
         tbody.innerHTML = '';
         if (filteredProducts.length === 0) {
-            tbody.innerHTML = '似乎<td colspan="7" style="text-align:center;">No products found</td>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No products found</td></tr>';
             return;
         }
         filteredProducts.forEach(prod => {
@@ -337,6 +343,51 @@
         if (!str) return '';
         return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
     }
+
+    // ========== 批量导入功能 ==========
+    const importFileInput = document.getElementById('importFileInput');
+    importFileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const allowedExtensions = ['.csv', '.xlsx', '.xls'];
+        const fileName = file.name.toLowerCase();
+        const isValid = allowedExtensions.some(ext => fileName.endsWith(ext));
+        if (!isValid) {
+            alert('Please select a CSV or Excel file (.csv, .xlsx, .xls)');
+            importFileInput.value = '';
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to import products from "${file.name}"?`)) {
+            importFileInput.value = '';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/api/admin/inventory/import', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || 'Import failed');
+
+            alert(`✅ Import completed!\nInserted: ${result.inserted}\nUpdated: ${result.updated || 0}\nErrors: ${result.errors || 0}`);
+            await loadProducts();
+        } catch (err) {
+            console.error('Import error:', err);
+            alert(`❌ Import failed: ${err.message}`);
+        } finally {
+            importFileInput.value = '';
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
         loadProducts();

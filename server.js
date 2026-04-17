@@ -22,10 +22,11 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // Middleware
 app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+    origin: process.env.NODE_ENV === 'production' 
+        ? ['https://stepup-backend-j8h1.onrender.com'] 
+        : '*',
+    credentials: true
+}))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -259,9 +260,10 @@ app.get('/api/users/orders/:id', verifyUserToken, async (req, res) => {
         const order = await Order.findById(req.params.id);
         if (!order) return res.status(404).json({ error: 'Order not found' });
         // 权限检查：订单属于当前用户
-        if (!order.userId || order.userId.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ error: 'Access denied' });
-        }
+       // 如果有 userId 则必须匹配，如果没有 userId 则允许查看（旧数据）
+if (order.userId && order.userId.toString() !== req.user._id.toString()) {
+    return res.status(403).json({ error: 'Access denied' });
+}
         res.json({ success: true, order });
     } catch (err) {
         console.error('Error fetching order detail:', err);
@@ -286,11 +288,11 @@ app.post('/api/products', async (req, res) => {
     try {
         if (mongoose.connection.readyState !== 1) return res.status(503).json({ error: "Database not connected" });
         console.log("📦 Data received:", req.body);
-        const requiredFields = ['productName', 'brand', 'category', 'price'];
-        const missingFields = requiredFields.filter(field => !req.body[field]);
+        const requiredFields = ['name', 'brand', 'price'];
+        const missingFields = requiredFields.filter(field => req.body[field] === undefined);
         if (missingFields.length > 0) {
             return res.status(400).json({ error: `Missing required fields: ${missingFields.join(', ')}` });
-        }
+}
         const newProduct = new Product(req.body);
         await newProduct.save();
         console.log("✅ Product saved:", newProduct._id);

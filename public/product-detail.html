@@ -23,7 +23,7 @@
         .user-icon-btn { text-decoration: none; color: #262626; font-size: 1.25rem; transition: color 0.3s; }
         .product-section { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; padding: 3rem 0; align-items: start; }
         .product-images { display: flex; flex-direction: column; gap: 1rem; position: sticky; top: 100px; }
-        .main-image { width: 100%; height: 500px; background-color: #f5f5f5; border: 1px solid #e5e5e5; background-size: contain; background-repeat: no-repeat; background-position: center; }
+        .main-image { width: 100%; height: 500px; background-color: #f5f5f5; border: 1px solid #e5e5e5; background-size: contain; background-repeat: no-repeat; background-position: center; display: flex; align-items: center; justify-content: center; }
         .product-details { display: flex; flex-direction: column; }
         .product-brand { color: #262626; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
         .product-title { font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem; }
@@ -58,7 +58,6 @@
     </header>
 
     <div class="container">
-        <!-- Back to Products link -->
         <a href="products.html" class="back-link">← Back to Products</a>
         <div id="productDetail" class="product-detail-container"><div class="loading">Loading product...</div></div>
     </div>
@@ -71,7 +70,6 @@
 
         function parseSizes(sizeRange) {
             if (!sizeRange) return [];
-            // Handle range like "7-13"
             if (sizeRange.includes('-')) {
                 const [start, end] = sizeRange.split('-').map(Number);
                 if (isNaN(start) || isNaN(end)) return [];
@@ -79,11 +77,9 @@
                 for (let i = start; i <= end; i++) sizes.push(i.toString());
                 return sizes;
             }
-            // Handle comma-separated list
             if (sizeRange.includes(',')) {
                 return sizeRange.split(',').map(s => s.trim());
             }
-            // Single size
             return [sizeRange];
         }
 
@@ -107,7 +103,11 @@
 
             const html = `
                 <div class="product-section">
-                    <div class="product-images"><div class="main-image" style="background-image: url('${p.image || 'https://via.placeholder.com/600?text=No+Image'}');"></div></div>
+                    <div class="product-images">
+                        <div class="main-image" style="background-image: url('${p.image || ''}');">
+                            ${!p.image ? '<span style="font-size: 5rem;">👟</span>' : ''}
+                        </div>
+                    </div>
                     <div class="product-details">
                         <p class="product-brand">${p.brand}</p>
                         <h1 class="product-title">${p.name}</h1>

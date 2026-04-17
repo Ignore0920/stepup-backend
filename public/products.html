@@ -6,7 +6,6 @@
     <title>All Products - StepUp</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* (copy the exact same CSS from your current products.html – unchanged) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; background-color: #ffffff; color: #262626; line-height: 1.6; }
         h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; }
@@ -124,7 +123,9 @@
             grid.style.display = 'grid'; no.style.display = 'none';
             grid.innerHTML = filteredProducts.map(p => `
                 <a href="product-detail.html?id=${p._id}" class="product-card">
-                    <div class="product-image"><img src="${p.image || 'https://via.placeholder.com/200?text=No+Image'}" alt="${p.name}"></div>
+                    <div class="product-image" style="background-image: url('${p.image || ''}'); background-size: contain; background-repeat: no-repeat; background-position: center;">
+                        ${!p.image ? '<span style="font-size: 3rem;">👟</span>' : ''}
+                    </div>
                     <div class="product-info"><div class="product-brand">${p.brand}</div><div class="product-name">${p.name}</div><div class="product-price">MOP $${p.price.toFixed(2)}</div>${p.tag ? `<div class="product-tag">${p.tag}</div>` : ''}</div>
                 </a>
             `).join('');

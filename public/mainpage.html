@@ -6,7 +6,6 @@
     <title>StepUp - Premium Men's Athletic Footwear</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* (all existing CSS remains unchanged – keep as is) */
         * {
             margin: 0;
             padding: 0;
@@ -479,6 +478,13 @@
             margin-bottom: 1rem;
             object-fit: cover;
             transition: transform 0.3s;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
         }
 
         .product-card:hover .product-image {
@@ -1177,7 +1183,9 @@
             grid.innerHTML = products.map((p, index) => `
                 <div class="product-card" onclick="window.location.href='product-detail.html?id=${p._id}'" style="cursor: pointer; position: relative;">
                     <div style="position: relative;">
-                        <div class="product-image" style="background-image: url('${p.image || 'https://via.placeholder.com/200?text=No+Image'}'); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
+                        <div class="product-image" style="background-image: url('${p.image || ''}');">
+                            ${!p.image ? '<span style="font-size: 3rem;">👟</span>' : ''}
+                        </div>
                         ${p.tag ? `<span class="product-tag">${p.tag}</span>` : ''}
                         <span class="hot-badge">🔥 HOT #${index + 1}</span>
                     </div>
@@ -1200,7 +1208,9 @@
             grid.innerHTML = products.map(p => `
                 <div class="product-card" onclick="window.location.href='product-detail.html?id=${p._id}'" style="cursor: pointer;">
                     <div style="position: relative;">
-                        <div class="product-image" style="background-image: url('${p.image || 'https://via.placeholder.com/200?text=No+Image'}'); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
+                        <div class="product-image" style="background-image: url('${p.image || ''}');">
+                            ${!p.image ? '<span style="font-size: 3rem;">👟</span>' : ''}
+                        </div>
                         ${p.tag ? `<span class="product-tag">${p.tag}</span>` : ''}
                     </div>
                     <p class="product-brand">${p.brand}</p>

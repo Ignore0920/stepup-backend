@@ -231,6 +231,22 @@ app.put('/api/users/profile', verifyUserToken, async (req, res) => {
     }
 });
 
+// ============ User Order History (Authenticated) ============
+app.get('/api/users/orders', verifyUserToken, async (req, res) => {
+    try {
+        // 根据当前登录用户的 email 查询订单（因为订单模型中存了 customer.email）
+        const userEmail = req.user.email;
+        const orders = await Order.find({ 'customer.email': userEmail })
+            .sort({ createdAt: -1 })           // 最新订单在前
+            .select('orderId createdAt total status items');  // 只返回前端需要的字段
+
+        res.json({ success: true, orders });
+    } catch (err) {
+        console.error('Error fetching user orders:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // ============ Product Routes (Public) ============
 app.get('/api/products/:id', async (req, res) => {
     try {

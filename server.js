@@ -38,6 +38,19 @@ function isMongoConnected() {
     return mongoose.connection.readyState === 1;
 }
 
+// 辅助函数：从 Authorization 头解析 token 并获取用户 ID（用于非强制登录接口）
+function getUserIdFromToken(req) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        return decoded.id; // 用户注册/登录时 payload 中存的是 id
+    } catch (err) {
+        return null;
+    }
+}
+
 app.get('/test', (req, res) => {
     res.json({ message: 'Server is working!', timestamp: new Date().toISOString() });
 });
@@ -230,8 +243,8 @@ app.put('/api/users/profile', verifyUserToken, async (req, res) => {
 // ============ User Orders (Authenticated) ============
 app.get('/api/users/orders', verifyUserToken, async (req, res) => {
     try {
-        const userEmail = req.user.email;
-        const orders = await Order.find({ 'customer.email': userEmail })
+        // 修改为按 userId 查询，更准确
+        const orders = await Order.find({ userId: req.user._id })
             .sort({ createdAt: -1 })
             .select('orderId createdAt total status items');
         res.json({ success: true, orders });
@@ -241,12 +254,12 @@ app.get('/api/users/orders', verifyUserToken, async (req, res) => {
     }
 });
 
-// 新增：获取单个用户订单详情
 app.get('/api/users/orders/:id', verifyUserToken, async (req, res) => {
     try {
         const order = await Order.findById(req.params.id);
         if (!order) return res.status(404).json({ error: 'Order not found' });
-        if (order.customer.email !== req.user.email) {
+        // 权限检查：订单属于当前用户
+        if (!order.userId || order.userId.toString() !== req.user._id.toString()) {
             return res.status(403).json({ error: 'Access denied' });
         }
         res.json({ success: true, order });
@@ -330,13 +343,19 @@ app.post('/api/orders', async (req, res) => {
         if (!orderData.orderId || !orderData.customer?.firstName || !orderData.customer?.email || !orderData.items?.length) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
+
+        // 尝试从 token 获取登录用户 ID（如果请求头中包含 Authorization）
+        const userId = getUserIdFromToken(req);
+
         const cleanedItems = orderData.items.map(item => ({
             ...item,
             price: typeof item.price === 'string' ? parseFloat(item.price.replace('MOP $', '')) : item.price,
             productId: item.id
         }));
+
         const order = new Order({
             orderId: orderData.orderId,
+            userId: userId || undefined,   // 如果有登录用户则关联，否则留空（访客下单）
             customer: {
                 firstName: orderData.customer.firstName,
                 lastName: orderData.customer.lastName,
@@ -355,6 +374,7 @@ app.post('/api/orders', async (req, res) => {
             status: orderData.status || 'pending',
             paymentMethod: orderData.paymentMethod || 'credit'
         });
+
         await order.save();
         res.status(201).json({ success: true, order });
     } catch (err) {
@@ -578,13 +598,36 @@ app.delete('/api/admin/orders/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
-// ============ User Management (Admin) ============
+// ============ User Management (Admin) - 修改：增加订单统计 ============
 app.get('/api/admin/users', verifyAdminToken, async (req, res) => {
     try {
-        const users = await User.find().select('-password').sort({ createdAt: -1 });
+        // 使用聚合管道计算每个用户的订单数量
+        const users = await User.aggregate([
+            {
+                $lookup: {
+                    from: 'orders',          // MongoDB 集合名称，默认是模型名小写加 s
+                    localField: '_id',
+                    foreignField: 'userId',
+                    as: 'orders'
+                }
+            },
+            {
+                $addFields: {
+                    orderCount: { $size: '$orders' }
+                }
+            },
+            {
+                $project: {
+                    password: 0,   // 不返回密码
+                    orders: 0      // 不返回完整订单数组
+                }
+            },
+            { $sort: { createdAt: -1 } }
+        ]);
+
         res.json({ success: true, data: users });
     } catch (err) {
-        console.error('Error fetching users:', err);
+        console.error('Error fetching users with order count:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });

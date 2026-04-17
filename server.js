@@ -26,7 +26,7 @@ app.use(cors({
         ? ['https://stepup-backend-j8h1.onrender.com'] 
         : '*',
     credentials: true
-}))
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -42,12 +42,17 @@ function isMongoConnected() {
 // 辅助函数：从 Authorization 头解析 token 并获取用户 ID（用于非强制登录接口）
 function getUserIdFromToken(req) {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        console.log('🔐 No valid Authorization header');
+        return null;
+    }
     const token = authHeader.split(' ')[1];
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
+        console.log(`🔐 Token decoded, userId: ${decoded.id}`);
         return decoded.id; // 用户注册/登录时 payload 中存的是 id
     } catch (err) {
+        console.log('🔐 Token verification failed:', err.message);
         return null;
     }
 }
@@ -244,10 +249,10 @@ app.put('/api/users/profile', verifyUserToken, async (req, res) => {
 // ============ User Orders (Authenticated) ============
 app.get('/api/users/orders', verifyUserToken, async (req, res) => {
     try {
-        // 修改为按 userId 查询，更准确
         const orders = await Order.find({ userId: req.user._id })
             .sort({ createdAt: -1 })
             .select('orderId createdAt total status items');
+        console.log(`📦 Found ${orders.length} orders for user ${req.user.email}`);
         res.json({ success: true, orders });
     } catch (err) {
         console.error('Error fetching user orders:', err);
@@ -259,11 +264,9 @@ app.get('/api/users/orders/:id', verifyUserToken, async (req, res) => {
     try {
         const order = await Order.findById(req.params.id);
         if (!order) return res.status(404).json({ error: 'Order not found' });
-        // 权限检查：订单属于当前用户
-       // 如果有 userId 则必须匹配，如果没有 userId 则允许查看（旧数据）
-if (order.userId && order.userId.toString() !== req.user._id.toString()) {
-    return res.status(403).json({ error: 'Access denied' });
-}
+        if (order.userId && order.userId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
         res.json({ success: true, order });
     } catch (err) {
         console.error('Error fetching order detail:', err);
@@ -292,7 +295,7 @@ app.post('/api/products', async (req, res) => {
         const missingFields = requiredFields.filter(field => req.body[field] === undefined);
         if (missingFields.length > 0) {
             return res.status(400).json({ error: `Missing required fields: ${missingFields.join(', ')}` });
-}
+        }
         const newProduct = new Product(req.body);
         await newProduct.save();
         console.log("✅ Product saved:", newProduct._id);
@@ -346,8 +349,8 @@ app.post('/api/orders', async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        // 尝试从 token 获取登录用户 ID（如果请求头中包含 Authorization）
         const userId = getUserIdFromToken(req);
+        console.log(`🛒 Creating order, userId from token: ${userId || 'none (guest)'}`);
 
         const cleanedItems = orderData.items.map(item => ({
             ...item,
@@ -357,7 +360,7 @@ app.post('/api/orders', async (req, res) => {
 
         const order = new Order({
             orderId: orderData.orderId,
-            userId: userId || undefined,   // 如果有登录用户则关联，否则留空（访客下单）
+            userId: userId || undefined,
             customer: {
                 firstName: orderData.customer.firstName,
                 lastName: orderData.customer.lastName,
@@ -378,6 +381,7 @@ app.post('/api/orders', async (req, res) => {
         });
 
         await order.save();
+        console.log(`✅ Order ${order.orderId} saved with userId: ${order.userId || 'none'}`);
         res.status(201).json({ success: true, order });
     } catch (err) {
         console.error('Order creation error:', err);
@@ -600,14 +604,13 @@ app.delete('/api/admin/orders/:id', verifyAdminToken, async (req, res) => {
     }
 });
 
-// ============ User Management (Admin) - 修改：增加订单统计 ============
+// ============ User Management (Admin) - 包含订单统计 ============
 app.get('/api/admin/users', verifyAdminToken, async (req, res) => {
     try {
-        // 使用聚合管道计算每个用户的订单数量
         const users = await User.aggregate([
             {
                 $lookup: {
-                    from: 'orders',          // MongoDB 集合名称，默认是模型名小写加 s
+                    from: 'orders',
                     localField: '_id',
                     foreignField: 'userId',
                     as: 'orders'
@@ -620,13 +623,14 @@ app.get('/api/admin/users', verifyAdminToken, async (req, res) => {
             },
             {
                 $project: {
-                    password: 0,   // 不返回密码
-                    orders: 0      // 不返回完整订单数组
+                    password: 0,
+                    orders: 0
                 }
             },
             { $sort: { createdAt: -1 } }
         ]);
 
+        console.log(`👥 Admin fetched ${users.length} users, first user orderCount: ${users[0]?.orderCount || 0}`);
         res.json({ success: true, data: users });
     } catch (err) {
         console.error('Error fetching users with order count:', err);
@@ -676,6 +680,43 @@ app.delete('/api/admin/users/:id', verifyAdminToken, async (req, res) => {
         res.json({ success: true, message: 'User deleted' });
     } catch (err) {
         console.error('Error deleting user:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ============ 数据迁移：修复旧订单缺少 userId ============
+app.post('/api/admin/migrate-orders-userid', verifyAdminToken, async (req, res) => {
+    try {
+        // 查找所有 userId 为 null 或不存在该字段的订单
+        const orders = await Order.find({ userId: { $exists: false } });
+        let updated = 0;
+        let skipped = 0;
+
+        for (const order of orders) {
+            const email = order.customer?.email;
+            if (email) {
+                const user = await User.findOne({ email: email.toLowerCase() });
+                if (user) {
+                    order.userId = user._id;
+                    await order.save();
+                    updated++;
+                    console.log(`✅ Updated order ${order.orderId} -> user ${user.email}`);
+                } else {
+                    skipped++;
+                    console.log(`⚠️ No user found for email: ${email}, order ${order.orderId}`);
+                }
+            } else {
+                skipped++;
+                console.log(`⚠️ Order ${order.orderId} has no customer email`);
+            }
+        }
+
+        res.json({
+            success: true,
+            message: `Migration complete. Updated: ${updated}, Skipped: ${skipped}`
+        });
+    } catch (err) {
+        console.error('Migration error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });

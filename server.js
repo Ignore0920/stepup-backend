@@ -558,6 +558,124 @@ app.delete('/api/admin/inventory/products/:id', verifyAdminToken, async (req, re
     }
 });
 
+// 批量导入商品 (CSV / Excel)
+const XLSX = require('xlsx');
+const upload = multer({ storage: multer.memoryStorage() }); // 若已有定义可复用
+
+app.post('/api/admin/inventory/import', verifyAdminToken, upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        const fileBuffer = req.file.buffer;
+        let rows = [];
+
+        // 根据文件扩展名决定解析方式
+        const fileName = req.file.originalname.toLowerCase();
+        if (fileName.endsWith('.csv')) {
+            // CSV 解析
+            const csvString = fileBuffer.toString('utf-8');
+            const workbook = XLSX.read(csvString, { type: 'string' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+        } else {
+            // Excel 解析
+            const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+        }
+
+        if (rows.length < 2) {
+            return res.status(400).json({ error: 'File must contain at least a header row and one data row' });
+        }
+
+        // 第一行为表头，映射到数据库字段（不区分大小写，去除空格）
+        const headers = rows[0].map(h => String(h).trim().toLowerCase());
+        const expectedFields = ['name', 'brand', 'model', 'sizerange', 'price', 'stock', 'image', 'tag', 'collection', 'description'];
+        
+        // 检查必需字段是否存在
+        const missingRequired = ['name', 'brand', 'model', 'sizerange', 'price', 'stock'].filter(f => !headers.includes(f));
+        if (missingRequired.length > 0) {
+            return res.status(400).json({ error: `Missing required columns: ${missingRequired.join(', ')}` });
+        }
+
+        let inserted = 0;
+        let updated = 0;
+        let errors = 0;
+
+        // 从第二行开始处理数据
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            if (!row || row.every(cell => cell === undefined || cell === null || String(cell).trim() === '')) {
+                continue; // 跳过空行
+            }
+
+            try {
+                // 构建产品对象
+                const productData = {};
+                headers.forEach((header, idx) => {
+                    let value = row[idx];
+                    if (value !== undefined && value !== null) {
+                        value = String(value).trim();
+                    } else {
+                        value = '';
+                    }
+                    
+                    // 字段映射
+                    if (header === 'sizerange') productData.sizeRange = value;
+                    else if (header === 'price') productData.price = parseFloat(value) || 0;
+                    else if (header === 'stock') productData.stock = parseInt(value) || 0;
+                    else if (header === 'image') productData.image = value;
+                    else if (header === 'tag') productData.tag = value;
+                    else if (header === 'collection') productData.collection = value || 'Casual';
+                    else if (header === 'description') productData.description = value || 'Premium athletic footwear.';
+                    else productData[header] = value;
+                });
+
+                // 验证必填字段
+                if (!productData.name || !productData.brand || !productData.model || !productData.sizeRange || isNaN(productData.price) || isNaN(productData.stock)) {
+                    errors++;
+                    continue;
+                }
+
+                // 检查是否已存在同名同品牌同型号的产品（作为更新依据）
+                const existing = await Product.findOne({ 
+                    name: productData.name, 
+                    brand: productData.brand, 
+                    model: productData.model 
+                });
+
+                if (existing) {
+                    // 更新现有产品（覆盖除 _id 外的字段）
+                    Object.assign(existing, productData);
+                    await existing.save();
+                    updated++;
+                } else {
+                    // 插入新产品
+                    const newProduct = new Product(productData);
+                    await newProduct.save();
+                    inserted++;
+                }
+            } catch (rowErr) {
+                console.error(`Error processing row ${i}:`, rowErr);
+                errors++;
+            }
+        }
+
+        res.json({ 
+            success: true, 
+            inserted, 
+            updated, 
+            errors,
+            total: rows.length - 1 
+        });
+    } catch (err) {
+        console.error('Import error:', err);
+        res.status(500).json({ error: 'Server error during import' });
+    }
+});
+
 // ============ Order Management (Admin) ============
 app.get('/api/admin/orders', verifyAdminToken, async (req, res) => {
     try {

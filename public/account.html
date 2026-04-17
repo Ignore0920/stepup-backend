@@ -69,7 +69,7 @@
         .success-message { background-color: #d4edda; border: 1px solid #4caf50; color: #155724; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; display: none; }
         .success-message.show { display: block; }
 
-        /* 新增：订单详情模态框样式 */
+        /* 订单详情模态框样式 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -260,18 +260,25 @@
                     </div>
                 </div>
 
-                <!-- Settings Section -->
+                <!-- Settings Section (已修改：仅保留 Reset Password 按钮) -->
                 <div id="settings" class="content-section">
                     <h2 class="section-title">Account Settings</h2>
                     <div class="success-message" id="settingsSuccess">Settings updated successfully!</div>
                     <div id="settingsView">
                         <div class="profile-grid">
-                             <div class="profile-item"><div class="profile-label">Password</div><div class="profile-value">••••••••</div></div>
-                             <div class="profile-item"><div class="profile-label">Email Notifications</div><div class="profile-value" id="notifications">-</div></div>
+                            <div class="profile-item">
+                                <div class="profile-label">Password</div>
+                                <div class="profile-value">••••••••</div>
+                            </div>
+                            <div class="profile-item">
+                                <div class="profile-label">Email Notifications</div>
+                                <div class="profile-value" id="notifications">-</div>
+                            </div>
                         </div>
-    <!-- 新增的 Reset Password 按钮 -->
-                    <button class="edit-btn" onclick="simulateResetPassword()" style="margin-right: 0.5rem;">Reset Password</button>
-                    <button class="edit-btn" onclick="startEditSettings()">Edit Settings</button>
+                        <!-- 仅保留 Reset Password 按钮 -->
+                        <button class="edit-btn" onclick="simulateResetPassword()">Reset Password</button>
+                    </div>
+                    <!-- Edit Settings 表单已移除，无需保留 -->
                 </div>
             </div>
         </div>
@@ -439,15 +446,6 @@
             }
         }
 
-        function saveSettings() {
-            const notifications = document.getElementById('editNotifications').value;
-            localStorage.setItem('emailNotifications', notifications);
-            document.getElementById('notifications').textContent = notifications === 'enabled' ? 'Enabled' : 'Disabled';
-            document.getElementById('settingsView').style.display = 'block';
-            document.getElementById('settingsEdit').classList.remove('active');
-            showSuccessMessage('settingsSuccess');
-        }
-
         async function checkLoginStatus() {
             const token = getAuthToken();
             if (!token) {
@@ -522,22 +520,15 @@
             document.getElementById('addressEdit').classList.remove('active');
         }
 
-        function startEditSettings() {
-            const notifications = localStorage.getItem('emailNotifications') || 'enabled';
-            document.getElementById('editNotifications').value = notifications;
-            document.getElementById('settingsView').style.display = 'none';
-            document.getElementById('settingsEdit').classList.add('active');
-        }
-
-        function cancelEditSettings() {
-            document.getElementById('settingsView').style.display = 'block';
-            document.getElementById('settingsEdit').classList.remove('active');
-        }
-
         function showSuccessMessage(elementId) {
             const element = document.getElementById(elementId);
             element.classList.add('show');
             setTimeout(() => element.classList.remove('show'), 3000);
+        }
+
+        // 模拟重置密码（弹窗提示）
+        function simulateResetPassword() {
+            alert('📧 A password reset link has been sent to your email address. Please check your inbox to continue.');
         }
 
         // 查看订单详情

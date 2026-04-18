@@ -780,11 +780,11 @@
                     <div class="stat-label">Premium Styles</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number" id="statBrands">--</div>
-                    <div class="stat-label">Top Brands</div>
+                    <div class="stat-number" id="statDailyOrders">--</div>
+                    <div class="stat-label">Daily Orders</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number" id="statCustomers">--</div>
+                    <div class="stat-number" id="statActiveCustomers">--</div>
                     <div class="stat-label">Active Customers</div>
                 </div>
             </div>
@@ -944,37 +944,36 @@
             document.getElementById('cartBadge').textContent = totalItems;
         }
 
-        // 加载统计数据（兼容公开访问）
+        // 加载统计数据（调用新公开接口）
         async function loadStats() {
             try {
-                // 尝试调用公开统计接口（若后端已添加）
                 const res = await fetch('/api/public/stats');
                 if (res.ok) {
                     const data = await res.json();
-                    document.getElementById('statStyles').textContent = data.totalProducts || '500+';
-                    document.getElementById('statBrands').textContent = '50+';
-                    document.getElementById('statCustomers').textContent = data.totalUsers || '10K+';
+                    document.getElementById('statStyles').textContent = data.totalProducts || '0';
+                    document.getElementById('statDailyOrders').textContent = data.dailyOrders || '0';
+                    document.getElementById('statActiveCustomers').textContent = data.activeUsers || '0';
                     return;
                 }
             } catch (e) {
                 console.warn('Public stats not available, falling back to product count');
             }
 
-            // 降级方案：从产品列表获取总数，品牌固定为50+，用户数显示静态值
+            // 降级方案：仅获取商品总数，其他显示占位符
             try {
                 const productsRes = await fetch('/api/products');
                 const productsData = await productsRes.json();
                 if (productsData.success) {
                     document.getElementById('statStyles').textContent = productsData.count || productsData.data.length;
                 } else {
-                    document.getElementById('statStyles').textContent = '500+';
+                    document.getElementById('statStyles').textContent = '0';
                 }
             } catch (e) {
-                document.getElementById('statStyles').textContent = '500+';
+                document.getElementById('statStyles').textContent = '0';
             }
 
-            document.getElementById('statBrands').textContent = '50+';
-            document.getElementById('statCustomers').textContent = '10K+';
+            document.getElementById('statDailyOrders').textContent = '--';
+            document.getElementById('statActiveCustomers').textContent = '--';
         }
 
         // 加载热销产品

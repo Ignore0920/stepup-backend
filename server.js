@@ -95,6 +95,43 @@ app.get('/api/info', (req, res) => {
     });
 });
 
+// ============ 公开统计接口（无需登录） ============
+app.get('/api/public/stats', async (req, res) => {
+    try {
+        // 商品总数
+        const totalProducts = await Product.countDocuments();
+
+        // 今日订单数（基于本地时间零点）
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
+        const dailyOrders = await Order.countDocuments({
+            createdAt: { $gte: todayStart, $lte: todayEnd }
+        });
+
+        // 活跃用户数（近30天有登录记录的用户，若无 lastLogin 则回退到 createdAt）
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const activeUsers = await User.countDocuments({
+            $or: [
+                { lastLogin: { $gte: thirtyDaysAgo } },
+                { lastLogin: { $exists: false }, createdAt: { $gte: thirtyDaysAgo } }
+            ]
+        });
+
+        res.json({
+            success: true,
+            totalProducts,
+            dailyOrders,
+            activeUsers
+        });
+    } catch (err) {
+        console.error('Public stats error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // ============ 管理员认证 ============
 app.post('/api/admin/login', async (req, res) => {
     try {

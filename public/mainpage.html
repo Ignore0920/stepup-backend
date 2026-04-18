@@ -247,31 +247,6 @@
             color: #ffffff;
         }
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #e5e5e5;
-        }
-
-        .stat {
-            text-align: left;
-        }
-
-        .stat-number {
-            font-size: 1.75rem;
-            font-family: 'Playfair Display', serif;
-            font-weight: bold;
-            color: #262626;
-        }
-
-        .stat-label {
-            font-size: 0.875rem;
-            color: #999999;
-            margin-top: 0.25rem;
-        }
-
         .hero-visual {
             position: relative;
             aspect-ratio: 1;
@@ -312,57 +287,59 @@
             }
         }
 
-        /* Monthly Selection Section */
-        .monthly-selection-section {
+        /* Stats Banner Section (取代原来的 Monthly Selection) */
+        .stats-banner-section {
             padding: 5rem 0;
-            background-color: #ffffff;
+            background-color: #f9f9f9;
+            border-top: 1px solid #e5e5e5;
+            border-bottom: 1px solid #e5e5e5;
         }
 
-        .monthly-title {
-            text-align: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 3rem;
-            font-family: 'Playfair Display', serif;
-        }
-
-        .monthly-products {
+        .stats-banner {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 2rem;
-            margin-bottom: 4rem;
-        }
-
-        .monthly-product-card {
             text-align: center;
         }
 
-        .monthly-product-image {
-            width: 100%;
-            height: 300px;
-            background-color: #f5f5f5;
-            margin-bottom: 1.5rem;
-            object-fit: cover;
+        .stat-item {
+            padding: 2rem;
+            background-color: #ffffff;
             border: 1px solid #e5e5e5;
+            transition: all 0.3s;
         }
 
-        .stars {
-            display: flex;
-            justify-content: center;
-            gap: 0.25rem;
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
+        .stat-item:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            transform: translateY(-3px);
+            border-color: #262626;
         }
 
-        .star {
-            color: #ffc107;
+        .stat-number {
+            font-size: 3.5rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            color: #262626;
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
         }
 
-        .monthly-product-description {
-            font-size: 0.95rem;
+        .stat-label {
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
             color: #666666;
-            margin-bottom: 1rem;
-            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .stats-banner {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .stat-number {
+                font-size: 2.5rem;
+            }
         }
 
         /* Recommendation Section */
@@ -795,7 +772,8 @@
             .social-links {
                 justify-content: center;
             }
-        }    .recommendation-section {
+
+            .recommendation-section {
                 flex-direction: column;
                 align-items: stretch;
             }
@@ -804,7 +782,7 @@
             .recommendation-button {
                 width: 100%;
             }
-        
+        }
     </style>
 </head>
 <body>
@@ -853,21 +831,6 @@
                         <button class="btn btn-primary" onclick="window.location.href='products.html'">Explore Collection</button>
                         <button class="btn btn-secondary" onclick="window.location.href='about.html'">View Lookbook</button>
                     </div>
-
-                    <div class="stats">
-                        <div class="stat">
-                            <div class="stat-number" id="statStyles">--</div>
-                            <div class="stat-label">Premium Styles</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-number" id="statBrands">--</div>
-                            <div class="stat-label">Top Brands</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-number" id="statCustomers">--</div>
-                            <div class="stat-label">Happy Customers</div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="hero-visual">
@@ -880,43 +843,21 @@
         </div>
     </section>
 
-    <!-- Monthly Selection Section -->
-    <section class="monthly-selection-section" id="monthly">
+    <!-- Stats Banner Section (取代原 Monthly Selection) -->
+    <section class="stats-banner-section">
         <div class="container">
-            <h2 class="monthly-title">This Month's Selection</h2>
-
-            <div class="monthly-products">
-                <!-- Product 1 -->
-                <div class="monthly-product-card">
-                    <div class="monthly-product-image" style="background-color: #e5e5e5;"></div>
-                    <div class="stars">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                    </div>
-                    <p class="monthly-product-description">Leather Shoes, Tan, Waterproof</p>
+            <div class="stats-banner">
+                <div class="stat-item">
+                    <div class="stat-number" id="statStyles">--</div>
+                    <div class="stat-label">Premium Styles</div>
                 </div>
-
-                <!-- Product 2 -->
-                <div class="monthly-product-card">
-                    <div class="monthly-product-image" style="background-color: #e5e5e5;"></div>
-                    <div class="stars">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                    </div>
-                    <p class="monthly-product-description">Leather Shoes, Tan, Formal Occasion</p>
+                <div class="stat-item">
+                    <div class="stat-number" id="statBrands">--</div>
+                    <div class="stat-label">Top Brands</div>
                 </div>
-
-                <!-- Product 3 -->
-                <div class="monthly-product-card">
-                    <div class="monthly-product-image" style="background-color: #e5e5e5;"></div>
-                    <div class="stars">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                    </div>
-                    <p class="monthly-product-description">Leather Shoes, Black, Formal Occasion</p>
+                <div class="stat-item">
+                    <div class="stat-number" id="statCustomers">--</div>
+                    <div class="stat-label">Happy Customers</div>
                 </div>
             </div>
         </div>

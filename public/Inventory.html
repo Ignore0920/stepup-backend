@@ -117,10 +117,10 @@
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button class="btn export-btn" onclick="exportToExcel()">📊 Export to Excel</button>
-                    <label class="btn btn-primary import-label" style="display: inline-block;">
+                    <label class="btn btn-primary import-label" style="display: inline-block; cursor: pointer;" onclick="showImportFormatAndSelectFile()">
                         📤 Import Products
-                        <input type="file" id="importFileInput" accept=".csv,.xlsx,.xls" style="display: none;" />
                     </label>
+                    <input type="file" id="importFileInput" accept=".csv,.xlsx,.xls" style="display: none;" />
                 </div>
             </div>
 
@@ -342,6 +342,35 @@
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
+    }
+
+    // ========== 导入格式提示 ==========
+    function showImportFormatAndSelectFile() {
+        const formatMessage = `📋 IMPORT FILE FORMAT REQUIREMENTS
+
+✅ REQUIRED COLUMNS (must be present):
+   • name         – Product name
+   • brand        – Brand name
+   • model        – Model identifier
+   • sizeRange    – e.g., 35-45 or 35,36,37
+   • price        – Numeric (e.g., 189.99)
+   • stock        – Integer (e.g., 45)
+
+🟡 OPTIONAL COLUMNS:
+   • image        – URL to product image
+   • tag          – e.g., FEATURED, NEW, SALE
+   • collection   – e.g., Casual, Running
+   • description  – Product description
+
+⚠️ IMPORTANT NOTES:
+   • File must be CSV, XLSX, or XLS.
+   • First row must be the header with exact column names (case-insensitive).
+   • If a product with the same name, brand, and model already exists, it will be UPDATED instead of duplicated.
+   • Empty rows will be skipped.`;
+
+        if (confirm(formatMessage + '\n\nClick "OK" to select a file.')) {
+            document.getElementById('importFileInput').click();
+        }
     }
 
     // ========== 批量导入功能 ==========

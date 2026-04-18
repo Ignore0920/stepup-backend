@@ -287,7 +287,7 @@
             }
         }
 
-        /* Stats Banner Section (取代原来的 Monthly Selection) */
+        /* Stats Banner Section */
         .stats-banner-section {
             padding: 5rem 0;
             background-color: #f9f9f9;
@@ -340,60 +340,6 @@
             .stat-number {
                 font-size: 2.5rem;
             }
-        }
-
-        /* Recommendation Section */
-        .recommendation-section {
-            background-color: #f9f9f9;
-            padding: 3rem;
-            border-radius: 0;
-            margin-bottom: 3rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .recommendation-label {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #262626;
-            white-space: nowrap;
-        }
-
-        .recommendation-input {
-            flex: 1;
-            min-width: 250px;
-            padding: 1rem 1.5rem;
-            background-color: #ffc107;
-            border: none;
-            font-size: 0.95rem;
-            color: #262626;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .recommendation-input:hover {
-            background-color: #ffb300;
-        }
-
-        .recommendation-button {
-            padding: 1rem 2rem;
-            background-color: #4a90e2;
-            color: #ffffff;
-            border: none;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-
-        .recommendation-button:hover {
-            background-color: #3a7bc8;
         }
 
         /* Featured Products Section */
@@ -510,7 +456,6 @@
             font-weight: 600;
         }
 
-        /* 热销徽章 */
         .hot-badge {
             position: absolute;
             top: 1rem;
@@ -758,35 +703,21 @@
             .container {
                 padding: 0 1rem;
             }
-
             .footer-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-
             .footer-bottom {
                 flex-direction: column;
                 gap: 1rem;
                 text-align: center;
             }
-
             .social-links {
                 justify-content: center;
-            }
-
-            .recommendation-section {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .recommendation-input,
-            .recommendation-button {
-                width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation Header -->
     <header>
         <div class="container">
             <div class="header-content">
@@ -808,7 +739,6 @@
         </div>
     </header>
 
-    <!-- Hero Section -->
     <section class="hero">
         <div class="container">
             <div class="hero-content">
@@ -826,13 +756,11 @@
                             </p>
                         </div>
                     </div>
-
                     <div class="button-group">
                         <button class="btn btn-primary" onclick="window.location.href='products.html'">Explore Collection</button>
                         <button class="btn btn-secondary" onclick="window.location.href='about.html'">View Lookbook</button>
                     </div>
                 </div>
-
                 <div class="hero-visual">
                     <div class="hero-visual-content">
                         <div class="hero-visual-emoji">👟</div>
@@ -843,7 +771,7 @@
         </div>
     </section>
 
-    <!-- Stats Banner Section (取代原 Monthly Selection) -->
+    <!-- Stats Banner -->
     <section class="stats-banner-section">
         <div class="container">
             <div class="stats-banner">
@@ -857,52 +785,44 @@
                 </div>
                 <div class="stat-item">
                     <div class="stat-number" id="statCustomers">--</div>
-                    <div class="stat-label">Happy Customers</div>
+                    <div class="stat-label">Active Customers</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Featured Products Section (热销产品 - 实时更新) -->
     <section class="featured-section" id="shop">
         <div class="container">
             <h2 class="section-title">🔥 Hot Selling</h2>
             <p class="section-description">
                 Our most popular styles based on real customer orders. Updated in real-time.
             </p>
-
             <div class="products-grid" id="featuredProductsGrid">
-                <!-- Products will be loaded dynamically -->
                 <div style="text-align: center; grid-column: 1/-1; padding: 2rem;">Loading hot products...</div>
             </div>
         </div>
     </section>
 
-    <!-- Collections Section -->
     <section class="collections-section" id="collections">
         <div class="container">
             <h2 class="section-title">Shop by Collection</h2>
             <p class="section-description">
                 Curated collections designed for every lifestyle and occasion.
             </p>
-
             <div class="collections-grid">
-                <div class="collection-card" onclick="goToProductsWithFilter('Running')" style="cursor: pointer;">
+                <div class="collection-card" onclick="goToProductsWithFilter('Running')">
                     <div class="collection-image">🏃</div>
                     <h3 class="collection-name">Athletic</h3>
                 </div>
-
-                <div class="collection-card" onclick="goToProductsWithFilter('Casual')" style="cursor: pointer;">
+                <div class="collection-card" onclick="goToProductsWithFilter('Casual')">
                     <div class="collection-image">👟</div>
                     <h3 class="collection-name">Casual</h3>
                 </div>
-
-                <div class="collection-card" onclick="goToProductsWithFilter('Basketball')" style="cursor: pointer;">
+                <div class="collection-card" onclick="goToProductsWithFilter('Basketball')">
                     <div class="collection-image">⚽</div>
                     <h3 class="collection-name">Sport</h3>
                 </div>
-
-                <div class="collection-card" onclick="goToProductsWithFilter('Training')" style="cursor: pointer;">
+                <div class="collection-card" onclick="goToProductsWithFilter('Training')">
                     <div class="collection-image">👑</div>
                     <h3 class="collection-name">Premium</h3>
                 </div>
@@ -910,7 +830,6 @@
         </div>
     </section>
 
-    <!-- Brands Section -->
     <section class="brands-section" id="brands">
         <div class="container">
             <div class="brands-title">
@@ -919,29 +838,28 @@
                     We partner with the world's most prestigious athletic and lifestyle brands.
                 </p>
             </div>
-
             <div class="brands-grid">
-                <div class="brand-card" onclick="goToProductsWithBrand('Nike')" style="cursor: pointer;">
+                <div class="brand-card" onclick="goToProductsWithBrand('Nike')">
                     <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/nike_logo-3ofqLp6PBdCCDqG4ZLiuEV.webp" alt="Nike" style="width: 120px; height: 120px; object-fit: contain;">
                     <div class="brand-name">Nike</div>
                 </div>
-                <div class="brand-card" onclick="goToProductsWithBrand('Adidas')" style="cursor: pointer;">
+                <div class="brand-card" onclick="goToProductsWithBrand('Adidas')">
                     <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/adidas_logo-gD7A8tdW3c8kf4LAiBdpj6.webp" alt="Adidas" style="width: 120px; height: 120px; object-fit: contain;">
                     <div class="brand-name">Adidas</div>
                 </div>
-                <div class="brand-card" onclick="goToProductsWithBrand('Jordan')" style="cursor: pointer;">
+                <div class="brand-card" onclick="goToProductsWithBrand('Jordan')">
                     <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/jordan_logo-XbKPzVfYBPX7WYw9MFaxz4.webp" alt="Jordan" style="width: 120px; height: 120px; object-fit: contain;">
                     <div class="brand-name">Jordan</div>
                 </div>
-                <div class="brand-card" onclick="goToProductsWithBrand('Puma')" style="cursor: pointer;">
+                <div class="brand-card" onclick="goToProductsWithBrand('Puma')">
                     <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/puma_logo-efjVBACcBRSEgTHJmiJfqc.webp" alt="Puma" style="width: 120px; height: 120px; object-fit: contain;">
                     <div class="brand-name">Puma</div>
                 </div>
-                <div class="brand-card" onclick="goToProductsWithBrand('New Balance')" style="cursor: pointer;">
+                <div class="brand-card" onclick="goToProductsWithBrand('New Balance')">
                     <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/newbalance_logo-FxVhjrqBwtHjs7pmYDMfhd.webp" alt="New Balance" style="width: 120px; height: 120px; object-fit: contain;">
                     <div class="brand-name">New Balance</div>
                 </div>
-                <div class="brand-card" onclick="goToProductsWithBrand('Converse')" style="cursor: pointer;">
+                <div class="brand-card" onclick="goToProductsWithBrand('Converse')">
                     <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/converse_logo-RFfmSudDH2EGYUBRkBHL5a.webp" alt="Converse" style="width: 120px; height: 120px; object-fit: contain;">
                     <div class="brand-name">Converse</div>
                 </div>
@@ -949,7 +867,6 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
     <section class="cta-section">
         <div class="container">
             <h2 class="cta-title">Discover Your Perfect Fit</h2>
@@ -968,7 +885,6 @@
                     <div class="brand-name">STEPUP</div>
                     <p>Your destination for premium footwear and athletic gear. We believe in quality, style, and comfort for every step of your journey.</p>
                 </div>
-
                 <div class="footer-section">
                     <h4>Shop</h4>
                     <ul>
@@ -978,7 +894,6 @@
                         <li><a href="#">Sale</a></li>
                     </ul>
                 </div>
-
                 <div class="footer-section">
                     <h4>Support</h4>
                     <ul>
@@ -988,7 +903,6 @@
                         <li><a href="#">FAQ</a></li>
                     </ul>
                 </div>
-
                 <div class="footer-section">
                     <h4>Company</h4>
                     <ul>
@@ -999,7 +913,6 @@
                     </ul>
                 </div>
             </div>
-
             <div class="footer-bottom">
                 <span>&copy; 2026 StepUp. All rights reserved.</span>
                 <div class="social-links">
@@ -1012,98 +925,85 @@
     </footer>
 
     <script>
-        // Product collections data (for collection count only, not used for navigation)
-        const collections = [
-            { name: 'Athletic', key: 'Running' },
-            { name: 'Casual', key: 'Casual' },
-            { name: 'Sport', key: 'Basketball' },
-            { name: 'Premium', key: 'Training' }
-        ];
-
         function goToProductsWithFilter(collection) {
             sessionStorage.setItem('selectedCollection', collection);
             window.location.href = 'products.html';
         }
-
         function goToProductsWithBrand(brand) {
             sessionStorage.setItem('selectedBrand', brand);
             window.location.href = 'products.html';
         }
-
         function goToProducts() {
             sessionStorage.removeItem('selectedBrand');
             sessionStorage.removeItem('selectedCollection');
             window.location.href = 'products.html';
         }
-
         function updateCartBadge() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const badge = document.getElementById('cartBadge');
-            if (badge) badge.textContent = totalItems;
+            document.getElementById('cartBadge').textContent = totalItems;
         }
 
-        // 加载统计数据（产品总数、品牌数、用户数）
+        // 加载统计数据（兼容公开访问）
         async function loadStats() {
             try {
-                const res = await fetch('/api/admin/dashboard/stats');
-                const data = await res.json();
-                if (data.success) {
+                // 尝试调用公开统计接口（若后端已添加）
+                const res = await fetch('/api/public/stats');
+                if (res.ok) {
+                    const data = await res.json();
                     document.getElementById('statStyles').textContent = data.totalProducts || '500+';
-                    document.getElementById('statBrands').textContent = '50+'; // 固定或从后端获取
+                    document.getElementById('statBrands').textContent = '50+';
                     document.getElementById('statCustomers').textContent = data.totalUsers || '10K+';
+                    return;
                 }
-            } catch (err) {
-                console.error('Failed to load stats:', err);
-                // 保持默认值
-                document.getElementById('statStyles').textContent = '500+';
-                document.getElementById('statBrands').textContent = '50+';
-                document.getElementById('statCustomers').textContent = '10K+';
+            } catch (e) {
+                console.warn('Public stats not available, falling back to product count');
             }
+
+            // 降级方案：从产品列表获取总数，品牌固定为50+，用户数显示静态值
+            try {
+                const productsRes = await fetch('/api/products');
+                const productsData = await productsRes.json();
+                if (productsData.success) {
+                    document.getElementById('statStyles').textContent = productsData.count || productsData.data.length;
+                } else {
+                    document.getElementById('statStyles').textContent = '500+';
+                }
+            } catch (e) {
+                document.getElementById('statStyles').textContent = '500+';
+            }
+
+            document.getElementById('statBrands').textContent = '50+';
+            document.getElementById('statCustomers').textContent = '10K+';
         }
 
-        // 加载热销产品（按销量排序）
+        // 加载热销产品
         async function loadHotProducts() {
             const grid = document.getElementById('featuredProductsGrid');
             grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 2rem;">Loading hot products...</div>';
 
             try {
-                // 获取热销产品数据（按销量排序）
                 const res = await fetch('/api/admin/dashboard/top-products?limit=8');
                 const data = await res.json();
-                
                 if (data.success && data.data && data.data.length > 0) {
-                    // 有销售数据，展示热销产品
                     const hotProducts = data.data;
-                    
-                    // 获取完整产品信息（包含图片等）
                     const productsRes = await fetch('/api/products');
                     const productsData = await productsRes.json();
-                    
                     if (productsData.success) {
                         const allProducts = productsData.data;
-                        
-                        // 合并销量数据与产品详情
-                        const enrichedProducts = hotProducts.map(hotItem => {
+                        const enriched = hotProducts.map(hotItem => {
                             const product = allProducts.find(p => p.name === hotItem.name && p.brand === hotItem.brand);
-                            return {
-                                ...product,
-                                totalQuantity: hotItem.totalQuantity,
-                                totalRevenue: hotItem.totalRevenue
-                            };
-                        }).filter(p => p && p._id); // 过滤掉找不到的产品
-
-                        if (enrichedProducts.length > 0) {
-                            renderHotProducts(enrichedProducts);
+                            return { ...product, totalQuantity: hotItem.totalQuantity, totalRevenue: hotItem.totalRevenue };
+                        }).filter(p => p && p._id);
+                        if (enriched.length > 0) {
+                            renderHotProducts(enriched);
                         } else {
-                            // 如果没有匹配的产品，显示所有产品
                             renderFallbackProducts(allProducts.slice(0, 8));
                         }
                     } else {
                         renderFallbackMessage();
                     }
                 } else {
-                    // 没有销售数据，显示普通产品
                     const productsRes = await fetch('/api/products');
                     const productsData = await productsRes.json();
                     if (productsData.success) {
@@ -1118,7 +1018,6 @@
             }
         }
 
-        // 渲染热销产品
         function renderHotProducts(products) {
             const grid = document.getElementById('featuredProductsGrid');
             grid.innerHTML = products.map((p, index) => `
@@ -1143,11 +1042,10 @@
             `).join('');
         }
 
-        // 降级显示普通产品
         function renderFallbackProducts(products) {
             const grid = document.getElementById('featuredProductsGrid');
             grid.innerHTML = products.map(p => `
-                <div class="product-card" onclick="window.location.href='product-detail.html?id=${p._id}'" style="cursor: pointer;">
+                <div class="product-card" onclick="window.location.href='product-detail.html?id=${p._id}'">
                     <div style="position: relative;">
                         <div class="product-image" style="background-image: url('${p.image || ''}');">
                             ${!p.image ? '<span style="font-size: 3rem;">👟</span>' : ''}
@@ -1165,8 +1063,7 @@
         }
 
         function renderFallbackMessage() {
-            const grid = document.getElementById('featuredProductsGrid');
-            grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 2rem;">No products available at the moment.</div>';
+            document.getElementById('featuredProductsGrid').innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 2rem;">No products available at the moment.</div>';
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -1174,7 +1071,6 @@
             loadStats();
             loadHotProducts();
         });
-
         window.addEventListener('storage', updateCartBadge);
     </script>
 </body>

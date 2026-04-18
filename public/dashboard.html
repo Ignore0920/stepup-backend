@@ -100,8 +100,7 @@
             margin-bottom: 2rem;
             display: flex;
             flex-direction: column;
-            height: 100%;
-            min-height: 450px; /* 保证两个卡片视觉统一 */
+            height: fit-content;          /* 改为 fit-content，避免强制拉伸 */
         }
         .card-header {
             display: flex;
@@ -154,18 +153,16 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.85rem;
+            table-layout: auto;           /* 自动分配列宽 */
         }
         .data-table th,
         .data-table td {
-            padding: 0.6rem 0.5rem;
+            padding: 0.75rem 0.8rem;
             text-align: left;
             border-bottom: 1px solid #e5e5e5;
-            white-space: nowrap;
         }
         .data-table td {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 180px;
+            white-space: nowrap;          /* 强制不换行，配合横向滚动 */
         }
         .data-table th {
             background: #fafafa;
@@ -177,27 +174,32 @@
             border-bottom: 2px solid #262626;
         }
 
+        /* 表格容器：支持横向滚动，并控制最大高度 */
         .table-responsive {
             overflow-x: auto;
-            margin: 0 -1.5rem;
+            overflow-y: auto;
+            max-height: 320px;             /* 限制表格区域高度，与图表视觉平衡 */
+            margin: 0 -1.5rem;             /* 抵消卡片内边距，让滚动条贴边 */
             padding: 0 1.5rem;
-            flex: 1;
         }
 
         .chart-container {
             position: relative;
             height: 280px;
             width: 100%;
-            flex: 1;
-            min-height: 0;
         }
 
-        /* 两列布局 */
+        /* 两列布局网格 */
         .dashboard-grid-2col {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
             margin-bottom: 2rem;
+        }
+
+        /* 让两列卡片在内容高度不同时顶部对齐 */
+        .dashboard-grid-2col .card {
+            margin-bottom: 0;
         }
 
         .mode-toggle {
@@ -254,8 +256,8 @@
             .dashboard-grid-2col {
                 grid-template-columns: 1fr;
             }
-            .card {
-                min-height: auto;
+            .table-responsive {
+                max-height: none;
             }
         }
     </style>
@@ -412,7 +414,6 @@
     let currentForecastData = [];
     let refreshInterval = null;
 
-    // 获取仪表板统计数据
     async function fetchDashboardStats() {
         try {
             const res = await fetch('/api/admin/dashboard/stats', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -426,7 +427,6 @@
         } catch (err) { console.error('Stats error:', err); }
     }
 
-    // 获取销售额时间线
     async function fetchSalesTimeline() {
         try {
             const res = await fetch('/api/admin/dashboard/sales-timeline?days=30', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -468,7 +468,6 @@
         });
     }
 
-    // 渲染预测图表
     function renderForecastChart(dates, values, label) {
         const ctx = document.getElementById('forecastChart').getContext('2d');
         if (forecastChart) forecastChart.destroy();
@@ -706,7 +705,7 @@
         return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
     }
 
-    // 绑定事件
+    // 事件绑定
     document.getElementById('autoRefreshCheckbox').addEventListener('change', startAutoRefresh);
     document.getElementById('manualRefreshBtn').addEventListener('click', async () => {
         await fetchDashboardStats();
@@ -725,7 +724,7 @@
         e.target.value = '';
     });
 
-    // 统一初始化
+    // 初始化
     (async function init() {
         await fetchDashboardStats();
         await fetchSalesTimeline();

@@ -357,7 +357,7 @@
 
     let salesChart, forecastChart, productsChart;
     let currentForecastMode = 'auto';
-    let currentForecastData = []; // stores { date, value }
+    let currentForecastData = [];
     let refreshInterval = null;
 
     // Fetch dashboard stats
@@ -374,7 +374,7 @@
         } catch (err) { console.error('Stats error:', err); }
     }
 
-    // Fetch actual sales timeline (for the actual sales chart)
+    // Fetch actual sales timeline
     async function fetchSalesTimeline() {
         try {
             const res = await fetch('/api/admin/dashboard/sales-timeline?days=30', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -416,7 +416,7 @@
         });
     }
 
-    // Render forecast chart (standalone)
+    // Render forecast chart
     function renderForecastChart(dates, values, label) {
         const ctx = document.getElementById('forecastChart').getContext('2d');
         if (forecastChart) forecastChart.destroy();
@@ -445,7 +445,6 @@
         });
     }
 
-    // Update forecast table
     function updateForecastTable(forecastArray, sourceLabel) {
         const tbody = document.getElementById('forecastTableBody');
         if (!forecastArray || forecastArray.length === 0) {
@@ -462,7 +461,6 @@
         currentForecastData = forecastArray;
     }
 
-    // Auto-forecast
     async function fetchAutoForecast() {
         const includeToday = document.getElementById('includeTodayCheckbox').checked;
         let url = '/api/admin/dashboard/auto-forecast?days=7';
@@ -471,13 +469,10 @@
             const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
             if (res.ok && data.data && data.data.length) {
-                const forecastDates = data.data.map(f => f.date);
-                const forecastValues = data.data.map(f => f.value);
-                renderForecastChart(forecastDates, forecastValues, 'Auto Forecast (ML)');
+                renderForecastChart(data.data.map(f => f.date), data.data.map(f => f.value), 'Auto Forecast (ML)');
                 updateForecastTable(data.data, 'Auto ML');
                 return true;
             } else {
-                console.warn('Auto-forecast not available:', data.message);
                 renderForecastChart([], [], 'No forecast');
                 updateForecastTable([], 'Auto ML');
                 return false;
@@ -490,15 +485,12 @@
         }
     }
 
-    // Manual uploaded forecast
     async function fetchUploadedForecast() {
         try {
             const res = await fetch('/api/admin/dashboard/forecast', { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
             if (res.ok && data.data && data.data.length) {
-                const forecastDates = data.data.map(f => f.date);
-                const forecastValues = data.data.map(f => f.value);
-                renderForecastChart(forecastDates, forecastValues, 'Uploaded Forecast');
+                renderForecastChart(data.data.map(f => f.date), data.data.map(f => f.value), 'Uploaded Forecast');
                 updateForecastTable(data.data, 'Manual Upload');
                 return true;
             } else {
@@ -519,15 +511,12 @@
         else await fetchUploadedForecast();
     }
 
-    // Top products bar chart
     async function fetchTopProducts() {
         try {
             const res = await fetch('/api/admin/dashboard/top-products?limit=5', { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
             if (res.ok && data.data) {
-                const labels = data.data.map(p => p.name);
-                const quantities = data.data.map(p => p.totalQuantity);
-                renderProductsChart(labels, quantities);
+                renderProductsChart(data.data.map(p => p.name), data.data.map(p => p.totalQuantity));
             }
         } catch (err) { console.error('Top products error:', err); }
     }
@@ -542,73 +531,28 @@
         });
     }
 
-    
-async function fetchTopCustomers() {
-    try {
-        const res = await fetch('/api/admin/dashboard/top-customers?limit=10', { 
-            headers: { 'Authorization': `Bearer ${token}` } 
-        });
-        const data = await res.json();
-        if (res.ok && data.data) {
-            const tbody = document.querySelector('#topCustomersTable tbody');
-            if (data.data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No customers found</td></tr>';
-            } else {
-                tbody.innerHTML = data.data.map(customer => `
-                    <tr>
-                        <td>${escapeHtml(customer.name)}</td>
-                        <td>${escapeHtml(customer.email)}</td>
-                        <td>${customer.orderCount}</td>
-                        <td>MOP ${customer.totalSpent.toFixed(2)}</td>
-                    </tr>
-                `).join('');
+    async function fetchTopCustomers() {
+        try {
+            const res = await fetch('/api/admin/dashboard/top-customers?limit=10', { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            if (res.ok && data.data) {
+                const tbody = document.querySelector('#topCustomersTable tbody');
+                if (data.data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No customers found</td></tr>';
+                } else {
+                    tbody.innerHTML = data.data.map(customer => `
+                        <tr>
+                            <td>${escapeHtml(customer.name)}</td>
+                            <td>${escapeHtml(customer.email)}</td>
+                            <td>${customer.orderCount}</td>
+                            <td>MOP ${customer.totalSpent.toFixed(2)}</td>
+                        </tr>
+                    `).join('');
+                }
             }
-        }
-    } catch (err) { 
-        console.error('Top customers error:', err); 
+        } catch (err) { console.error('Top customers error:', err); }
     }
-}
 
-// 导出函数
-async function exportTopCustomersToCSV() {
-    const res = await fetch('/api/admin/dashboard/top-customers?limit=100', { 
-        headers: { 'Authorization': `Bearer ${token}` } 
-    });
-    const data = await res.json();
-    if (res.ok && data.data) {
-        const headers = ['Name', 'Email', 'Orders', 'Total Spent (MOP)'];
-        const rows = data.data.map(c => [c.name, c.email, c.orderCount, c.totalSpent.toFixed(2)]);
-        downloadCSV(headers, rows, 'top_customers.csv');
-    } else alert('Failed to fetch top customers');
-}
-
-// 修改初始化函数中调用
-(async function init() {
-    await fetchDashboardStats();
-    await fetchSalesTimeline();
-    initModeToggle();
-    await loadForecast();
-    await fetchTopProducts();
-    await fetchTopCustomers();   // 替换原来的 fetchRecentOrders()
-    startAutoRefresh();
-})();
-
-// 修改自动刷新中的调用
-if (autoRefresh) {
-    refreshInterval = setInterval(async () => {
-        console.log('Auto-refreshing dashboard...');
-        await fetchDashboardStats();
-        await fetchSalesTimeline();
-        await loadForecast();
-        await fetchTopProducts();
-        await fetchTopCustomers();   // 替换
-    }, 60 * 60 * 1000);
-}
-
-// 绑定导出按钮事件（找到原来的 exportOrdersBtn 替换）
-document.getElementById('exportCustomersBtn').addEventListener('click', exportTopCustomersToCSV);
-   
-// Export functions
     async function exportSalesToCSV() {
         const res = await fetch('/api/admin/dashboard/sales-timeline?days=30', { headers: { 'Authorization': `Bearer ${token}` } });
         const data = await res.json();
@@ -629,14 +573,14 @@ document.getElementById('exportCustomersBtn').addEventListener('click', exportTo
         } else alert('Failed to fetch top products');
     }
 
-    async function exportRecentOrdersToCSV() {
-        const res = await fetch('/api/admin/dashboard/recent-orders?limit=1000', { headers: { 'Authorization': `Bearer ${token}` } });
+    async function exportTopCustomersToCSV() {
+        const res = await fetch('/api/admin/dashboard/top-customers?limit=100', { headers: { 'Authorization': `Bearer ${token}` } });
         const data = await res.json();
         if (res.ok && data.data) {
-            const headers = ['Order ID', 'Date', 'Customer', 'Total (MOP)', 'Status'];
-            const rows = data.data.map(o => [o.orderId, new Date(o.createdAt).toLocaleDateString(), `${o.customer.firstName} ${o.customer.lastName}`, o.total, o.status]);
-            downloadCSV(headers, rows, 'recent_orders.csv');
-        } else alert('Failed to fetch orders');
+            const headers = ['Name', 'Email', 'Orders', 'Total Spent (MOP)'];
+            const rows = data.data.map(c => [c.name, c.email, c.orderCount, c.totalSpent.toFixed(2)]);
+            downloadCSV(headers, rows, 'top_customers.csv');
+        } else alert('Failed to fetch top customers');
     }
 
     function exportForecastToCSV() {
@@ -662,7 +606,6 @@ document.getElementById('exportCustomersBtn').addEventListener('click', exportTo
         URL.revokeObjectURL(url);
     }
 
-    // Manual forecast upload
     async function uploadForecast(file) {
         const formData = new FormData();
         formData.append('forecast', file);
@@ -677,7 +620,6 @@ document.getElementById('exportCustomersBtn').addEventListener('click', exportTo
         } catch (err) { document.getElementById('uploadStatus').innerText = '✗ Network error'; }
     }
 
-    // Toggle forecast mode
     function initModeToggle() {
         const radios = document.querySelectorAll('input[name="forecastMode"]');
         const manualSection = document.getElementById('manualUploadSection');
@@ -685,8 +627,7 @@ document.getElementById('exportCustomersBtn').addEventListener('click', exportTo
             radio.addEventListener('change', async (e) => {
                 if (e.target.checked) {
                     currentForecastMode = e.target.value;
-                    if (currentForecastMode === 'auto') manualSection.style.display = 'none';
-                    else manualSection.style.display = 'block';
+                    manualSection.style.display = currentForecastMode === 'auto' ? 'none' : 'block';
                     await loadForecast();
                 }
             });
@@ -694,46 +635,52 @@ document.getElementById('exportCustomersBtn').addEventListener('click', exportTo
         manualSection.style.display = 'none';
     }
 
-    // Auto-refresh
     function startAutoRefresh() {
         if (refreshInterval) clearInterval(refreshInterval);
-        const autoRefresh = document.getElementById('autoRefreshCheckbox').checked;
-        if (autoRefresh) {
+        if (document.getElementById('autoRefreshCheckbox').checked) {
             refreshInterval = setInterval(async () => {
                 console.log('Auto-refreshing dashboard...');
                 await fetchDashboardStats();
                 await fetchSalesTimeline();
                 await loadForecast();
                 await fetchTopProducts();
-                await fetchRecentOrders();
+                await fetchTopCustomers();
             }, 60 * 60 * 1000);
         }
     }
 
-    // Event listeners
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
+    }
+
+    // 绑定事件
     document.getElementById('autoRefreshCheckbox').addEventListener('change', startAutoRefresh);
     document.getElementById('manualRefreshBtn').addEventListener('click', async () => {
         await fetchDashboardStats();
         await fetchSalesTimeline();
         await loadForecast();
         await fetchTopProducts();
-        await fetchRecentOrders();
+        await fetchTopCustomers();
     });
     document.getElementById('includeTodayCheckbox').addEventListener('change', loadForecast);
     document.getElementById('exportSalesBtn').addEventListener('click', exportSalesToCSV);
     document.getElementById('exportProductsBtn').addEventListener('click', exportTopProductsToCSV);
-    document.getElementById('exportOrdersBtn').addEventListener('click', exportRecentOrdersToCSV);
+    document.getElementById('exportCustomersBtn').addEventListener('click', exportTopCustomersToCSV);
     document.getElementById('exportForecastBtn').addEventListener('click', exportForecastToCSV);
-    document.getElementById('forecastFile').addEventListener('change', (e) => { if (e.target.files.length) uploadForecast(e.target.files[0]); e.target.value = ''; });
+    document.getElementById('forecastFile').addEventListener('change', (e) => {
+        if (e.target.files.length) uploadForecast(e.target.files[0]);
+        e.target.value = '';
+    });
 
-    // Initial load
+    // 统一初始化
     (async function init() {
         await fetchDashboardStats();
-        await fetchSalesTimeline();    // actual sales chart
+        await fetchSalesTimeline();
         initModeToggle();
-        await loadForecast();          // forecast chart + table
+        await loadForecast();
         await fetchTopProducts();
-        await fetchRecentOrders();
+        await fetchTopCustomers();
         startAutoRefresh();
     })();
 </script>

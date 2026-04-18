@@ -42,7 +42,69 @@
         .export-btn:hover { background-color: #2ecc71; }
         .import-label { background: #262626; color: white; cursor: pointer; display: inline-block; margin: 0; }
         .import-label:hover { background: #404040; }
-        @media (max-width: 768px) { .filter-group { min-width: 100%; } }
+
+        /* 模态框样式 (与 User.html 一致) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: #fff;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 8px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+        }
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+        .close-modal:hover { color: #262626; }
+        .modal-footer {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+        .btn-cancel {
+            background: #eee;
+            color: #666;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .btn-cancel:hover { background: #ddd; }
+        .btn-save {
+            background: #262626;
+            color: #fff;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .btn-save:hover { background: #404040; }
     </style>
 </head>
 <body>
@@ -102,7 +164,7 @@
                 </div>
             </div>
 
-            <!-- Sort and Export + Import -->
+            <!-- Sort and Export + Import + Add New Product -->
             <div class="sort-bar">
                 <div>
                     <label>Sort by: </label>
@@ -121,6 +183,7 @@
                         📤 Import Products
                     </label>
                     <input type="file" id="importFileInput" accept=".csv,.xlsx,.xls" style="display: none;" />
+                    <button class="btn btn-primary" onclick="openAddProductModal()">➕ Add New Product</button>
                 </div>
             </div>
 
@@ -133,21 +196,64 @@
             </table>
         </div>
 
-        <div class="admin-section">
-            <h2>Add / Edit Product</h2>
-            <form id="shoeForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="form-group"><label>Product Name *</label><input type="text" id="sName" class="form-control" required></div>
-                <div class="form-group"><label>Brand *</label><input type="text" id="sBrand" class="form-control" required></div>
-                <div class="form-group"><label>Model Name *</label><input type="text" id="sModel" class="form-control" required></div>
-                <div class="form-group"><label>Size Range *</label><input type="text" id="sSize" class="form-control" required></div>
-                <div class="form-group"><label>Price ($) *</label><input type="number" id="sPrice" step="0.01" class="form-control" required></div>
-                <div class="form-group"><label>Stock Level *</label><input type="number" id="sStock" class="form-control" required></div>
-                <div class="form-group"><label>Image URL</label><input type="text" id="sImage" class="form-control" placeholder="https://..."></div>
-                <div class="form-group"><label>Tag (optional)</label><input type="text" id="sTag" class="form-control" placeholder="NEW, FEATURED, SALE"></div>
-                <div class="form-group" style="display: flex; align-items: flex-end;"><button type="submit" class="btn btn-primary" style="width: 100%;">Add Product</button></div>
-            </form>
-        </div>
+        <!-- 原 Add / Edit 表单区域已移除 -->
     </main>
+</div>
+
+<!-- 产品编辑/新增模态框 -->
+<div id="productModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeProductModal()">&times;</span>
+        <div class="modal-header">
+            <h3 id="modalTitle">Add New Product</h3>
+        </div>
+        <form id="productForm">
+            <div class="form-group">
+                <label>Product Name *</label>
+                <input type="text" id="modalName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Brand *</label>
+                <input type="text" id="modalBrand" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Model Name *</label>
+                <input type="text" id="modalModel" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Size Range *</label>
+                <input type="text" id="modalSizeRange" class="form-control" placeholder="e.g., 35-45" required>
+            </div>
+            <div class="form-group">
+                <label>Price ($) *</label>
+                <input type="number" id="modalPrice" step="0.01" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Stock Level *</label>
+                <input type="number" id="modalStock" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Image URL</label>
+                <input type="text" id="modalImage" class="form-control" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Tag (optional)</label>
+                <input type="text" id="modalTag" class="form-control" placeholder="NEW, FEATURED, SALE">
+            </div>
+            <div class="form-group">
+                <label>Collection</label>
+                <input type="text" id="modalCollection" class="form-control" placeholder="Casual, Running, etc." value="Casual">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="modalDescription" class="form-control" rows="2" placeholder="Product description..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeProductModal()">Cancel</button>
+                <button type="submit" class="btn-save">Save Product</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
@@ -171,6 +277,96 @@
     let filteredProducts = [];
     let editingProductId = null;
 
+    // ---------- 模态框控制 ----------
+    function openAddProductModal() {
+        editingProductId = null;
+        document.getElementById('modalTitle').innerText = 'Add New Product';
+        document.getElementById('productForm').reset();
+        document.getElementById('modalCollection').value = 'Casual';
+        document.getElementById('modalDescription').value = '';
+        document.getElementById('productModal').style.display = 'flex';
+    }
+
+    function closeProductModal() {
+        document.getElementById('productModal').style.display = 'none';
+        editingProductId = null;
+    }
+
+    // 编辑产品时打开模态框并填充数据
+    async function openEditModal(productId) {
+        try {
+            const res = await fetch(`/api/admin/inventory/products/${productId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            const p = data.product;
+            
+            editingProductId = productId;
+            document.getElementById('modalTitle').innerText = 'Edit Product';
+            document.getElementById('modalName').value = p.name || '';
+            document.getElementById('modalBrand').value = p.brand || '';
+            document.getElementById('modalModel').value = p.model || '';
+            document.getElementById('modalSizeRange').value = p.sizeRange || '';
+            document.getElementById('modalPrice').value = p.price || '';
+            document.getElementById('modalStock').value = p.stock || '';
+            document.getElementById('modalImage').value = p.image || '';
+            document.getElementById('modalTag').value = p.tag || '';
+            document.getElementById('modalCollection').value = p.collection || 'Casual';
+            document.getElementById('modalDescription').value = p.description || '';
+            
+            document.getElementById('productModal').style.display = 'flex';
+        } catch (err) { alert(err.message); }
+    }
+
+    // 提交表单（新增或更新）
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const productData = {
+            name: document.getElementById('modalName').value.trim(),
+            brand: document.getElementById('modalBrand').value.trim(),
+            model: document.getElementById('modalModel').value.trim(),
+            sizeRange: document.getElementById('modalSizeRange').value.trim(),
+            price: parseFloat(document.getElementById('modalPrice').value),
+            stock: parseInt(document.getElementById('modalStock').value),
+            image: document.getElementById('modalImage').value.trim(),
+            tag: document.getElementById('modalTag').value.trim(),
+            collection: document.getElementById('modalCollection').value.trim() || 'Casual',
+            description: document.getElementById('modalDescription').value.trim() || 'Premium athletic footwear with exceptional comfort and style.'
+        };
+
+        if (!productData.name || !productData.brand || !productData.model || !productData.sizeRange || isNaN(productData.price) || isNaN(productData.stock)) {
+            alert('Please fill all required fields correctly');
+            return;
+        }
+
+        try {
+            let response;
+            if (editingProductId) {
+                response = await fetch(`/api/admin/inventory/products/${editingProductId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(productData)
+                });
+            } else {
+                response = await fetch('/api/admin/inventory/products', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(productData)
+                });
+            }
+            
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || 'Save failed');
+            
+            alert(editingProductId ? 'Product updated successfully!' : 'Product added successfully!');
+            closeProductModal();
+            await loadProducts();
+        } catch (err) {
+            alert(err.message);
+        }
+    });
+
+    // 加载产品列表
     async function loadProducts() {
         try {
             const res = await fetch('/api/admin/inventory/products', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -243,7 +439,7 @@
                 <td>${prod.stock}</td>
                 <td>
                     <div class="action-btns">
-                        <button class="btn-table btn-edit" onclick="editProduct('${prod._id}')">Edit</button>
+                        <button class="btn-table btn-edit" onclick="openEditModal('${prod._id}')">Edit</button>
                         <button class="btn-table btn-remove" onclick="removeProduct('${prod._id}')">Remove</button>
                     </div>
                  </td>
@@ -251,15 +447,22 @@
         });
     }
 
+    window.removeProduct = async function(id) {
+        if (!confirm('Remove this product?')) return;
+        try {
+            const res = await fetch(`/api/admin/inventory/products/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) throw new Error((await res.json()).error);
+            loadProducts();
+        } catch (err) { alert(err.message); }
+    };
+
     function exportToExcel() {
         if (filteredProducts.length === 0) {
             alert('No data to export');
             return;
         }
         const headers = ['Name', 'Brand', 'Model', 'Size Range', 'Price (MOP)', 'Stock', 'Tag'];
-        const rows = filteredProducts.map(p => [
-            p.name, p.brand, p.model, p.sizeRange, p.price, p.stock, p.tag || ''
-        ]);
+        const rows = filteredProducts.map(p => [p.name, p.brand, p.model, p.sizeRange, p.price, p.stock, p.tag || '']);
         const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
         const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
@@ -272,79 +475,12 @@
         URL.revokeObjectURL(url);
     }
 
-    window.editProduct = async function(id) {
-        try {
-            const res = await fetch(`/api/admin/inventory/products/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-            const p = data.product;
-            document.getElementById('sName').value = p.name;
-            document.getElementById('sBrand').value = p.brand;
-            document.getElementById('sModel').value = p.model;
-            document.getElementById('sSize').value = p.sizeRange;
-            document.getElementById('sPrice').value = p.price;
-            document.getElementById('sStock').value = p.stock;
-            document.getElementById('sImage').value = p.image || '';
-            document.getElementById('sTag').value = p.tag || '';
-            editingProductId = id;
-            document.querySelector('#shoeForm button[type="submit"]').textContent = 'Update Product';
-        } catch (err) { alert(err.message); }
-    };
-
-    window.removeProduct = async function(id) {
-        if (!confirm('Remove this product?')) return;
-        try {
-            const res = await fetch(`/api/admin/inventory/products/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-            if (!res.ok) throw new Error((await res.json()).error);
-            loadProducts();
-        } catch (err) { alert(err.message); }
-    };
-
-    document.getElementById('shoeForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const productData = {
-            name: document.getElementById('sName').value.trim(),
-            brand: document.getElementById('sBrand').value.trim(),
-            model: document.getElementById('sModel').value.trim(),
-            sizeRange: document.getElementById('sSize').value.trim(),
-            price: parseFloat(document.getElementById('sPrice').value),
-            stock: parseInt(document.getElementById('sStock').value),
-            image: document.getElementById('sImage').value.trim(),
-            tag: document.getElementById('sTag').value.trim()
-        };
-        if (!productData.name || !productData.brand || !productData.model || !productData.sizeRange || isNaN(productData.price) || isNaN(productData.stock)) {
-            alert('Please fill all required fields correctly');
-            return;
-        }
-        try {
-            let response;
-            if (editingProductId) {
-                response = await fetch(`/api/admin/inventory/products/${editingProductId}`, {
-                    method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(productData)
-                });
-                if (response.ok) {
-                    editingProductId = null;
-                    document.querySelector('#shoeForm button[type="submit"]').textContent = 'Add Product';
-                }
-            } else {
-                response = await fetch('/api/admin/inventory/products', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(productData)
-                });
-            }
-            if (!response.ok) throw new Error((await response.json()).error);
-            document.getElementById('shoeForm').reset();
-            loadProducts();
-        } catch (err) { alert(err.message); }
-    });
-
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
     }
 
-    // ========== 导入格式提示 ==========
+    // 导入格式提示
     function showImportFormatAndSelectFile() {
         const formatMessage = `📋 IMPORT FILE FORMAT REQUIREMENTS
 
@@ -373,12 +509,10 @@
         }
     }
 
-    // ========== 批量导入功能 ==========
     const importFileInput = document.getElementById('importFileInput');
     importFileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
         const allowedExtensions = ['.csv', '.xlsx', '.xls'];
         const fileName = file.name.toLowerCase();
         const isValid = allowedExtensions.some(ext => fileName.endsWith(ext));
@@ -387,27 +521,20 @@
             importFileInput.value = '';
             return;
         }
-
         if (!confirm(`Are you sure you want to import products from "${file.name}"?`)) {
             importFileInput.value = '';
             return;
         }
-
         const formData = new FormData();
         formData.append('file', file);
-
         try {
             const response = await fetch('/api/admin/inventory/import', {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
             });
-
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || 'Import failed');
-
             alert(`✅ Import completed!\nInserted: ${result.inserted}\nUpdated: ${result.updated || 0}\nErrors: ${result.errors || 0}`);
             await loadProducts();
         } catch (err) {
@@ -417,6 +544,12 @@
             importFileInput.value = '';
         }
     });
+
+    // 点击模态框背景关闭
+    window.onclick = function(event) {
+        const modal = document.getElementById('productModal');
+        if (event.target === modal) closeProductModal();
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
         loadProducts();

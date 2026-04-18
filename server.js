@@ -662,12 +662,30 @@ app.delete('/api/admin/orders/:id', verifyAdminToken, async (req, res) => {
 app.get('/api/admin/users', verifyAdminToken, async (req, res) => {
     try {
         const users = await User.aggregate([
-            { $lookup: { from: 'orders', localField: '_id', foreignField: 'userId', as: 'orders' } },
-            { $addFields: { orderCount: { $size: '$orders' } } },
-            { $project: { password: 0, orders: 0 } },
+            {
+                $lookup: {
+                    from: 'orders',
+                    localField: '_id',
+                    foreignField: 'userId',
+                    as: 'orders'
+                }
+            },
+            {
+                $addFields: {
+                    orderCount: { $size: '$orders' },
+                    totalSpent: { $sum: '$orders.total' }
+                }
+            },
+            {
+                $project: {
+                    password: 0,
+                    orders: 0
+                }
+            },
             { $sort: { createdAt: -1 } }
         ]);
-        console.log(`👥 Admin fetched ${users.length} users, first user orderCount: ${users[0]?.orderCount || 0}`);
+
+        console.log(`👥 Admin fetched ${users.length} users, first user orderCount: ${users[0]?.orderCount || 0}, totalSpent: ${users[0]?.totalSpent || 0}`);
         res.json({ success: true, data: users });
     } catch (err) {
         console.error('Error fetching users with order count:', err);
@@ -820,6 +838,49 @@ app.get('/api/admin/dashboard/recent-orders', verifyAdminToken, async (req, res)
         res.json({ success: true, data: orders });
     } catch (err) {
         console.error('Recent orders error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.get('/api/admin/dashboard/top-customers', verifyAdminToken, async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const pipeline = [
+            {
+                $lookup: {
+                    from: 'orders',
+                    localField: '_id',
+                    foreignField: 'userId',
+                    as: 'orders'
+                }
+            },
+            {
+                $addFields: {
+                    orderCount: { $size: '$orders' },
+                    totalSpent: { $sum: '$orders.total' }
+                }
+            },
+            {
+                $match: {
+                    orderCount: { $gt: 0 }   // 只显示至少有一笔订单的用户
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    email: 1,
+                    orderCount: 1,
+                    totalSpent: 1
+                }
+            },
+            { $sort: { totalSpent: -1 } },
+            { $limit: limit }
+        ];
+
+        const results = await User.aggregate(pipeline);
+        res.json({ success: true, data: results });
+    } catch (err) {
+        console.error('Top customers error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });

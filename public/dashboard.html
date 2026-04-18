@@ -317,15 +317,19 @@
                 <div class="chart-container" style="height: 300px;"><canvas id="productsChart"></canvas></div>
             </div>
             <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Recent Orders</h3>
-                    <button class="btn export-btn" id="exportOrdersBtn">Export</button>
-                </div>
-                <table class="data-table" id="recentOrdersTable">
-                    <thead><tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
-                    <tbody><tr><td colspan="5" style="text-align:center;">Loading...</td></tr></tbody>
-                </table>
-            </div>
+    <div class="card-header">
+        <h3 class="card-title">Top Customers</h3>
+        <button class="btn export-btn" id="exportCustomersBtn">Export</button>
+    </div>
+    <table class="data-table" id="topCustomersTable">
+        <thead>
+            <tr><th>Name</th><th>Email</th><th>Orders</th><th>Total Spent</th></tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
         </div>
     </main>
 </div>
@@ -538,29 +542,73 @@
         });
     }
 
-    async function fetchRecentOrders() {
-        try {
-            const res = await fetch('/api/admin/dashboard/recent-orders?limit=10', { headers: { 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            if (res.ok && data.data) {
-                const tbody = document.querySelector('#recentOrdersTable tbody');
-                if (data.data.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No orders found</td></tr>';
-                else {
-                    tbody.innerHTML = data.data.map(order => `
-                        <tr>
-                            <td>${order.orderId}</td>
-                            <td>${new Date(order.createdAt).toLocaleDateString()}</td>
-                            <td>${order.customer.firstName} ${order.customer.lastName}</td>
-                            <td>MOP ${order.total.toFixed(2)}</td>
-                            <td>${order.status}</td>
-                        </tr>
-                    `).join('');
-                }
+    
+async function fetchTopCustomers() {
+    try {
+        const res = await fetch('/api/admin/dashboard/top-customers?limit=10', { 
+            headers: { 'Authorization': `Bearer ${token}` } 
+        });
+        const data = await res.json();
+        if (res.ok && data.data) {
+            const tbody = document.querySelector('#topCustomersTable tbody');
+            if (data.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No customers found</td></tr>';
+            } else {
+                tbody.innerHTML = data.data.map(customer => `
+                    <tr>
+                        <td>${escapeHtml(customer.name)}</td>
+                        <td>${escapeHtml(customer.email)}</td>
+                        <td>${customer.orderCount}</td>
+                        <td>MOP ${customer.totalSpent.toFixed(2)}</td>
+                    </tr>
+                `).join('');
             }
-        } catch (err) { console.error('Recent orders error:', err); }
+        }
+    } catch (err) { 
+        console.error('Top customers error:', err); 
     }
+}
 
-    // Export functions
+// 导出函数
+async function exportTopCustomersToCSV() {
+    const res = await fetch('/api/admin/dashboard/top-customers?limit=100', { 
+        headers: { 'Authorization': `Bearer ${token}` } 
+    });
+    const data = await res.json();
+    if (res.ok && data.data) {
+        const headers = ['Name', 'Email', 'Orders', 'Total Spent (MOP)'];
+        const rows = data.data.map(c => [c.name, c.email, c.orderCount, c.totalSpent.toFixed(2)]);
+        downloadCSV(headers, rows, 'top_customers.csv');
+    } else alert('Failed to fetch top customers');
+}
+
+// 修改初始化函数中调用
+(async function init() {
+    await fetchDashboardStats();
+    await fetchSalesTimeline();
+    initModeToggle();
+    await loadForecast();
+    await fetchTopProducts();
+    await fetchTopCustomers();   // 替换原来的 fetchRecentOrders()
+    startAutoRefresh();
+})();
+
+// 修改自动刷新中的调用
+if (autoRefresh) {
+    refreshInterval = setInterval(async () => {
+        console.log('Auto-refreshing dashboard...');
+        await fetchDashboardStats();
+        await fetchSalesTimeline();
+        await loadForecast();
+        await fetchTopProducts();
+        await fetchTopCustomers();   // 替换
+    }, 60 * 60 * 1000);
+}
+
+// 绑定导出按钮事件（找到原来的 exportOrdersBtn 替换）
+document.getElementById('exportCustomersBtn').addEventListener('click', exportTopCustomersToCSV);
+   
+// Export functions
     async function exportSalesToCSV() {
         const res = await fetch('/api/admin/dashboard/sales-timeline?days=30', { headers: { 'Authorization': `Bearer ${token}` } });
         const data = await res.json();

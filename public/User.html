@@ -155,15 +155,16 @@
         <!-- Users Table -->
         <table class="data-table">
             <thead>
-                <tr>
-                    <th>User ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Registered</th>
-                    <th>Orders</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+    <tr>
+        <th>User ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Registered</th>
+        <th>Orders</th>
+        <th>Total Spent</th>   <!-- 新增 -->
+        <th>Actions</th>
+    </tr>
+</thead>
             <tbody id="userTableBody">
                 <tr><td colspan="6" style="text-align:center;">Loading users...</td></tr>
             </tbody>
@@ -297,18 +298,19 @@
             return;
         }
         tbody.innerHTML = filteredUsers.map(user => `
-            <tr data-id="${user._id}">
-                <td>${user._id.slice(-6)}</td>
-                <td class="user-name">${escapeHtml(user.name)}</td>
-                <td class="user-email">${escapeHtml(user.email)}</td>
-                <td>${new Date(user.createdAt).toLocaleDateString()}</td>
-                <td class="user-orders">${user.orderCount || 0}</td>
-                <td>
-                    <button class="btn-action" onclick="openEditModal('${user._id}')">Edit</button>
-                    <button class="btn-action btn-remove" onclick="removeUser('${user._id}')">Remove</button>
-                </td>
-            </tr>
-        `).join('');
+    <tr data-id="${user._id}">
+        <td>${user._id.slice(-6)}</td>
+        <td class="user-name">${escapeHtml(user.name)}</td>
+        <td class="user-email">${escapeHtml(user.email)}</td>
+        <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+        <td class="user-orders">${user.orderCount || 0}</td>
+        <td class="user-spent">MOP ${(user.totalSpent || 0).toFixed(2)}</td>   <!-- 新增 -->
+        <td>
+            <button class="btn-action" onclick="openEditModal('${user._id}')">Edit</button>
+            <button class="btn-action btn-remove" onclick="removeUser('${user._id}')">Remove</button>
+        </td>
+    </tr>
+`).join('');
     }
 
     // Edit modal
@@ -402,14 +404,15 @@
             alert('No data to export');
             return;
         }
-        const headers = ['User ID', 'Name', 'Email', 'Registered', 'Orders'];
-        const rows = filteredUsers.map(u => [
-            u._id,
-            u.name,
-            u.email,
-            new Date(u.createdAt).toLocaleDateString(),
-            u.orderCount || 0
-        ]);
+        const headers = ['User ID', 'Name', 'Email', 'Registered', 'Orders', 'Total Spent (MOP)'];
+const rows = filteredUsers.map(u => [
+    u._id,
+    u.name,
+    u.email,
+    new Date(u.createdAt).toLocaleDateString(),
+    u.orderCount || 0,
+    (u.totalSpent || 0).toFixed(2)
+]);
         const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
         const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');

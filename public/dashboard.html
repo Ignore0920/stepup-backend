@@ -90,12 +90,18 @@
             letter-spacing: 0.1em;
             color: #999;
         }
+
+        /* 卡片通用样式 */
         .card {
             background: #fff;
             border: 1px solid #e5e5e5;
             border-radius: 8px;
             padding: 1.5rem;
             margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 450px; /* 保证两个卡片视觉统一 */
         }
         .card-header {
             display: flex;
@@ -103,7 +109,7 @@
             align-items: center;
             margin-bottom: 1rem;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 0.5rem;
         }
         .card-title {
             font-size: 1.25rem;
@@ -142,29 +148,58 @@
         .export-btn:hover {
             background: #2ecc71;
         }
+
+        /* 表格样式优化 */
         .data-table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.85rem;
         }
-        .data-table th {
+        .data-table th,
+        .data-table td {
+            padding: 0.6rem 0.5rem;
             text-align: left;
-            padding: 0.75rem;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            border-bottom: 2px solid #262626;
-            background: #fafafa;
+            border-bottom: 1px solid #e5e5e5;
+            white-space: nowrap;
         }
         .data-table td {
-            padding: 0.75rem;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 0.9rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
         }
+        .data-table th {
+            background: #fafafa;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.7rem;
+            color: #666;
+            border-bottom: 2px solid #262626;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            margin: 0 -1.5rem;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
         .chart-container {
             position: relative;
-            height: 300px;
-            margin-top: 1rem;
+            height: 280px;
+            width: 100%;
+            flex: 1;
+            min-height: 0;
         }
+
+        /* 两列布局 */
+        .dashboard-grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
         .mode-toggle {
             display: flex;
             gap: 1rem;
@@ -208,12 +243,19 @@
             font-size: 0.85rem;
             text-transform: uppercase;
         }
+
         @media (max-width: 768px) {
             .main-content {
                 padding: 20px;
             }
             .stats-grid {
                 grid-template-columns: 1fr;
+            }
+            .dashboard-grid-2col {
+                grid-template-columns: 1fr;
+            }
+            .card {
+                min-height: auto;
             }
         }
     </style>
@@ -236,7 +278,7 @@
     <main class="main-content">
         <h1>Dashboard</h1>
 
-        <!-- Stats Cards -->
+        <!-- 统计卡片 -->
         <div class="stats-grid" id="statsGrid">
             <div class="stat-card"><div class="stat-value" id="totalRevenue">--</div><div class="stat-label">Total Revenue (MOP)</div></div>
             <div class="stat-card"><div class="stat-value" id="totalOrders">--</div><div class="stat-label">Total Orders</div></div>
@@ -244,7 +286,7 @@
             <div class="stat-card"><div class="stat-value" id="totalProducts">--</div><div class="stat-label">Products in Inventory</div></div>
         </div>
 
-        <!-- Actual Sales Chart (no forecast) -->
+        <!-- 实际销售额图表 -->
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">📈 Actual Sales (Last 30 Days)</h3>
@@ -255,7 +297,7 @@
             </div>
         </div>
 
-        <!-- Forecast Chart (separate) -->
+        <!-- 预测图表 -->
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">🔮 Forecast (Next 7 Days)</h3>
@@ -279,7 +321,6 @@
                 <canvas id="forecastChart"></canvas>
             </div>
 
-            <!-- Manual upload section -->
             <div id="manualUploadSection" style="margin-top: 1rem; text-align: center; display: none;">
                 <label class="btn btn-secondary" style="display: inline-block; cursor: pointer;">
                     📁 Upload Forecast CSV
@@ -291,7 +332,6 @@
                 </div>
             </div>
 
-            <!-- Forecast Values Table -->
             <div class="forecast-table-container">
                 <div class="card-header" style="margin-bottom: 0;">
                     <h3 class="card-title">📋 Forecast Values</h3>
@@ -307,29 +347,41 @@
             </div>
         </div>
 
-        <!-- Top Products & Recent Orders -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <!-- 热销产品 & 顶级客户 (两列布局) -->
+        <div class="dashboard-grid-2col">
+            <!-- 热销产品卡片 -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Top Selling Products</h3>
+                    <h3 class="card-title">🔥 Top Selling Products</h3>
                     <button class="btn export-btn" id="exportProductsBtn">Export</button>
                 </div>
-                <div class="chart-container" style="height: 300px;"><canvas id="productsChart"></canvas></div>
+                <div class="chart-container">
+                    <canvas id="productsChart"></canvas>
+                </div>
             </div>
+
+            <!-- 顶级客户卡片 -->
             <div class="card">
-    <div class="card-header">
-        <h3 class="card-title">Top Customers</h3>
-        <button class="btn export-btn" id="exportCustomersBtn">Export</button>
-    </div>
-    <table class="data-table" id="topCustomersTable">
-        <thead>
-            <tr><th>Name</th><th>Email</th><th>Orders</th><th>Total Spent</th></tr>
-        </thead>
-        <tbody>
-            <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
-        </tbody>
-    </table>
-</div>
+                <div class="card-header">
+                    <h3 class="card-title">🏆 Top Customers</h3>
+                    <button class="btn export-btn" id="exportCustomersBtn">Export</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table" id="topCustomersTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Orders</th>
+                                <th>Total Spent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </main>
 </div>
@@ -360,7 +412,7 @@
     let currentForecastData = [];
     let refreshInterval = null;
 
-    // Fetch dashboard stats
+    // 获取仪表板统计数据
     async function fetchDashboardStats() {
         try {
             const res = await fetch('/api/admin/dashboard/stats', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -374,7 +426,7 @@
         } catch (err) { console.error('Stats error:', err); }
     }
 
-    // Fetch actual sales timeline
+    // 获取销售额时间线
     async function fetchSalesTimeline() {
         try {
             const res = await fetch('/api/admin/dashboard/sales-timeline?days=30', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -416,7 +468,7 @@
         });
     }
 
-    // Render forecast chart
+    // 渲染预测图表
     function renderForecastChart(dates, values, label) {
         const ctx = document.getElementById('forecastChart').getContext('2d');
         if (forecastChart) forecastChart.destroy();
@@ -542,8 +594,8 @@
                 } else {
                     tbody.innerHTML = data.data.map(customer => `
                         <tr>
-                            <td>${escapeHtml(customer.name)}</td>
-                            <td>${escapeHtml(customer.email)}</td>
+                            <td title="${escapeHtml(customer.name)}">${escapeHtml(customer.name)}</td>
+                            <td title="${escapeHtml(customer.email)}">${escapeHtml(customer.email)}</td>
                             <td>${customer.orderCount}</td>
                             <td>MOP ${customer.totalSpent.toFixed(2)}</td>
                         </tr>

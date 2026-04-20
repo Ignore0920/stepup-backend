@@ -43,7 +43,17 @@
         .import-label { background: #262626; color: white; cursor: pointer; display: inline-block; margin: 0; }
         .import-label:hover { background: #404040; }
 
-        /* 模态框样式 (与 User.html 一致) */
+        /* 低库存行高亮样式 */
+        .low-stock-row {
+            background-color: #ffebee !important;
+            border-left: 4px solid #e74c3c;
+            font-weight: 600;
+        }
+        .low-stock-row td {
+            color: #c0392b;
+        }
+
+        /* 模态框样式 */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -193,10 +203,8 @@
                     <th>Name</th><th>Brand</th><th>Model</th><th>Sizes</th><th>Price</th><th>Stock</th><th>Actions</th>
                 </thead>
                 <tbody id="shoeTableBody"></tbody>
-            </table>
+             </table>
         </div>
-
-        <!-- 原 Add / Edit 表单区域已移除 -->
     </main>
 </div>
 
@@ -292,7 +300,6 @@
         editingProductId = null;
     }
 
-    // 编辑产品时打开模态框并填充数据
     async function openEditModal(productId) {
         try {
             const res = await fetch(`/api/admin/inventory/products/${productId}`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -317,7 +324,6 @@
         } catch (err) { alert(err.message); }
     }
 
-    // 提交表单（新增或更新）
     document.getElementById('productForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -366,7 +372,6 @@
         }
     });
 
-    // 加载产品列表
     async function loadProducts() {
         try {
             const res = await fetch('/api/admin/inventory/products', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -422,29 +427,38 @@
 
     function renderTable() {
         const tbody = document.getElementById('shoeTableBody');
-        tbody.innerHTML = '';
         if (filteredProducts.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No products found</td></tr>';
             return;
         }
-        filteredProducts.forEach(prod => {
-            const row = tbody.insertRow();
-            row.setAttribute('data-id', prod._id);
-            row.innerHTML = `
-                <td>${escapeHtml(prod.name)}</td>
-                <td>${escapeHtml(prod.brand)}</td>
-                <td>${escapeHtml(prod.model)}</td>
-                <td>${escapeHtml(prod.sizeRange)}</td>
-                <td>$${prod.price.toFixed(2)}</td>
-                <td>${prod.stock}</td>
-                <td>
-                    <div class="action-btns">
-                        <button class="btn-table btn-edit" onclick="openEditModal('${prod._id}')">Edit</button>
-                        <button class="btn-table btn-remove" onclick="removeProduct('${prod._id}')">Remove</button>
-                    </div>
-                 </td>
-            `;
+
+        // 排序：库存 < 5 的排前面，其余保持原顺序
+        const sorted = [...filteredProducts].sort((a, b) => {
+            if (a.stock < 5 && b.stock >= 5) return -1;
+            if (a.stock >= 5 && b.stock < 5) return 1;
+            return 0;
         });
+
+        tbody.innerHTML = sorted.map(prod => {
+            const isLowStock = prod.stock < 5;
+            const rowClass = isLowStock ? 'low-stock-row' : '';
+            return `
+                <tr class="${rowClass}" data-id="${prod._id}">
+                    <td>${escapeHtml(prod.name)}</td>
+                    <td>${escapeHtml(prod.brand)}</td>
+                    <td>${escapeHtml(prod.model)}</td>
+                    <td>${escapeHtml(prod.sizeRange)}</td>
+                    <td>$${prod.price.toFixed(2)}</td>
+                    <td>${prod.stock}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-table btn-edit" onclick="openEditModal('${prod._id}')">Edit</button>
+                            <button class="btn-table btn-remove" onclick="removeProduct('${prod._id}')">Remove</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
 
     window.removeProduct = async function(id) {
@@ -480,7 +494,6 @@
         return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
     }
 
-    // 导入格式提示
     function showImportFormatAndSelectFile() {
         const formatMessage = `📋 IMPORT FILE FORMAT REQUIREMENTS
 
@@ -545,7 +558,6 @@
         }
     });
 
-    // 点击模态框背景关闭
     window.onclick = function(event) {
         const modal = document.getElementById('productModal');
         if (event.target === modal) closeProductModal();

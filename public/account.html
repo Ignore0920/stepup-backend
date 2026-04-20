@@ -65,6 +65,8 @@
         .status-cancelled { background-color: #f8d7da; color: #721c24; }
         .view-btn { background: none; border: 1px solid #262626; color: #262626; padding: 0.375rem 0.75rem; cursor: pointer; font-size: 0.75rem; transition: all 0.3s; }
         .view-btn:hover { background-color: #262626; color: #ffffff; }
+        .cancel-btn { margin-left: 5px; background-color: #e74c3c; border-color: #e74c3c; color: white; }
+        .cancel-btn:hover { background-color: #c0392b; border-color: #c0392b; }
         .empty-state { text-align: center; padding: 3rem 1rem; color: #666666; }
         .success-message { background-color: #d4edda; border: 1px solid #4caf50; color: #155724; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; display: none; }
         .success-message.show { display: block; }
@@ -231,7 +233,7 @@
                             <tbody id="ordersBody">
                                 <tr><td colspan="5" style="text-align: center;">Loading orders...</td></tr>
                             </tbody>
-                        </table>
+                         </table>
                     </div>
                 </div>
 
@@ -260,7 +262,7 @@
                     </div>
                 </div>
 
-                <!-- Settings Section (已修改：仅保留 Reset Password 按钮) -->
+                <!-- Settings Section -->
                 <div id="settings" class="content-section">
                     <h2 class="section-title">Account Settings</h2>
                     <div class="success-message" id="settingsSuccess">Settings updated successfully!</div>
@@ -275,10 +277,8 @@
                                 <div class="profile-value" id="notifications">-</div>
                             </div>
                         </div>
-                        <!-- 仅保留 Reset Password 按钮 -->
                         <button class="edit-btn" onclick="simulateResetPassword()">Reset Password</button>
                     </div>
-                    <!-- Edit Settings 表单已移除，无需保留 -->
                 </div>
             </div>
         </div>
@@ -380,23 +380,56 @@
                     const statusClass = `status-${order.status}`;
                     const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A';
                     const canCancel = order.status === 'pending' || order.status === 'processing';
-const cancelButton = canCancel ? `<button class="view-btn cancel-btn" style="margin-left: 5px; background-color: #e74c3c; border-color: #e74c3c; color: white;" onclick="cancelUserOrder('${order._id}')">Cancel</button>` : '';
-
-row.innerHTML = `
-    <td class="order-id">${escapeHtml(order.orderId || order._id)}</td>
-    <td>${orderDate}</td>
-    <td>MOP ${order.total.toFixed(2)}</td>
-    <td><span class="order-status ${statusClass}">${order.status}</span></td>
-    <td>
-        <button class="view-btn" onclick="viewOrder('${order._id}')">View</button>
-        ${cancelButton}
-    </td>
-`;
+                    const cancelButton = canCancel ? `<button class="view-btn cancel-btn" onclick="cancelUserOrder('${order._id}')">Cancel</button>` : '';
+                    row.innerHTML = `
+                        <td class="order-id">${escapeHtml(order.orderId || order._id)}</td>
+                        <td>${orderDate}</td>
+                        <td>MOP ${order.total.toFixed(2)}</td>
+                        <td><span class="order-status ${statusClass}">${order.status}</span></td>
+                        <td>
+                            <button class="view-btn" onclick="viewOrder('${order._id}')">View</button>
+                            ${cancelButton}
+                        </td>
+                    `;
                     ordersBody.appendChild(row);
                 });
             } catch (err) {
                 console.error('Load orders error:', err);
                 ordersBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Error loading orders. Please try again.</td></tr>';
+            }
+        }
+
+        // 用户取消订单
+        async function cancelUserOrder(orderId) {
+            if (!confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const token = localStorage.getItem('userToken');
+                if (!token) {
+                    alert('Please login to continue');
+                    window.location.href = 'loginregister.html';
+                    return;
+                }
+                
+                const response = await fetch(`/api/users/orders/${orderId}/cancel`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Failed to cancel order');
+                
+                alert('Order cancelled successfully!');
+                // 刷新订单列表
+                await loadOrders();
+            } catch (err) {
+                console.error('Cancel order error:', err);
+                alert(err.message || 'Failed to cancel order. Please try again.');
             }
         }
 
@@ -532,7 +565,6 @@ row.innerHTML = `
             setTimeout(() => element.classList.remove('show'), 3000);
         }
 
-        // 模拟重置密码（弹窗提示）
         function simulateResetPassword() {
             alert('📧 A password reset link has been sent to your email address. Please check your inbox to continue.');
         }
@@ -598,7 +630,7 @@ row.innerHTML = `
                             <tbody>
                                 ${itemsHtml}
                             </tbody>
-                        </table>
+                         </table>
                         <div style="text-align: right; margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid #eee;">
                             <p><strong>Subtotal:</strong> MOP ${order.subtotal.toFixed(2)}</p>
                             <p><strong>Shipping:</strong> ${order.shipping === 0 ? 'Free' : 'MOP ' + order.shipping.toFixed(2)}</p>
@@ -610,40 +642,6 @@ row.innerHTML = `
                 contentDiv.innerHTML = `<p style="color: #e74c3c; text-align: center; padding: 2rem;">Error: ${escapeHtml(err.message)}</p>`;
             }
         }
-
-        // 用户取消订单
-async function cancelUserOrder(orderId) {
-    if (!confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
-        return;
-    }
-    
-    try {
-        const token = localStorage.getItem('userToken');
-        if (!token) {
-            alert('Please login to continue');
-            window.location.href = 'loginregister.html';
-            return;
-        }
-        
-        const response = await fetch(`/api/users/orders/${orderId}/cancel`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Failed to cancel order');
-        
-        alert('Order cancelled successfully!');
-        // 刷新订单列表
-        await loadOrders();
-    } catch (err) {
-        console.error('Cancel order error:', err);
-        alert(err.message || 'Failed to cancel order. Please try again.');
-    }
-}
 
         function closeOrderModal() {
             document.getElementById('orderDetailModal').style.display = 'none';

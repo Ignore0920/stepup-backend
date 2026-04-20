@@ -5,7 +5,7 @@ const path = require('path');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const XLSX = require('xlsx'); // 引入 xlsx 模块
+const XLSX = require('xlsx');
 
 // Models
 const Admin = require('./models/Admin');
@@ -19,7 +19,7 @@ const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'stepup_admin_secret_key_change_in_production';
 
 const multer = require('multer');
-const upload = multer({ storage: multer.memoryStorage() }); // 只定义一次
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Middleware
 app.use(cors({
@@ -43,16 +43,13 @@ function isMongoConnected() {
 function getUserIdFromToken(req) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        console.log('🔐 No valid Authorization header');
         return null;
     }
     const token = authHeader.split(' ')[1];
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
-        console.log(`🔐 Token decoded, userId: ${decoded.id}`);
         return decoded.id;
     } catch (err) {
-        console.log('🔐 Token verification failed:', err.message);
         return null;
     }
 }
@@ -98,19 +95,15 @@ app.get('/api/info', (req, res) => {
 // ============ 公开统计接口（无需登录） ============
 app.get('/api/public/stats', async (req, res) => {
     try {
-        // 商品总数
         const totalProducts = await Product.countDocuments();
-
-        // 今日订单数（基于本地时间零点）
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
         const todayEnd = new Date();
         todayEnd.setHours(23, 59, 59, 999);
         const dailyOrders = await Order.countDocuments({
-            createdAt: { $gte: todayStart, $lte: todayEnd }
+            createdAt: { $gte: todayStart, $lte: todayEnd },
+            status: { $ne: 'cancelled' }
         });
-
-        // 活跃用户数（近30天有登录记录的用户，若无 lastLogin 则回退到 createdAt）
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         const activeUsers = await User.countDocuments({
@@ -119,13 +112,7 @@ app.get('/api/public/stats', async (req, res) => {
                 { lastLogin: { $exists: false }, createdAt: { $gte: thirtyDaysAgo } }
             ]
         });
-
-        res.json({
-            success: true,
-            totalProducts,
-            dailyOrders,
-            activeUsers
-        });
+        res.json({ success: true, totalProducts, dailyOrders, activeUsers });
     } catch (err) {
         console.error('Public stats error:', err);
         res.status(500).json({ error: 'Server error' });
@@ -283,7 +270,7 @@ app.get('/api/users/orders/:id', verifyUserToken, async (req, res) => {
     }
 });
 
-// 用户取消订单
+// 用户取消订单（新增）
 app.put('/api/users/orders/:id/cancel', verifyUserToken, async (req, res) => {
     try {
         const orderId = req.params.id;
@@ -293,17 +280,14 @@ app.put('/api/users/orders/:id/cancel', verifyUserToken, async (req, res) => {
             return res.status(404).json({ error: 'Order not found' });
         }
         
-        // 验证订单归属
         if (order.userId && order.userId.toString() !== req.user._id.toString()) {
             return res.status(403).json({ error: 'Access denied' });
         }
         
-        // 仅允许取消 pending 或 processing 状态的订单
         if (order.status !== 'pending' && order.status !== 'processing') {
             return res.status(400).json({ error: 'Order cannot be cancelled in its current status' });
         }
         
-        // 更新状态为 cancelled
         order.status = 'cancelled';
         order.updatedAt = Date.now();
         await order.save();
@@ -382,12 +366,38 @@ app.delete('/api/products/:id', async (req, res) => {
     }
 });
 
-// ============ 订单创建 ============
+// ============ 订单创建（含库存扣减） ============
 app.post('/api/orders', async (req, res) => {
     try {
         const orderData = req.body;
         if (!orderData.orderId || !orderData.customer?.firstName || !orderData.customer?.email || !orderData.items?.length) {
             return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        // 1. 预先检查所有商品库存是否充足
+        for (const item of orderData.items) {
+            const productId = item.id;
+            const quantity = item.quantity;
+            const product = await Product.findById(productId);
+            if (!product) {
+                return res.status(400).json({ error: `Product ${item.name} not found` });
+            }
+            if (product.stock < quantity) {
+                return res.status(400).json({ error: `Insufficient stock for ${product.name}. Available: ${product.stock}` });
+            }
+        }
+
+        // 2. 依次扣除库存（原子操作）
+        for (const item of orderData.items) {
+            const productId = item.id;
+            const quantity = item.quantity;
+            const updated = await Product.updateOne(
+                { _id: productId, stock: { $gte: quantity } },
+                { $inc: { stock: -quantity } }
+            );
+            if (updated.modifiedCount === 0) {
+                throw new Error(`Failed to update stock for product ${item.name}`);
+            }
         }
 
         const userId = getUserIdFromToken(req);
@@ -599,7 +609,7 @@ app.delete('/api/admin/inventory/products/:id', verifyAdminToken, async (req, re
     }
 });
 
-// 批量导入商品 (CSV / Excel) - 修复重复 upload 声明
+// 批量导入商品 (CSV / Excel)
 app.post('/api/admin/inventory/import', verifyAdminToken, upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
@@ -839,7 +849,7 @@ app.post('/api/admin/migrate-orders-userid', verifyAdminToken, async (req, res) 
     }
 });
 
-// ============ 仪表盘分析 ============
+// ============ 仪表盘分析（排除 cancelled 订单） ============
 function formatLocalDate(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -865,7 +875,7 @@ app.get('/api/admin/dashboard/stats', verifyAdminToken, async (req, res) => {
 });
 
 app.get('/api/admin/dashboard/sales-timeline', verifyAdminToken, async (req, res) => {
-        try {
+    try {
         const days = parseInt(req.query.days) || 30;
         const startDate = new Date();
         startDate.setHours(0, 0, 0, 0);
@@ -893,13 +903,9 @@ app.get('/api/admin/dashboard/top-products', verifyAdminToken, async (req, res) 
     try {
         const limit = parseInt(req.query.limit) || 5;
         const pipeline = [
-            { $match: { status: { $ne: 'cancelled' } } },  // 排除取消订单
+            { $match: { status: { $ne: 'cancelled' } } },
             { $unwind: '$items' },
-            { $group: { 
-                _id: { name: '$items.name', brand: '$items.brand' }, 
-                totalQuantity: { $sum: '$items.quantity' }, 
-                totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } } 
-            } },
+            { $group: { _id: { name: '$items.name', brand: '$items.brand' }, totalQuantity: { $sum: '$items.quantity' }, totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } } } },
             { $sort: { totalQuantity: -1 } },
             { $limit: limit },
             { $project: { _id: 0, name: '$_id.name', brand: '$_id.brand', totalQuantity: 1, totalRevenue: 1 } }
@@ -937,7 +943,6 @@ app.get('/api/admin/dashboard/top-customers', verifyAdminToken, async (req, res)
             },
             {
                 $addFields: {
-                    // 只统计非取消订单
                     validOrders: {
                         $filter: {
                             input: '$allOrders',
@@ -1043,9 +1048,9 @@ app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res)
         startDate.setHours(0, 0, 0, 0);
         startDate.setDate(startDate.getDate() - historyDays);
         const orders = await Order.find({ 
-    createdAt: { $gte: startDate },
-    status: { $ne: 'cancelled' }
-}).select('total createdAt');
+            createdAt: { $gte: startDate },
+            status: { $ne: 'cancelled' }
+        }).select('total createdAt');
         const salesByLocalDate = new Map();
         orders.forEach(order => {
             const localDate = new Date(order.createdAt);

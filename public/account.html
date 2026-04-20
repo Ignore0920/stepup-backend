@@ -590,77 +590,81 @@
             alert('📧 A password reset link has been sent to your email address. Please check your inbox to continue.');
         }
 
-        // 查看订单详情
-        async function viewOrder(orderId) {
-            const modal = document.getElementById('orderDetailModal');
-            const contentDiv = document.getElementById('orderDetailContent');
-            const titleEl = document.getElementById('modalOrderTitle');
-            
-            modal.style.display = 'flex';
-            contentDiv.innerHTML = '<p style="text-align: center; padding: 2rem;">Loading order details...</p>';
+        // 查看订单详情 - 与 Order.html 格式保持一致
+async function viewOrder(orderId) {
+    const modal = document.getElementById('orderDetailModal');
+    const contentDiv = document.getElementById('orderDetailContent');
+    const titleEl = document.getElementById('modalOrderTitle');
+    
+    modal.style.display = 'flex';
+    contentDiv.innerHTML = '<p style="text-align: center; padding: 2rem;">Loading order details...</p>';
 
-            try {
-                const res = await authFetch(`/api/users/orders/${orderId}`);
-                if (!res.ok) {
-                    if (res.status === 403) throw new Error('Access denied');
-                    if (res.status === 404) throw new Error('Order not found');
-                    throw new Error('Failed to load order');
-                }
-                const data = await res.json();
-                const order = data.order;
-                
-                titleEl.innerText = `Order ${order.orderId}`;
-                
-                let itemsHtml = '';
-                order.items.forEach(item => {
-                    itemsHtml += `
-                        <tr>
-                            <td>${escapeHtml(item.name)}</td>
-                            <td>${item.size || 'N/A'}</td>
-                            <td>${item.quantity}</td>
-                            <td>MOP ${item.price.toFixed(2)}</td>
-                            <td>MOP ${(item.price * item.quantity).toFixed(2)}</td>
-                        </tr>
-                    `;
-                });
-
-                contentDiv.innerHTML = `
-                    <div class="order-detail-row">
-                        <span class="order-detail-label">Order ID:</span> ${escapeHtml(order.orderId)}<br>
-                        <span class="order-detail-label">Date:</span> ${new Date(order.createdAt).toLocaleString()}<br>
-                        <span class="order-detail-label">Status:</span> <span class="order-status status-${order.status}">${order.status}</span><br>
-                        <span class="order-detail-label">Payment Method:</span> ${order.paymentMethod === 'credit' ? 'Credit Card' : 'Digital Wallet'}
-                    </div>
-                    <div class="order-detail-row">
-                        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 0.5rem;">Shipping Address</h3>
-                        <p>
-                            ${escapeHtml(order.customer.firstName)} ${escapeHtml(order.customer.lastName)}<br>
-                            ${escapeHtml(order.customer.street)}<br>
-                            ${escapeHtml(order.customer.city)}, ${escapeHtml(order.customer.state || '')} ${escapeHtml(order.customer.postal || '')}<br>
-                            ${escapeHtml(order.customer.country)}<br>
-                            <strong>Phone:</strong> ${escapeHtml(order.customer.phone)}<br>
-                            <strong>Email:</strong> ${escapeHtml(order.customer.email)}
-                        </p>
-                    </div>
-                    <div class="order-detail-row">
-                        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 0.5rem;">Order Items</h3>
-                        <table class="order-items-table">
-                            <thead><tr><th>Product</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
-                            <tbody>
-                                ${itemsHtml}
-                            </tbody>
-                        </table>
-                        <div style="text-align: right; margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid #eee;">
-                            <p><strong>Subtotal:</strong> MOP ${order.subtotal.toFixed(2)}</p>
-                            <p><strong>Shipping:</strong> ${order.shipping === 0 ? 'Free' : 'MOP ' + order.shipping.toFixed(2)}</p>
-                            <p style="font-size: 1.2rem;"><strong>Total:</strong> MOP ${order.total.toFixed(2)}</p>
-                        </div>
-                    </div>
-                `;
-            } catch (err) {
-                contentDiv.innerHTML = `<p style="color: #e74c3c; text-align: center; padding: 2rem;">Error: ${escapeHtml(err.message)}</p>`;
-            }
+    try {
+        const res = await authFetch(`/api/users/orders/${orderId}`);
+        if (!res.ok) {
+            if (res.status === 403) throw new Error('Access denied');
+            if (res.status === 404) throw new Error('Order not found');
+            throw new Error('Failed to load order');
         }
+        const data = await res.json();
+        const order = data.order;
+        
+        titleEl.innerText = `Order ${order.orderId}`;
+        
+        // 格式化订单商品列表 HTML（与 Order.html 表格结构一致）
+        let itemsHtml = '';
+        order.items.forEach(item => {
+            itemsHtml += `
+                <tr>
+                    <td>${escapeHtml(item.name)}</td>
+                    <td>${item.size || 'N/A'}</td>
+                    <td>${item.quantity}</td>
+                    <td>MOP ${item.price.toFixed(2)}</td>
+                    <td>MOP ${(item.price * item.quantity).toFixed(2)}</td>
+                </tr>
+            `;
+        });
+
+        // 构建与 Order.html 完全相同的 HTML 结构（不含银行卡信息）
+        const html = `
+            <div class="order-detail-row">
+                <span class="order-detail-label">Order ID:</span> ${order.orderId}<br>
+                <span class="order-detail-label">Date:</span> ${new Date(order.createdAt).toLocaleString()}<br>
+                <span class="order-detail-label">Payment Method:</span> 
+                ${order.paymentMethod === 'credit' ? 'Credit Card' : 'Digital Wallet'}
+                <span class="order-detail-label">Status:</span> <span class="order-status status-${order.status}">${order.status}</span>
+            </div>
+            <div class="order-detail-row">
+                <h3>Customer Information</h3>
+                <p>
+                    <strong>Name:</strong> ${order.customer.firstName} ${order.customer.lastName}<br>
+                    <strong>Email:</strong> ${order.customer.email}<br>
+                    <strong>Phone:</strong> ${order.customer.phone || 'N/A'}<br>
+                    <strong>Address:</strong> ${order.customer.street}, ${order.customer.city}, ${order.customer.state || ''} ${order.customer.postal || ''}, ${order.customer.country}
+                </p>
+            </div>
+            <div class="order-detail-row">
+                <h3>Order Items</h3>
+                <table class="order-items-table">
+                    <thead>
+                        <tr><th>Product</th><th>Size</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHtml}
+                    </tbody>
+                </table>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <p><strong>Subtotal:</strong> MOP ${order.subtotal.toFixed(2)}</p>
+                    <p><strong>Shipping:</strong> ${order.shipping === 0 ? 'Free' : 'MOP ' + order.shipping.toFixed(2)}</p>
+                    <p><strong>Total:</strong> MOP ${order.total.toFixed(2)}</p>
+                </div>
+            </div>
+        `;
+        contentDiv.innerHTML = html;
+    } catch (err) {
+        contentDiv.innerHTML = `<p style="color: #e74c3c; text-align: center; padding: 2rem;">Error: ${escapeHtml(err.message)}</p>`;
+    }
+}
 
         function closeOrderModal() {
             document.getElementById('orderDetailModal').style.display = 'none';

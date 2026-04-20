@@ -229,7 +229,7 @@
                         <p class="product-description">${p.description || 'Premium athletic footwear with exceptional comfort and style.'}</p>
                         ${sizeHtml}
                         <div class="purchase-section">
-                            <div class="quantity-control"><button class="qty-btn">−</button><input type="number" class="qty-input" value="1" min="1"><button class="qty-btn">+</button></div>
+                            <div class="quantity-control"><button class="qty-btn">−</button><input type="number" class="qty-input" value="1" min="1" oninput="this.value = Math.abs(parseInt(this.value)) || 1"><button class="qty-btn">+</button></div>
                             <button class="add-to-cart-btn" data-id="${p._id}" data-name="${p.name}" data-price="${p.price}">Add to Cart</button>
                         </div>
                     </div>

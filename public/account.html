@@ -207,14 +207,13 @@
                         <button class="edit-btn" onclick="startEditProfile()">Edit Profile</button>
                     </div>
                     <div id="profileEdit" class="edit-form">
-                        <div class="form-group"><label class="profile-label">First Name</label><input type="text" id="editFirstName" placeholder="Enter first name"></div>
-                        <div class="form-group"><label class="profile-label">Last Name</label><input type="text" id="editLastName" placeholder="Enter last name"></div>
-                        <div class="form-group"><label class="profile-label">Email Address</label><input type="email" id="editEmail" placeholder="Enter email"></div>
-                        <div class="form-group"><label class="profile-label">Phone Number</label><input type="tel" id="editPhone" placeholder="+853 0000 0000"></div>
-                        <button class="save-btn" onclick="saveProfile()">Save Changes</button>
-                        <button class="cancel-btn" onclick="cancelEditProfile()">Cancel</button>
-                    </div>
-                </div>
+    <div class="form-group"><label class="profile-label">First Name</label><input type="text" id="editFirstName" placeholder="Enter first name" pattern="[A-Za-z\s\-']{2,50}" title="Only letters, spaces, hyphens, apostrophes. 2-50 characters."></div>
+    <div class="form-group"><label class="profile-label">Last Name</label><input type="text" id="editLastName" placeholder="Enter last name" pattern="[A-Za-z\s\-']{2,50}"></div>
+    <div class="form-group"><label class="profile-label">Email Address</label><input type="email" id="editEmail" placeholder="Enter email"></div>
+    <div class="form-group"><label class="profile-label">Phone Number</label><input type="tel" id="editPhone" placeholder="+853 0000 0000" pattern="[0-9+\-\s]{8,20}" title="Digits, spaces, +, -, 8-20 characters"></div>
+    <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+    <button class="cancel-btn" onclick="cancelEditProfile()">Cancel</button>
+</div>
 
                 <!-- Orders Section -->
                 <div id="orders" class="content-section">
@@ -252,15 +251,14 @@
                         <button class="edit-btn" onclick="startEditAddress()">Edit Address</button>
                     </div>
                     <div id="addressEdit" class="edit-form">
-                        <div class="form-group"><label class="profile-label">Street Address</label><input type="text" id="editStreet" placeholder="Enter street address"></div>
-                        <div class="form-group"><label class="profile-label">City</label><input type="text" id="editCity" placeholder="Enter city"></div>
-                        <div class="form-group"><label class="profile-label">State/Province</label><input type="text" id="editState" placeholder="Enter state/province"></div>
-                        <div class="form-group"><label class="profile-label">Postal Code</label><input type="text" id="editPostal" placeholder="Enter postal code"></div>
-                        <div class="form-group"><label class="profile-label">Country</label><input type="text" id="editCountry" placeholder="Enter country"></div>
-                        <button class="save-btn" onclick="saveAddress()">Save Changes</button>
-                        <button class="cancel-btn" onclick="cancelEditAddress()">Cancel</button>
-                    </div>
-                </div>
+    <div class="form-group"><label class="profile-label">Street Address</label><input type="text" id="editStreet" placeholder="Enter street address" pattern="[A-Za-z0-9\s\-,.'#]{3,100}" title="Address (letters, numbers, spaces, commas, hyphens, periods, apostrophes, #)"></div>
+    <div class="form-group"><label class="profile-label">City</label><input type="text" id="editCity" placeholder="Enter city" pattern="[A-Za-z\s\-']{2,50}"></div>
+    <div class="form-group"><label class="profile-label">State/Province</label><input type="text" id="editState" placeholder="Enter state/province" pattern="[A-Za-z\s\-']{0,50}"></div>
+    <div class="form-group"><label class="profile-label">Postal Code</label><input type="text" id="editPostal" placeholder="Enter postal code" pattern="[A-Za-z0-9\s\-]{3,10}"></div>
+    <div class="form-group"><label class="profile-label">Country</label><input type="text" id="editCountry" placeholder="Enter country" pattern="[A-Za-z\s\-']{2,50}"></div>
+    <button class="save-btn" onclick="saveAddress()">Save Changes</button>
+    <button class="cancel-btn" onclick="cancelEditAddress()">Cancel</button>
+</div>
 
                 <!-- Settings Section -->
                 <div id="settings" class="content-section">
@@ -439,11 +437,16 @@
         }
 
         async function saveProfile() {
-            const firstName = document.getElementById('editFirstName').value;
-            const lastName = document.getElementById('editLastName').value;
-            const email = document.getElementById('editEmail').value;
-            const phone = document.getElementById('editPhone').value;
-            
+    const firstName = document.getElementById('editFirstName');
+    const lastName = document.getElementById('editLastName');
+    const email = document.getElementById('editEmail');
+    const phone = document.getElementById('editPhone');
+    
+    if (!firstName.checkValidity()) { firstName.reportValidity(); return; }
+    if (!lastName.checkValidity()) { lastName.reportValidity(); return; }
+    if (!email.checkValidity()) { email.reportValidity(); return; }
+    if (phone.value && !phone.checkValidity()) { phone.reportValidity(); return; }
+
             try {
                 const res = await authFetch('/api/users/profile', {
                     method: 'PUT',
@@ -462,12 +465,18 @@
         }
 
         async function saveAddress() {
-            const street = document.getElementById('editStreet').value;
-            const city = document.getElementById('editCity').value;
-            const state = document.getElementById('editState').value;
-            const postal = document.getElementById('editPostal').value;
-            const country = document.getElementById('editCountry').value;
-            
+    const street = document.getElementById('editStreet');
+    const city = document.getElementById('editCity');
+    const state = document.getElementById('editState');
+    const postal = document.getElementById('editPostal');
+    const country = document.getElementById('editCountry');
+    
+    if (street.value && !street.checkValidity()) { street.reportValidity(); return; }
+    if (city.value && !city.checkValidity()) { city.reportValidity(); return; }
+    if (state.value && !state.checkValidity()) { state.reportValidity(); return; }
+    if (postal.value && !postal.checkValidity()) { postal.reportValidity(); return; }
+    if (country.value && !country.checkValidity()) { country.reportValidity(); return; }
+    
             try {
                 const res = await authFetch('/api/users/profile', {
                     method: 'PUT',

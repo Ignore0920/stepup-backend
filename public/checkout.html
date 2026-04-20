@@ -6,235 +6,43 @@
     <title>Checkout - StepUp</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* All existing CSS unchanged – keep as in your original file */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #FAFAF8;
-            color: #262626;
-        }
-        header {
-            background-color: #FAFAF8;
-            border-bottom: 1px solid #262626;
-            padding: 20px 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .header-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 28px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            cursor: pointer;
-        }
-        .nav-right {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-        .nav-right button {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            position: relative;
-        }
-        .cart-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: #262626;
-            color: #FAFAF8;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .user-icon-btn {
-            font-size: 24px;
-            text-decoration: none;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        main {
-            padding: 40px 0;
-        }
-        .breadcrumb {
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        .breadcrumb a {
-            color: #262626;
-            text-decoration: none;
-            margin-right: 10px;
-        }
-        .breadcrumb a:hover {
-            text-decoration: underline;
-        }
-        .checkout-wrapper {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 40px;
-        }
-        .checkout-form {
-            background-color: #fff;
-            padding: 30px;
-            border: 1px solid #262626;
-        }
-        .form-section {
-            margin-bottom: 40px;
-        }
-        .form-section h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 24px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #262626;
-            padding-bottom: 10px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #262626;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 14px;
-        }
-        input:focus, select:focus {
-            outline: none;
-            background-color: #f5f5f5;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        .payment-methods {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .payment-option {
-            padding: 15px;
-            border: 2px solid #262626;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .payment-option:hover {
-            background-color: #f5f5f5;
-        }
-        .payment-option.selected {
-            background-color: #262626;
-            color: #FAFAF8;
-        }
-        .order-summary {
-            background-color: #fff;
-            padding: 30px;
-            border: 1px solid #262626;
-            height: fit-content;
-            position: sticky;
-            top: 100px;
-        }
-        .summary-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 20px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #262626;
-            padding-bottom: 10px;
-        }
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #e5e5e5;
-            font-size: 14px;
-        }
-        .summary-row.total {
-            border-bottom: 2px solid #262626;
-            padding: 15px 0;
-            font-weight: 600;
-            font-size: 16px;
-        }
-        .checkout-btn {
-            width: 100%;
-            padding: 15px;
-            background-color: #262626;
-            color: #FAFAF8;
-            border: none;
-            font-family: 'Playfair Display', serif;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: all 0.3s ease;
-        }
-        .checkout-btn:hover {
-            background-color: #000;
-        }
-        .back-btn {
-            padding: 10px 20px;
-            background-color: transparent;
-            border: 1px solid #262626;
-            color: #262626;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 10px;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-        .back-btn:hover {
-            background-color: #f5f5f5;
-        }
-        @media (max-width: 768px) {
-            .checkout-wrapper {
-                grid-template-columns: 1fr;
-            }
-            .order-summary {
-                position: relative;
-                top: 0;
-            }
-            .payment-methods {
-                grid-template-columns: 1fr;
-            }
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #FAFAF8; color: #262626; }
+        header { background-color: #FAFAF8; border-bottom: 1px solid #262626; padding: 20px 0; position: sticky; top: 0; z-index: 100; }
+        .header-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; letter-spacing: 2px; cursor: pointer; }
+        .nav-right { display: flex; gap: 20px; align-items: center; }
+        .nav-right button { background: none; border: none; font-size: 24px; cursor: pointer; position: relative; }
+        .cart-badge { position: absolute; top: -8px; right: -8px; background-color: #262626; color: #FAFAF8; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+        .user-icon-btn { font-size: 24px; text-decoration: none; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        main { padding: 40px 0; }
+        .breadcrumb { margin-bottom: 30px; font-size: 14px; }
+        .breadcrumb a { color: #262626; text-decoration: none; margin-right: 10px; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .checkout-wrapper { display: grid; grid-template-columns: 2fr 1fr; gap: 40px; }
+        .checkout-form { background-color: #fff; padding: 30px; border: 1px solid #262626; }
+        .form-section { margin-bottom: 40px; }
+        .form-section h2 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 20px; border-bottom: 2px solid #262626; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #262626; font-family: 'Montserrat', sans-serif; font-size: 14px; }
+        input:focus, select:focus { outline: none; background-color: #f5f5f5; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .payment-methods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .payment-option { padding: 15px; border: 2px solid #262626; text-align: center; cursor: pointer; transition: all 0.3s ease; }
+        .payment-option:hover { background-color: #f5f5f5; }
+        .payment-option.selected { background-color: #262626; color: #FAFAF8; }
+        .order-summary { background-color: #fff; padding: 30px; border: 1px solid #262626; height: fit-content; position: sticky; top: 100px; }
+        .summary-title { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 20px; border-bottom: 2px solid #262626; padding-bottom: 10px; }
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+        .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e5e5; font-size: 14px; }
+        .summary-row.total { border-bottom: 2px solid #262626; padding: 15px 0; font-weight: 600; font-size: 16px; }
+        .checkout-btn { width: 100%; padding: 15px; background-color: #262626; color: #FAFAF8; border: none; font-family: 'Playfair Display', serif; font-size: 16px; cursor: pointer; margin-top: 20px; transition: all 0.3s ease; }
+        .checkout-btn:hover { background-color: #000; }
+        .back-btn { padding: 10px 20px; background-color: transparent; border: 1px solid #262626; color: #262626; font-family: 'Montserrat', sans-serif; font-size: 14px; cursor: pointer; margin-top: 10px; width: 100%; transition: all 0.3s ease; }
+        .back-btn:hover { background-color: #f5f5f5; }
+        @media (max-width: 768px) { .checkout-wrapper { grid-template-columns: 1fr; } .order-summary { position: relative; top: 0; } .payment-methods { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -267,11 +75,11 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>First Name *</label>
-                                <input type="text" id="checkoutFirstName" placeholder="John" required>
+                                <input type="text" id="checkoutFirstName" placeholder="John" pattern="[A-Za-z\s\-']{2,50}" title="Only letters, spaces, hyphens, apostrophes" required>
                             </div>
                             <div class="form-group">
                                 <label>Last Name *</label>
-                                <input type="text" id="checkoutLastName" placeholder="Doe" required>
+                                <input type="text" id="checkoutLastName" placeholder="Doe" pattern="[A-Za-z\s\-']{2,50}" required>
                             </div>
                         </div>
                         <div class="form-group">
@@ -280,24 +88,24 @@
                         </div>
                         <div class="form-group">
                             <label>Phone Number *</label>
-                            <input type="tel" id="checkoutPhone" placeholder="+853 0000 0000" required>
+                            <input type="tel" id="checkoutPhone" placeholder="+853 0000 0000" pattern="[0-9+\-\s]{8,20}" title="Phone number (digits, spaces, +, -) 8-20 characters" required>
                         </div>
                         <div class="form-group">
                             <label>Street Address *</label>
-                            <input type="text" id="checkoutStreet" placeholder="123 Main Street" required>
+                            <input type="text" id="checkoutStreet" placeholder="123 Main Street" pattern="[A-Za-z0-9\s\-,.'#]{3,100}" title="Address (letters, numbers, spaces, commas, hyphens, periods, apostrophes, #)" required>
                         </div>
                         <div class="form-group">
                             <label>City *</label>
-                            <input type="text" id="checkoutCity" placeholder="New York" required>
+                            <input type="text" id="checkoutCity" placeholder="New York" pattern="[A-Za-z\s\-']{2,50}" required>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label>State/Province</label>
-                                <input type="text" id="checkoutState" placeholder="State/Province">
+                                <input type="text" id="checkoutState" placeholder="State/Province" pattern="[A-Za-z\s\-']{0,50}">
                             </div>
                             <div class="form-group">
                                 <label>Postal Code</label>
-                                <input type="text" id="checkoutPostal" placeholder="Postal Code">
+                                <input type="text" id="checkoutPostal" placeholder="Postal Code" pattern="[A-Za-z0-9\s\-]{3,10}">
                             </div>
                         </div>
                         <div class="form-group">
@@ -355,20 +163,20 @@
                         <div id="card-form">
                             <div class="form-group">
                                 <label>Cardholder Name *</label>
-                                <input type="text" id="cardHolderName" placeholder="John Doe" required>
+                                <input type="text" id="cardHolderName" placeholder="John Doe" pattern="[A-Za-z\s\-']{2,50}" required>
                             </div>
                             <div class="form-group">
                                 <label>Card Number *</label>
-                                <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                                <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" pattern="\d{4}\s?\d{4}\s?\d{4}\s?\d{4}" maxlength="19" required>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>Expiry Date *</label>
-                                    <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" required>
+                                    <input type="text" id="cardExpiry" placeholder="MM/YY" pattern="(0[1-9]|1[0-2])\/\d{2}" maxlength="5" required>
                                 </div>
                                 <div class="form-group">
                                     <label>CVV *</label>
-                                    <input type="text" id="cardCVV" placeholder="123" maxlength="3" required>
+                                    <input type="text" id="cardCVV" placeholder="123" pattern="\d{3,4}" maxlength="4" required>
                                 </div>
                             </div>
                         </div>
@@ -478,7 +286,6 @@
             if (badge) badge.textContent = totalItems;
         }
 
-        // Helper for escaping HTML
         function escapeHtml(str) {
             if (!str) return '';
             return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
@@ -558,109 +365,109 @@
         }
 
         async function completeCheckout() {
-    const firstName = document.getElementById('checkoutFirstName').value.trim();
-    const lastName = document.getElementById('checkoutLastName').value.trim();
-    const email = document.getElementById('checkoutEmail').value.trim();
-    const phone = document.getElementById('checkoutPhone').value.trim();
-    const street = document.getElementById('checkoutStreet').value.trim();
-    const city = document.getElementById('checkoutCity').value.trim();
-    const state = document.getElementById('checkoutState').value.trim();
-    const postal = document.getElementById('checkoutPostal').value.trim();
-    const country = document.getElementById('checkoutCountry').value;
+            // Validate all shipping fields
+            const shippingFields = ['checkoutFirstName', 'checkoutLastName', 'checkoutEmail', 'checkoutPhone', 'checkoutStreet', 'checkoutCity', 'checkoutCountry'];
+            for (let id of shippingFields) {
+                const el = document.getElementById(id);
+                if (!el.checkValidity()) { el.reportValidity(); return; }
+            }
 
-    if (!firstName || !lastName || !email || !street || !city || !country) {
-        alert('Please fill in all required fields');
-        return;
-    }
+            const paymentMethod = document.querySelector('.payment-option.selected');
+            const paymentMethodType = paymentMethod ? (paymentMethod.textContent.toLowerCase().includes('credit') ? 'credit' : 'wallet') : 'credit';
+            let cardLast4 = '', cardExpiry = '', cardHolderName = '';
 
-    const paymentMethod = document.querySelector('.payment-option.selected');
-    const paymentMethodType = paymentMethod ? (paymentMethod.textContent.toLowerCase().includes('credit') ? 'credit' : 'wallet') : 'credit';
-    let cardLast4 = '', cardExpiry = '', cardHolderName = '';
+            if (paymentMethodType === 'credit') {
+                const cardNum = document.getElementById('cardNumber');
+                const expiry = document.getElementById('cardExpiry');
+                const holder = document.getElementById('cardHolderName');
+                if (!cardNum.checkValidity()) { cardNum.reportValidity(); return; }
+                if (!expiry.checkValidity()) { expiry.reportValidity(); return; }
+                if (!holder.checkValidity()) { holder.reportValidity(); return; }
+                
+                const raw = cardNum.value.replace(/\s/g, '');
+                if (raw.length > 4) cardLast4 = raw.slice(-4);
+                cardExpiry = expiry.value;
+                cardHolderName = holder.value;
+            }
 
-    if (paymentMethodType === 'credit') {
-        const cardNumberInput = document.getElementById('cardNumber');
-        if (cardNumberInput && cardNumberInput.value) {
-            const raw = cardNumberInput.value.replace(/\s/g, '');
-            if (raw.length > 4) cardLast4 = raw.slice(-4);
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+
+            let subtotal = 0;
+            const items = cart.map(item => {
+                const price = parseFloat(item.price.replace('MOP $', '')) || 0;
+                subtotal += price * item.quantity;
+                return {
+                    id: item.id,
+                    name: item.name,
+                    brand: item.brand,
+                    price: price,
+                    quantity: item.quantity,
+                    size: item.size,
+                    image: item.image
+                };
+            });
+
+            const shippingRadio = document.querySelector('input[name="shipping"]:checked');
+            let shipping = 0;
+            if (shippingRadio) {
+                if (shippingRadio.value === 'express') shipping = 15.00;
+                else if (shippingRadio.value === 'overnight') shipping = 30.00;
+            }
+            const total = subtotal + shipping;
+
+            const orderData = {
+                orderId: 'ORD-' + Date.now(),
+                customer: {
+                    firstName: document.getElementById('checkoutFirstName').value.trim(),
+                    lastName: document.getElementById('checkoutLastName').value.trim(),
+                    email: document.getElementById('checkoutEmail').value.trim(),
+                    phone: document.getElementById('checkoutPhone').value.trim(),
+                    street: document.getElementById('checkoutStreet').value.trim(),
+                    city: document.getElementById('checkoutCity').value.trim(),
+                    state: document.getElementById('checkoutState').value.trim(),
+                    postal: document.getElementById('checkoutPostal').value.trim(),
+                    country: document.getElementById('checkoutCountry').value
+                },
+                items,
+                subtotal,
+                shipping,
+                total,
+                status: 'pending',
+                paymentMethod: paymentMethodType,
+                paymentDetails: { cardHolderName, cardLast4, cardExpiry }
+            };
+
+            const token = localStorage.getItem('userToken');
+            try {
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token ? `Bearer ${token}` : ''
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Order submission failed');
+
+                await updateUserProfile(
+                    orderData.customer,
+                    { cardLast4, cardExpiry, cardHolderName, paymentMethodType }
+                );
+
+                localStorage.removeItem('cart');
+                alert('Thank you for your purchase! Your order has been confirmed.');
+                window.location.href = 'mainpage.html';
+            } catch (err) {
+                console.error('Checkout error:', err);
+                alert('There was a problem processing your order. Please try again.');
+            }
         }
-        const expiryInput = document.getElementById('cardExpiry');
-        if (expiryInput) cardExpiry = expiryInput.value;
-        const holderInput = document.getElementById('cardHolderName');
-        if (holderInput) cardHolderName = holderInput.value;
-    }
 
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    if (cart.length === 0) {
-        alert('Your cart is empty!');
-        return;
-    }
-
-    let subtotal = 0;
-    const items = cart.map(item => {
-        const price = parseFloat(item.price.replace('MOP $', '')) || 0;
-        subtotal += price * item.quantity;
-        return {
-            id: item.id,
-            name: item.name,
-            brand: item.brand,
-            price: price,
-            quantity: item.quantity,
-            size: item.size,
-            image: item.image
-        };
-    });
-
-    const shippingRadio = document.querySelector('input[name="shipping"]:checked');
-    let shipping = 0;
-    if (shippingRadio) {
-        if (shippingRadio.value === 'express') shipping = 15.00;
-        else if (shippingRadio.value === 'overnight') shipping = 30.00;
-    }
-    const total = subtotal + shipping;
-
-    const orderData = {
-        orderId: 'ORD-' + Date.now(),
-        customer: { firstName, lastName, email, phone, street, city, state, postal, country },
-        items,
-        subtotal,
-        shipping,
-        total,
-        status: 'pending',
-        paymentMethod: paymentMethodType,
-        paymentDetails: {
-            cardHolderName,
-            cardLast4,
-            cardExpiry
-        }
-    };
-
-    const token = localStorage.getItem('userToken');
-
-    try {
-        const response = await fetch('/api/orders', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token ? `Bearer ${token}` : ''
-            },
-            body: JSON.stringify(orderData)
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Order submission failed');
-
-        await updateUserProfile(
-            { firstName, lastName, phone, street, city, state, postal, country },
-            { cardLast4, cardExpiry, cardHolderName, paymentMethodType }
-        );
-
-        localStorage.removeItem('cart');
-        alert('Thank you for your purchase! Your order has been confirmed.');
-        window.location.href = 'mainpage.html';
-    } catch (err) {
-        console.error('Checkout error:', err);
-        alert('There was a problem processing your order. Please try again.');
-    }
-}
         // ========== Initialization ==========
         document.addEventListener('DOMContentLoaded', async () => {
             const isLoggedIn = await checkLoginAndLoadProfile();

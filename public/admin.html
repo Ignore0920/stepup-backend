@@ -224,12 +224,10 @@
     if (addAdminForm) {
         addAdminForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = document.getElementById('newAdminName').value.trim();
-            const password = document.getElementById('newAdminPass').value;
-            if (!username || !password) {
-                alert('Please enter username and password');
-                return;
-            }
+            const username = document.getElementById('newAdminName');
+const password = document.getElementById('newAdminPass');
+if (!username.checkValidity()) { username.reportValidity(); return; }
+if (!password.checkValidity()) { password.reportValidity(); return; }
             try {
                 const response = await fetch('/api/admins', {
                     method: 'POST',

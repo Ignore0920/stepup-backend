@@ -43,7 +43,97 @@
         .add-to-cart-btn:hover { opacity: 0.9; }
         .back-link { display: inline-block; margin: 1.5rem 0 0.5rem; text-decoration: none; color: #262626; font-size: 0.875rem; font-weight: 500; border-bottom: 1px solid #262626; transition: color 0.3s, border-color 0.3s; }
         .back-link:hover { color: #666666; border-bottom-color: #666666; }
-        @media (max-width: 768px) { .product-section { grid-template-columns: 1fr; } .main-image { height: 400px; } .purchase-section { flex-direction: column; } .add-to-cart-btn { width: 100%; } nav { display: none; } }
+
+        /* You May Also Like 样式 */
+        .recommendations-section {
+            margin: 4rem 0 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e5e5;
+        }
+        .recommendations-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+        .recommendations-title::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: #262626;
+        }
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .rec-card {
+            background-color: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+        .rec-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .rec-image {
+            width: 100%;
+            height: 200px;
+            background-color: #f0f0f0;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .rec-info {
+            padding: 1rem;
+            flex: 1;
+        }
+        .rec-brand {
+            font-size: 0.7rem;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+        .rec-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+        .rec-price {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #000;
+        }
+
+        @media (max-width: 768px) {
+            .product-section { grid-template-columns: 1fr; }
+            .main-image { height: 400px; }
+            .purchase-section { flex-direction: column; }
+            .add-to-cart-btn { width: 100%; }
+            nav { display: none; }
+            .recommendations-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+            .rec-image { height: 150px; }
+        }
     </style>
 </head>
 <body>
@@ -60,13 +150,37 @@
     <div class="container">
         <a href="products.html" class="back-link">← Back to Products</a>
         <div id="productDetail" class="product-detail-container"><div class="loading">Loading product...</div></div>
+        <!-- You May Also Like 区域将动态插入此处 -->
     </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const productId = urlParams.get('id');
-        if (!productId) document.getElementById('productDetail').innerHTML = '<p class="error">Product not specified.</p>';
-        else fetch(`/api/products/${productId}`).then(res => res.json()).then(product => { if (product.error) throw new Error(product.error); renderProduct(product); }).catch(err => { document.getElementById('productDetail').innerHTML = `<p class="error">Product not found: ${err.message}</p>`; });
+        let allProducts = [];   // 存储所有商品用于推荐
+
+        if (!productId) {
+            document.getElementById('productDetail').innerHTML = '<p class="error">Product not specified.</p>';
+        } else {
+            // 先加载当前商品详情
+            fetch(`/api/products/${productId}`)
+                .then(res => res.json())
+                .then(product => {
+                    if (product.error) throw new Error(product.error);
+                    renderProduct(product);
+                    // 商品详情渲染完成后，加载所有商品用于推荐
+                    return fetch('/api/products');
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        allProducts = data.data;
+                        renderRecommendations(productId);
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('productDetail').innerHTML = `<p class="error">Product not found: ${err.message}</p>`;
+                });
+        }
 
         function parseSizes(sizeRange) {
             if (!sizeRange) return [];
@@ -165,7 +279,80 @@
             });
         }
 
-        function updateCartBadge() { const cart = JSON.parse(localStorage.getItem('cart')) || []; const total = cart.reduce((s,i) => s + i.quantity, 0); document.getElementById('cartBadge').textContent = total; }
+        // 个性化推荐算法
+        function getRecommendations(currentProduct, allProducts, limit = 4) {
+            if (!allProducts.length) return [];
+            // 排除当前商品
+            const candidates = allProducts.filter(p => p._id !== currentProduct._id);
+            if (candidates.length === 0) return [];
+
+            // 计算每个候选商品的得分
+            const scored = candidates.map(candidate => {
+                let score = 0;
+                // 1. 相同品牌 +50
+                if (candidate.brand === currentProduct.brand) score += 50;
+                // 2. 相同集合（collection）+30
+                if (candidate.collection && currentProduct.collection && candidate.collection === currentProduct.collection) score += 30;
+                // 3. 相同标签（tag）+20
+                if (candidate.tag && currentProduct.tag && candidate.tag === currentProduct.tag) score += 20;
+                // 4. 价格相近（相差20%以内）+15
+                const priceDiffPercent = Math.abs(candidate.price - currentProduct.price) / currentProduct.price;
+                if (priceDiffPercent <= 0.2) score += 15;
+                // 5. 品牌知名度影响：若品牌是主流品牌且非相同品牌，也可轻微加分（但不如相同品牌高）
+                // 6. 随机种子打破平局（可选）
+                return { product: candidate, score };
+            });
+
+            // 按得分降序排序，取前 limit 个
+            scored.sort((a, b) => b.score - a.score);
+            return scored.slice(0, limit).map(item => item.product);
+        }
+
+        function renderRecommendations(currentProductId) {
+            const currentProduct = allProducts.find(p => p._id === currentProductId);
+            if (!currentProduct) return;
+
+            const recommendations = getRecommendations(currentProduct, allProducts, 4);
+            if (recommendations.length === 0) return;
+
+            // 查找或创建推荐区域容器
+            let recContainer = document.getElementById('recommendationsContainer');
+            if (!recContainer) {
+                const productDetailDiv = document.getElementById('productDetail');
+                const recSection = document.createElement('div');
+                recSection.id = 'recommendationsContainer';
+                recSection.className = 'recommendations-section';
+                productDetailDiv.insertAdjacentElement('afterend', recSection);
+                recContainer = recSection;
+            }
+
+            const recHtml = `
+                <div class="recommendations-title">You May Also Like</div>
+                <div class="recommendations-grid" id="recommendationsGrid">
+                    ${recommendations.map(rec => `
+                        <a href="product-detail.html?id=${rec._id}" class="rec-card">
+                            <div class="rec-image" style="background-image: url('${rec.image || ''}');">
+                                ${!rec.image ? '<span style="font-size: 2rem;">👟</span>' : ''}
+                            </div>
+                            <div class="rec-info">
+                                <div class="rec-brand">${rec.brand}</div>
+                                <div class="rec-name">${rec.name}</div>
+                                <div class="rec-price">MOP $${rec.price.toFixed(2)}</div>
+                            </div>
+                        </a>
+                    `).join('')}
+                </div>
+            `;
+            recContainer.innerHTML = recHtml;
+        }
+
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const total = cart.reduce((s, i) => s + i.quantity, 0);
+            const badge = document.getElementById('cartBadge');
+            if (badge) badge.textContent = total;
+        }
+
         updateCartBadge();
     </script>
 </body>

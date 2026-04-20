@@ -65,6 +65,7 @@
     <div class="container">
         <div class="products-page">
             <aside class="sidebar">
+                <!-- Brand Filter -->
                 <div class="filter-group"><h3>Brand</h3><div class="filter-options">
                     <div class="filter-option"><input type="checkbox" id="brand-nike" value="Nike" onchange="applyFilters()"><label for="brand-nike">Nike</label></div>
                     <div class="filter-option"><input type="checkbox" id="brand-jordan" value="Jordan" onchange="applyFilters()"><label for="brand-jordan">Jordan</label></div>
@@ -72,12 +73,17 @@
                     <div class="filter-option"><input type="checkbox" id="brand-puma" value="Puma" onchange="applyFilters()"><label for="brand-puma">Puma</label></div>
                     <div class="filter-option"><input type="checkbox" id="brand-newbalance" value="New Balance" onchange="applyFilters()"><label for="brand-newbalance">New Balance</label></div>
                     <div class="filter-option"><input type="checkbox" id="brand-converse" value="Converse" onchange="applyFilters()"><label for="brand-converse">Converse</label></div>
+                    <!-- Other 选项 -->
+                    <div class="filter-option"><input type="checkbox" id="brand-other" value="Other" onchange="applyFilters()"><label for="brand-other">Other</label></div>
                 </div></div>
+                <!-- Collection Filter -->
                 <div class="filter-group"><h3>Collection</h3><div class="filter-options">
                     <div class="filter-option"><input type="checkbox" id="collection-running" value="Running" onchange="applyFilters()"><label for="collection-running">Running</label></div>
                     <div class="filter-option"><input type="checkbox" id="collection-casual" value="Casual" onchange="applyFilters()"><label for="collection-casual">Casual</label></div>
                     <div class="filter-option"><input type="checkbox" id="collection-sports" value="Basketball" onchange="applyFilters()"><label for="collection-sports">Sports</label></div>
                     <div class="filter-option"><input type="checkbox" id="collection-premium" value="Training" onchange="applyFilters()"><label for="collection-premium">Premium</label></div>
+                    <!-- Other 选项 -->
+                    <div class="filter-option"><input type="checkbox" id="collection-other" value="Other" onchange="applyFilters()"><label for="collection-other">Other</label></div>
                 </div></div>
             </aside>
             <div class="products-section">
@@ -91,6 +97,10 @@
     <script>
         let products = [], filteredProducts = [], searchQuery = '';
 
+        // 预定义品牌列表和集合列表
+        const predefinedBrands = ['Nike', 'Jordan', 'Adidas', 'Puma', 'New Balance', 'Converse'];
+        const predefinedCollections = ['Running', 'Casual', 'Basketball', 'Training'];
+
         async function loadProducts() {
             try {
                 const res = await fetch('/api/products');
@@ -101,15 +111,56 @@
         }
 
         function applySearch() { searchQuery = document.getElementById('searchInput').value.toLowerCase(); applyFilters(); }
+        
         function applyFilters() {
-            const selectedBrands = Array.from(document.querySelectorAll('.filter-option input[id^="brand-"]:checked')).map(el => el.value);
+            // 获取选中的品牌值
+            const selectedBrands = Array.from(document.querySelectorAll('.filter-options input[id^="brand-"]:checked')).map(el => el.value);
+            // 获取选中的集合值
+            const selectedCollections = Array.from(document.querySelectorAll('.filter-options input[id^="collection-"]:checked')).map(el => el.value);
+            
             filteredProducts = products.filter(p => {
-                const brandMatch = selectedBrands.length === 0 || selectedBrands.includes(p.brand);
+                // 品牌筛选逻辑
+                let brandMatch = true;
+                if (selectedBrands.length > 0) {
+                    const brand = p.brand;
+                    // 如果选中了 "Other" 且同时选中了其他具体品牌
+                    const hasOther = selectedBrands.includes('Other');
+                    const specificBrands = selectedBrands.filter(b => b !== 'Other');
+                    if (hasOther && specificBrands.length > 0) {
+                        // 品牌满足：是具体品牌之一 或者 不在预定义品牌列表中
+                        brandMatch = specificBrands.includes(brand) || !predefinedBrands.includes(brand);
+                    } else if (hasOther) {
+                        // 只选中了 Other
+                        brandMatch = !predefinedBrands.includes(brand);
+                    } else {
+                        // 只选中了具体品牌
+                        brandMatch = specificBrands.includes(brand);
+                    }
+                }
+                
+                // 集合筛选逻辑
+                let collectionMatch = true;
+                if (selectedCollections.length > 0) {
+                    const collection = p.collection || '';
+                    const hasOtherColl = selectedCollections.includes('Other');
+                    const specificColls = selectedCollections.filter(c => c !== 'Other');
+                    if (hasOtherColl && specificColls.length > 0) {
+                        collectionMatch = specificColls.includes(collection) || !predefinedCollections.includes(collection);
+                    } else if (hasOtherColl) {
+                        collectionMatch = !predefinedCollections.includes(collection);
+                    } else {
+                        collectionMatch = specificColls.includes(collection);
+                    }
+                }
+                
+                // 搜索匹配
                 const searchMatch = searchQuery === '' || p.name.toLowerCase().includes(searchQuery) || p.brand.toLowerCase().includes(searchQuery);
-                return brandMatch && searchMatch;
+                
+                return brandMatch && collectionMatch && searchMatch;
             });
             renderProducts();
         }
+        
         function sortProducts(sortBy) {
             if (sortBy === 'name-asc') filteredProducts.sort((a,b) => a.name.localeCompare(b.name));
             else if (sortBy === 'name-desc') filteredProducts.sort((a,b) => b.name.localeCompare(a.name));
@@ -117,6 +168,7 @@
             else if (sortBy === 'price-desc') filteredProducts.sort((a,b) => b.price - a.price);
             renderProducts();
         }
+        
         function renderProducts() {
             const grid = document.getElementById('productsGrid'), no = document.getElementById('noProducts');
             if (!filteredProducts.length) { grid.style.display = 'none'; no.style.display = 'block'; return; }
@@ -130,8 +182,25 @@
                 </a>
             `).join('');
         }
+        
         function updateCartBadge() { const cart = JSON.parse(localStorage.getItem('cart')) || []; const total = cart.reduce((s,i) => s + i.quantity, 0); document.getElementById('cartBadge').textContent = total; }
-        window.addEventListener('load', () => { loadProducts(); updateCartBadge(); const coll = sessionStorage.getItem('selectedCollection'), brand = sessionStorage.getItem('selectedBrand'); if (coll) { const cb = document.getElementById('collection-'+coll.toLowerCase()); if(cb) cb.checked=true; sessionStorage.removeItem('selectedCollection'); } if(brand) { const cb = document.getElementById('brand-'+brand.toLowerCase()); if(cb) cb.checked=true; sessionStorage.removeItem('selectedBrand'); } applyFilters(); });
+        
+        window.addEventListener('load', () => { 
+            loadProducts(); 
+            updateCartBadge(); 
+            const coll = sessionStorage.getItem('selectedCollection'), brand = sessionStorage.getItem('selectedBrand'); 
+            if (coll) { 
+                const cb = document.getElementById('collection-'+coll.toLowerCase()); 
+                if(cb) cb.checked=true; 
+                sessionStorage.removeItem('selectedCollection'); 
+            } 
+            if(brand) { 
+                const cb = document.getElementById('brand-'+brand.toLowerCase()); 
+                if(cb) cb.checked=true; 
+                sessionStorage.removeItem('selectedBrand'); 
+            } 
+            applyFilters(); 
+        });
         window.addEventListener('storage', updateCartBadge);
     </script>
 </body>

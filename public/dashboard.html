@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - StepUp Admin</title>
+    <title>StepUp - Premium Men's Athletic Footwear</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -11,814 +11,1187 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: 'Montserrat', sans-serif;
-            background-color: #f9f9f9;
+            background-color: #ffffff;
             color: #262626;
             line-height: 1.6;
         }
-        h1, h2, h3 {
+
+        h1, h2, h3, h4, h5, h6 {
             font-family: 'Playfair Display', serif;
         }
-        .admin-wrapper {
-            display: flex;
-            min-height: 100vh;
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
         }
-        .sidebar {
-            width: 250px;
-            background-color: #262626;
-            color: white;
-            padding: 20px;
-            flex-shrink: 0;
+
+        /* Navigation Header */
+        header {
             position: sticky;
             top: 0;
-            height: 100vh;
-        }
-        .sidebar h2 {
-            font-size: 1.5rem;
-            border-bottom: 1px solid #444;
-            padding-bottom: 20px;
-            margin-top: 0;
-        }
-        .sidebar nav a {
-            display: block;
-            color: #bbb;
-            text-decoration: none;
-            padding: 15px 0;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: 0.3s;
-        }
-        .sidebar nav a:hover,
-        .sidebar nav a.active {
-            color: white;
-            font-weight: bold;
-            border-left: 3px solid white;
-            padding-left: 10px;
-        }
-        hr {
-            margin: 20px 0;
-            border-color: #444;
-        }
-        .main-content {
-            flex-grow: 1;
-            padding: 40px;
-            overflow-y: auto;
-        }
-        /* 标题行：包含 Dashboard 标题和 Export 按钮 */
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-        .dashboard-header h1 {
-            margin: 0;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: #fff;
-            padding: 1.5rem;
-            border: 1px solid #e5e5e5;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #262626;
-        }
-        .stat-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #999;
-        }
-
-        /* 卡片通用样式 */
-        .card {
-            background: #fff;
-            border: 1px solid #e5e5e5;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-direction: column;
-            height: fit-content;
-        }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-        .btn {
-            padding: 0.6rem 1.2rem;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            letter-spacing: 0.05em;
-            border-radius: 4px;
-        }
-        .btn-primary {
-            background: #262626;
-            color: #fff;
-        }
-        .btn-primary:hover {
-            background: #404040;
-        }
-        .btn-secondary {
-            background: #fff;
-            color: #262626;
-            border: 1px solid #262626;
-        }
-        .btn-secondary:hover {
-            background: #f5f5f5;
-        }
-        .export-btn {
-            background: #27ae60;
-            color: white;
-        }
-        .export-btn:hover {
-            background: #2ecc71;
-        }
-        .report-btn {
-            background: #2980b9;
-            color: white;
-        }
-        .report-btn:hover {
-            background: #3498db;
-        }
-
-        /* 表格样式优化 */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            table-layout: auto;
-        }
-        .data-table th,
-        .data-table td {
-            padding: 0.75rem 0.8rem;
-            text-align: left;
+            z-index: 50;
+            background-color: #ffffff;
             border-bottom: 1px solid #e5e5e5;
         }
-        .data-table td {
-            white-space: nowrap;
-        }
-        .data-table th {
-            background: #fafafa;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-size: 0.7rem;
-            color: #666;
-            border-bottom: 2px solid #262626;
-        }
 
-        .table-responsive {
-            overflow-x: auto;
-            overflow-y: auto;
-            max-height: 320px;
-            margin: 0 -1.5rem;
-            padding: 0 1.5rem;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 280px;
-            width: 100%;
-        }
-
-        .dashboard-grid-2col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .dashboard-grid-2col .card {
-            margin-bottom: 0;
-        }
-
-        .mode-toggle {
+        .header-content {
             display: flex;
-            gap: 1rem;
             align-items: center;
-            margin-bottom: 1rem;
-            justify-content: flex-end;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            padding: 1.5rem 0;
         }
-        .mode-toggle label {
+
+        .logo {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.85rem;
-            cursor: pointer;
         }
-        .refresh-bar {
+
+        .logo-box {
+            width: 40px;
+            height: 40px;
+            background-color: #262626;
             display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            margin-bottom: 1rem;
             align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            font-size: 1.125rem;
         }
-        .forecast-table-container {
-            margin-top: 1.5rem;
-            overflow-x: auto;
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            letter-spacing: 0.05em;
         }
-        .forecast-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
-            border: 1px solid #e5e5e5;
+
+        nav {
+            display: flex;
+            gap: 2rem;
         }
-        .forecast-table th, .forecast-table td {
-            padding: 0.75rem;
-            text-align: center;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .forecast-table th {
-            background: #fafafa;
+
+        nav a {
+            text-decoration: none;
+            color: #262626;
+            font-size: 0.875rem;
             font-weight: 600;
-            font-size: 0.85rem;
             text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #666666;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-right button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #262626;
+            font-size: 1.25rem;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-right button:hover {
+            color: #666666;
+        }
+
+        .user-icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #262626;
+            font-size: 1.25rem;
+            transition: color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .user-icon-btn:hover {
+            color: #666666;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #262626;
+            color: #FAFAF8;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
         }
 
         @media (max-width: 768px) {
-            .main-content {
-                padding: 20px;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            .dashboard-grid-2col {
-                grid-template-columns: 1fr;
-            }
-            .table-responsive {
-                max-height: none;
+            nav {
+                display: none;
             }
         }
 
-        /* ========== 打印样式 (用于 PDF 导出) ========== */
-        @media print {
-            /* 隐藏不需要打印的元素 */
-            .sidebar,
-            .btn,
-            .refresh-bar,
-            .mode-toggle,
-            #manualUploadSection,
-            .forecast-table-container .card-header .btn,
-            #autoRefreshCheckbox,
-            #manualRefreshBtn,
-            #includeTodayCheckbox,
-            #forecastFile,
-            #exportSalesBtn,
-            #exportProductsBtn,
-            #exportCustomersBtn,
-            #exportForecastBtn,
-            .report-btn,
-            .dashboard-header .btn {
-                display: none !important;
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 4rem 0;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .deco-frame {
+            position: relative;
+            border-left: 4px solid #262626;
+            border-top: 4px solid #262626;
+            padding-left: 1.5rem;
+            padding-top: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .deco-frame::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-right: 4px solid #262626;
+            border-bottom: 4px solid #262626;
+        }
+
+        .hero-text-label {
+            color: #262626;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title .highlight {
+            color: #262626;
+        }
+
+        .hero-description {
+            color: #666666;
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+            max-width: 400px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #262626;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: #262626;
+            border: 2px solid #262626;
+        }
+
+        .btn-secondary:hover {
+            background-color: #262626;
+            color: #ffffff;
+        }
+
+        .hero-visual {
+            position: relative;
+            aspect-ratio: 1;
+            background-color: #f5f5f5;
+            border: 2px solid #d9d9d9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0;
+        }
+
+        .hero-visual-content {
+            text-align: center;
+        }
+
+        .hero-visual-emoji {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-visual-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #262626;
+        }
+
+        @media (max-width: 768px) {
+            .hero-content {
+                grid-template-columns: 1fr;
             }
 
-            /* 调整布局为全幅 */
-            .admin-wrapper {
-                display: block;
-            }
-            .main-content {
-                padding: 20px;
-                margin: 0;
-                width: 100%;
+            .hero-title {
+                font-size: 2.5rem;
             }
 
-            /* 卡片和表格边框调整 */
-            .card {
-                box-shadow: none;
-                border: 1px solid #ccc;
-                page-break-inside: avoid;
+            .hero-visual {
+                display: none;
             }
+        }
 
-            /* 图表容器确保打印时不缩放失真 */
-            .chart-container {
-                height: 250px;
-                page-break-inside: avoid;
+        /* Stats Banner Section */
+        .stats-banner-section {
+            padding: 5rem 0;
+            background-color: #f9f9f9;
+            border-top: 1px solid #e5e5e5;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .stats-banner {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .stat-item {
+            padding: 2rem;
+            background-color: #ffffff;
+            border: 1px solid #e5e5e5;
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            transform: translateY(-3px);
+            border-color: #262626;
+        }
+
+        .stat-number {
+            font-size: 3.5rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            color: #262626;
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666666;
+        }
+
+        @media (max-width: 768px) {
+            .stats-banner {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
             }
-
-            /* 表格文字缩小以适应打印 */
-            .data-table {
-                font-size: 0.75rem;
+            .stat-number {
+                font-size: 2.5rem;
             }
+        }
 
-            /* 确保颜色打印清晰 */
-            body {
-                background: white;
-                color: black;
+        /* ===== 新轮播图区域样式 ===== */
+        .featured-section {
+            padding: 5rem 0;
+            background-color: #f9f9f9;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 0;
+            width: 6rem;
+            height: 4px;
+            background-color: #262626;
+        }
+
+        .section-description {
+            color: #666666;
+            font-size: 1rem;
+            max-width: 600px;
+            margin-bottom: 3rem;
+            margin-top: 1rem;
+        }
+
+        /* 轮播容器 */
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e5e5;
+        }
+
+        .carousel-slides {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            height: 500px; /* 固定高度，可根据需要调整 */
+        }
+
+        .carousel-slide {
+            flex: 0 0 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+
+        /* 图片占位说明（若图片加载失败可显示文字） */
+        .carousel-slide::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.05);
+            pointer-events: none;
+        }
+
+        /* 左右箭头 */
+        .carousel-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 300;
+            color: #262626;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+            backdrop-filter: blur(2px);
+        }
+
+        .carousel-arrow:hover {
+            background-color: #262626;
+            color: #fff;
+            border-color: #262626;
+        }
+
+        .carousel-arrow.left {
+            left: 20px;
+        }
+
+        .carousel-arrow.right {
+            right: 20px;
+        }
+
+        /* 指示器圆点 */
+        .carousel-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+            background: rgba(0,0,0,0.2);
+            padding: 8px 16px;
+            border-radius: 40px;
+            backdrop-filter: blur(4px);
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(0,0,0,0.2);
+        }
+
+        .dot.active {
+            background-color: #262626;
+            transform: scale(1.3);
+            border-color: #fff;
+        }
+
+        .dot:hover {
+            background-color: #262626;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .carousel-slides {
+                height: 350px;
             }
+            .carousel-arrow {
+                width: 36px;
+                height: 36px;
+                font-size: 22px;
+            }
+        }
 
-            /* 预测值表格显示完整 */
-            .forecast-table-container {
-                overflow: visible;
+        /* 原有产品卡片样式保留，但不再用于该区域，可保留以备后用 */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .product-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e5e5;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-0.5rem);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            background-color: transparent;
+            margin-bottom: 1rem;
+            object-fit: cover;
+            transition: transform 0.3s;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-tag {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: #262626;
+            color: #ffffff;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .product-brand {
+            color: #262626;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-name {
+            font-size: 1.125rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .product-price {
+            color: #262626;
+            font-weight: 600;
+        }
+
+        /* Collections Section */
+        .collections-section {
+            padding: 5rem 0;
+            background-color: #f9f9f9;
+        }
+
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .collection-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e5e5;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .collection-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-0.5rem);
+            border-color: #262626;
+        }
+
+        .collection-image {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            transition: transform 0.3s;
+        }
+
+        .collection-card:hover .collection-image {
+            transform: scale(1.1);
+        }
+
+        .collection-name {
+            font-size: 1.25rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #262626;
+        }
+
+        .collection-count {
+            font-size: 0.875rem;
+            color: #999999;
+            font-weight: 500;
+        }
+
+        /* Brands Section */
+        .brands-section {
+            padding: 5rem 0;
+            background-color: #ffffff;
+        }
+
+        .brands-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .brands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+        }
+
+        .brand-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            border: 1px solid #e5e5e5;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .brand-card:hover {
+            border-color: #262626;
+        }
+
+        .brand-emoji {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            transition: transform 0.3s;
+        }
+
+        .brand-card:hover .brand-emoji {
+            transform: scale(1.1);
+        }
+
+        .brand-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: center;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 5rem 0;
+            background-color: #f9f9f9;
+            border-top: 1px solid #e5e5e5;
+            border-bottom: 1px solid #e5e5e5;
+            text-align: center;
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-description {
+            color: #666666;
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #f5f5f5;
+            border-top: 1px solid #e5e5e5;
+            padding: 3rem 0;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3rem;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .footer-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .footer-section-brand {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .footer-section-brand .logo-box {
+            width: 32px;
+            height: 32px;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section-brand .brand-name {
+            font-weight: bold;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .footer-section-brand p {
+            font-size: 0.875rem;
+            color: #666666;
+            line-height: 1.6;
+        }
+
+        .footer-section h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            color: #262626;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-section ul li a {
+            color: #666666;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.3s;
+        }
+
+        .footer-section ul li a:hover {
+            color: #262626;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #666666;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .social-links a {
+            color: #666666;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: #262626;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            .social-links {
+                justify-content: center;
             }
         }
     </style>
 </head>
 <body>
-<div class="admin-wrapper">
-    <aside class="sidebar">
-        <h2>StepUp Admin</h2>
-        <nav>
-            <a href="admin.html">Staff Management</a>
-            <a href="Inventory.html">Inventory Management</a>
-            <a href="User.html">User Records</a>
-            <a href="Order.html">Order Fulfillment</a>
-            <a href="dashboard.html" class="active">Dashboard</a>
-            <hr>
-            <a href="#" onclick="logoutAdmin(); return false;" style="color: #e74c3c;">Logout</a>
-        </nav>
-    </aside>
-
-    <main class="main-content">
-        <!-- 标题行 + Export Sales Report 按钮 -->
-        <div class="dashboard-header">
-            <h1>Dashboard</h1>
-            <button class="btn report-btn" id="exportReportBtn">📄 Export Sales Report</button>
-        </div>
-
-        <!-- 统计卡片 -->
-        <div class="stats-grid" id="statsGrid">
-            <div class="stat-card"><div class="stat-value" id="totalRevenue">--</div><div class="stat-label">Total Revenue (MOP)</div></div>
-            <div class="stat-card"><div class="stat-value" id="totalOrders">--</div><div class="stat-label">Total Orders</div></div>
-            <div class="stat-card"><div class="stat-value" id="totalUsers">--</div><div class="stat-label">Registered Users</div></div>
-            <div class="stat-card"><div class="stat-value" id="totalProducts">--</div><div class="stat-label">Products in Inventory</div></div>
-        </div>
-
-        <!-- 实际销售额图表 -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">📈 Actual Sales (Last 30 Days)</h3>
-                <button class="btn export-btn" id="exportSalesBtn">📊 Export Sales Data</button>
-            </div>
-            <div class="chart-container">
-                <canvas id="salesChart"></canvas>
-            </div>
-        </div>
-
-        <!-- 预测图表 -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">🔮 Forecast (Next 7 Days)</h3>
-                <button class="btn export-btn" id="exportForecastBtn">📥 Export Forecast Table</button>
-            </div>
-
-            <div class="refresh-bar">
-                <label style="display: flex; align-items: center; gap: 0.5rem;">
-                    <input type="checkbox" id="autoRefreshCheckbox" checked> Auto-refresh (every 60 min)
-                </label>
-                <button class="btn btn-secondary" id="manualRefreshBtn">🔄 Refresh Now</button>
-            </div>
-
-            <div class="mode-toggle">
-                <label><input type="radio" name="forecastMode" value="auto" checked> 🤖 Auto Forecast (ML)</label>
-                <label><input type="radio" name="forecastMode" value="upload"> 📁 Manual Upload</label>
-                <label style="margin-left: 1rem;"><input type="checkbox" id="includeTodayCheckbox"> 📅 Include today in forecast</label>
-            </div>
-
-            <div class="chart-container">
-                <canvas id="forecastChart"></canvas>
-            </div>
-
-            <div id="manualUploadSection" style="margin-top: 1rem; text-align: center; display: none;">
-                <label class="btn btn-secondary" style="display: inline-block; cursor: pointer;">
-                    📁 Upload Forecast CSV
-                    <input type="file" id="forecastFile" accept=".csv" style="display: none;">
-                </label>
-                <span id="uploadStatus" style="margin-left: 1rem; font-size: 0.8rem;"></span>
-                <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #666;">
-                    CSV format: date,forecast_sales (date as YYYY-MM-DD, sales as number)
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-box">S</div>
+                    <div class="logo-text">STEPUP</div>
                 </div>
-            </div>
-
-            <div class="forecast-table-container">
-                <div class="card-header" style="margin-bottom: 0;">
-                    <h3 class="card-title">📋 Forecast Values</h3>
-                </div>
-                <table class="forecast-table" id="forecastTable">
-                    <thead>
-                        <tr><th>Date</th><th>Forecasted Sales (MOP)</th><th>Forecast Source</th></tr>
-                    </thead>
-                    <tbody id="forecastTableBody">
-                        <tr><td colspan="3" style="text-align:center;">Loading forecast...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- 热销产品 & 顶级客户 (两列布局) -->
-        <div class="dashboard-grid-2col">
-            <!-- 热销产品卡片 -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">🔥 Top Selling Products</h3>
-                    <button class="btn export-btn" id="exportProductsBtn">Export</button>
-                </div>
-                <div class="chart-container">
-                    <canvas id="productsChart"></canvas>
-                </div>
-            </div>
-
-            <!-- 顶级客户卡片 -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">🏆 Top Customers</h3>
-                    <button class="btn export-btn" id="exportCustomersBtn">Export</button>
-                </div>
-                <div class="table-responsive">
-                    <table class="data-table" id="topCustomersTable">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Orders</th>
-                                <th>Total Spent</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
-                        </tbody>
-                    </table>
+                <nav>
+                    <a href="#shop">Shop</a>
+                    <a href="#collections">Collections</a>
+                    <a href="#brands">Brands</a>
+                    <a href="about.html">About</a>
+                </nav>
+                <div class="nav-right">
+                    <button title="Shopping Cart" onclick="location.href='shopping-cart.html'" style="position: relative;">🛒<span class="cart-badge" id="cartBadge">0</span></button>
+                    <a href="account.html" class="user-icon-btn" title="User Account">👤</a>
                 </div>
             </div>
         </div>
-    </main>
-</div>
+    </header>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script>
-    const token = localStorage.getItem('adminToken');
-    if (!token) window.location.href = 'admin-login.html';
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div>
+                    <div class="deco-frame">
+                        <div>
+                            <p class="hero-text-label">Luxury Athletic Footwear</p>
+                            <h1 class="hero-title">
+                                Step Into
+                                <br>
+                                <span class="highlight">Excellence</span>
+                            </h1>
+                            <p class="hero-description">
+                                Curated collection of premium athletic sneakers and casual footwear for the modern man.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="window.location.href='products.html'">Explore Collection</button>
+                        <button class="btn btn-secondary" onclick="window.location.href='about.html'">View Lookbook</button>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="hero-visual-content">
+                        <div class="hero-visual-emoji">👟</div>
+                        <div class="hero-visual-text">Featured Collection</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    async function verifyToken() {
-        try {
-            const res = await fetch('/api/admin/verify', { headers: { 'Authorization': `Bearer ${token}` } });
-            if (!res.ok) throw new Error();
-        } catch (err) {
-            localStorage.removeItem('adminToken');
-            window.location.href = 'admin-login.html';
+    <!-- Stats Banner -->
+    <section class="stats-banner-section">
+        <div class="container">
+            <div class="stats-banner">
+                <div class="stat-item">
+                    <div class="stat-number" id="statStyles">--</div>
+                    <div class="stat-label">Premium Styles</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statDailyOrders">--</div>
+                    <div class="stat-label">Daily Orders</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statActiveCustomers">--</div>
+                    <div class="stat-label">Active Customers</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== 替换后的 Featured Selection 轮播区域 ========== -->
+    <section class="featured-section" id="shop">
+        <div class="container">
+            <h2 class="section-title">✨ Featured Selection</h2>
+            <p class="section-description">
+                A glimpse of our latest style inspiration. Swipe or click to explore.
+            </p>
+            
+            <!-- 轮播图结构 -->
+            <div class="carousel-container">
+                <div class="carousel-slides" id="carouselSlides">
+                    <div class="carousel-slide" style="background-image: url('photo1.jpg');"></div>
+                    <div class="carousel-slide" style="background-image: url('photo2.jpg');"></div>
+                    <div class="carousel-slide" style="background-image: url('photo3.jpg');"></div>
+                </div>
+                
+                <!-- 左右箭头 -->
+                <div class="carousel-arrow left" id="prevBtn">❮</div>
+                <div class="carousel-arrow right" id="nextBtn">❯</div>
+                
+                <!-- 指示点 -->
+                <div class="carousel-dots" id="carouselDots">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="collections-section" id="collections">
+        <div class="container">
+            <h2 class="section-title">Shop by Collection</h2>
+            <p class="section-description">
+                Curated collections designed for every lifestyle and occasion.
+            </p>
+            <div class="collections-grid">
+                <div class="collection-card" onclick="goToProductsWithFilter('Running')">
+                    <div class="collection-image">🏃</div>
+                    <h3 class="collection-name">Athletic</h3>
+                </div>
+                <div class="collection-card" onclick="goToProductsWithFilter('Casual')">
+                    <div class="collection-image">👟</div>
+                    <h3 class="collection-name">Casual</h3>
+                </div>
+                <div class="collection-card" onclick="goToProductsWithFilter('Basketball')">
+                    <div class="collection-image">⚽</div>
+                    <h3 class="collection-name">Sport</h3>
+                </div>
+                <div class="collection-card" onclick="goToProductsWithFilter('Training')">
+                    <div class="collection-image">👑</div>
+                    <h3 class="collection-name">Premium</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="brands-section" id="brands">
+        <div class="container">
+            <div class="brands-title">
+                <h2 class="section-title">Trusted Brands</h2>
+                <p class="section-description">
+                    We partner with the world's most prestigious athletic and lifestyle brands.
+                </p>
+            </div>
+            <div class="brands-grid">
+                <div class="brand-card" onclick="goToProductsWithBrand('Nike')">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/nike_logo-3ofqLp6PBdCCDqG4ZLiuEV.webp" alt="Nike" style="width: 120px; height: 120px; object-fit: contain;">
+                    <div class="brand-name">Nike</div>
+                </div>
+                <div class="brand-card" onclick="goToProductsWithBrand('Adidas')">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/adidas_logo-gD7A8tdW3c8kf4LAiBdpj6.webp" alt="Adidas" style="width: 120px; height: 120px; object-fit: contain;">
+                    <div class="brand-name">Adidas</div>
+                </div>
+                <div class="brand-card" onclick="goToProductsWithBrand('Jordan')">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/jordan_logo-XbKPzVfYBPX7WYw9MFaxz4.webp" alt="Jordan" style="width: 120px; height: 120px; object-fit: contain;">
+                    <div class="brand-name">Jordan</div>
+                </div>
+                <div class="brand-card" onclick="goToProductsWithBrand('Puma')">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/puma_logo-efjVBACcBRSEgTHJmiJfqc.webp" alt="Puma" style="width: 120px; height: 120px; object-fit: contain;">
+                    <div class="brand-name">Puma</div>
+                </div>
+                <div class="brand-card" onclick="goToProductsWithBrand('New Balance')">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/newbalance_logo-FxVhjrqBwtHjs7pmYDMfhd.webp" alt="New Balance" style="width: 120px; height: 120px; object-fit: contain;">
+                    <div class="brand-name">New Balance</div>
+                </div>
+                <div class="brand-card" onclick="goToProductsWithBrand('Converse')">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663370729728/jVJLyhqwN8wagV6sE3nUQf/converse_logo-RFfmSudDH2EGYUBRkBHL5a.webp" alt="Converse" style="width: 120px; height: 120px; object-fit: contain;">
+                    <div class="brand-name">Converse</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="cta-title">Discover Your Perfect Fit</h2>
+            <p class="cta-description">
+                Browse our complete collection of premium athletic footwear and find the perfect pair for your lifestyle.
+            </p>
+            <button class="btn btn-primary" onclick="goToProducts()">Start Shopping</button>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section-brand">
+                    <div class="logo-box">S</div>
+                    <div class="brand-name">STEPUP</div>
+                    <p>Your destination for premium footwear and athletic gear. We believe in quality, style, and comfort for every step of your journey.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Shop</h4>
+                    <ul>
+                        <li><a href="#">New Arrivals</a></li>
+                        <li><a href="#">Best Sellers</a></li>
+                        <li><a href="#">Collections</a></li>
+                        <li><a href="#">Sale</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Press</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 StepUp. All rights reserved.</span>
+                <div class="social-links">
+                    <a href="#">Facebook</a>
+                    <a href="#">Instagram</a>
+                    <a href="#">Twitter</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ---------- 原有辅助函数 ----------
+        function goToProductsWithFilter(collection) {
+            sessionStorage.setItem('selectedCollection', collection);
+            window.location.href = 'products.html';
         }
-    }
-    verifyToken();
-
-    function logoutAdmin() {
-        localStorage.removeItem('adminToken');
-        window.location.href = 'admin-login.html';
-    }
-
-    let salesChart, forecastChart, productsChart;
-    let currentForecastMode = 'auto';
-    let currentForecastData = [];
-    let refreshInterval = null;
-
-    // ---------- Export Report 功能 (打印为 PDF) ----------
-    document.getElementById('exportReportBtn').addEventListener('click', () => {
-        window.print();
-    });
-
-    async function fetchDashboardStats() {
-        try {
-            const res = await fetch('/api/admin/dashboard/stats', { headers: { 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            if (res.ok) {
-                document.getElementById('totalRevenue').innerText = `MOP ${data.totalRevenue.toFixed(2)}`;
-                document.getElementById('totalOrders').innerText = data.totalOrders;
-                document.getElementById('totalUsers').innerText = data.totalUsers;
-                document.getElementById('totalProducts').innerText = data.totalProducts;
-            }
-        } catch (err) { console.error('Stats error:', err); }
-    }
-
-    async function fetchSalesTimeline() {
-        try {
-            const res = await fetch('/api/admin/dashboard/sales-timeline?days=30', { headers: { 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            if (res.ok && data.data) {
-                const labels = data.data.map(d => d.date);
-                const actualSales = data.data.map(d => d.total);
-                renderSalesChart(labels, actualSales);
-                return { labels, actualSales };
-            }
-        } catch (err) { console.error('Sales timeline error:', err); }
-        return null;
-    }
-
-    function renderSalesChart(labels, actualData) {
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        if (salesChart) salesChart.destroy();
-        salesChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Actual Sales',
-                    data: actualData,
-                    borderColor: '#262626',
-                    backgroundColor: 'rgba(38,38,38,0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.1,
-                    pointRadius: 3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { tooltip: { callbacks: { label: (ctx) => `MOP ${ctx.raw.toFixed(2)}` } } },
-                scales: { y: { ticks: { callback: (val) => 'MOP ' + val } } }
-            }
-        });
-    }
-
-    function renderForecastChart(dates, values, label) {
-        const ctx = document.getElementById('forecastChart').getContext('2d');
-        if (forecastChart) forecastChart.destroy();
-        forecastChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: dates,
-                datasets: [{
-                    label: label,
-                    data: values,
-                    borderColor: '#e74c3c',
-                    backgroundColor: 'rgba(231,76,60,0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.1,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#e74c3c'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { tooltip: { callbacks: { label: (ctx) => `MOP ${ctx.raw.toFixed(2)}` } } },
-                scales: { y: { ticks: { callback: (val) => 'MOP ' + val } } }
-            }
-        });
-    }
-
-    function updateForecastTable(forecastArray, sourceLabel) {
-        const tbody = document.getElementById('forecastTableBody');
-        if (!forecastArray || forecastArray.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No forecast data available</td></tr>';
-            return;
+        function goToProductsWithBrand(brand) {
+            sessionStorage.setItem('selectedBrand', brand);
+            window.location.href = 'products.html';
         }
-        tbody.innerHTML = forecastArray.map(item => `
-            <tr>
-                <td>${item.date}</td>
-                <td>MOP ${item.value.toFixed(2)}</td>
-                <td>${sourceLabel}</td>
-            </tr>
-        `).join('');
-        currentForecastData = forecastArray;
-    }
-
-    async function fetchAutoForecast() {
-        const includeToday = document.getElementById('includeTodayCheckbox').checked;
-        let url = '/api/admin/dashboard/auto-forecast?days=7';
-        if (includeToday) url += '&includeToday=true';
-        try {
-            const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            if (res.ok && data.data && data.data.length) {
-                renderForecastChart(data.data.map(f => f.date), data.data.map(f => f.value), 'Auto Forecast (ML)');
-                updateForecastTable(data.data, 'Auto ML');
-                return true;
-            } else {
-                renderForecastChart([], [], 'No forecast');
-                updateForecastTable([], 'Auto ML');
-                return false;
-            }
-        } catch (err) {
-            console.error('Auto-forecast error:', err);
-            renderForecastChart([], [], 'Error');
-            updateForecastTable([], 'Auto ML');
-            return false;
+        function goToProducts() {
+            sessionStorage.removeItem('selectedBrand');
+            sessionStorage.removeItem('selectedCollection');
+            window.location.href = 'products.html';
         }
-    }
-
-    async function fetchUploadedForecast() {
-        try {
-            const res = await fetch('/api/admin/dashboard/forecast', { headers: { 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            if (res.ok && data.data && data.data.length) {
-                renderForecastChart(data.data.map(f => f.date), data.data.map(f => f.value), 'Uploaded Forecast');
-                updateForecastTable(data.data, 'Manual Upload');
-                return true;
-            } else {
-                renderForecastChart([], [], 'No forecast uploaded');
-                updateForecastTable([], 'Manual Upload');
-                return false;
-            }
-        } catch (err) {
-            console.error('Uploaded forecast error:', err);
-            renderForecastChart([], [], 'Error');
-            updateForecastTable([], 'Manual Upload');
-            return false;
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartBadge').textContent = totalItems;
         }
-    }
 
-    async function loadForecast() {
-        if (currentForecastMode === 'auto') await fetchAutoForecast();
-        else await fetchUploadedForecast();
-    }
-
-    async function fetchTopProducts() {
-        try {
-            const res = await fetch('/api/admin/dashboard/top-products?limit=5', { headers: { 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            if (res.ok && data.data) {
-                renderProductsChart(data.data.map(p => p.name), data.data.map(p => p.totalQuantity));
+        // 加载统计数据（保留原功能）
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/public/stats');
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('statStyles').textContent = data.totalProducts || '0';
+                    document.getElementById('statDailyOrders').textContent = data.dailyOrders || '0';
+                    document.getElementById('statActiveCustomers').textContent = data.activeUsers || '0';
+                    return;
+                }
+            } catch (e) {
+                console.warn('Public stats not available, falling back to product count');
             }
-        } catch (err) { console.error('Top products error:', err); }
-    }
 
-    function renderProductsChart(labels, quantities) {
-        const ctx = document.getElementById('productsChart').getContext('2d');
-        if (productsChart) productsChart.destroy();
-        productsChart = new Chart(ctx, {
-            type: 'bar',
-            data: { labels, datasets: [{ label: 'Units Sold', data: quantities, backgroundColor: '#262626', borderRadius: 4 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-        });
-    }
-
-    async function fetchTopCustomers() {
-        try {
-            const res = await fetch('/api/admin/dashboard/top-customers?limit=10', { headers: { 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            if (res.ok && data.data) {
-                const tbody = document.querySelector('#topCustomersTable tbody');
-                if (data.data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No customers found</td></tr>';
+            try {
+                const productsRes = await fetch('/api/products');
+                const productsData = await productsRes.json();
+                if (productsData.success) {
+                    document.getElementById('statStyles').textContent = productsData.count || productsData.data.length;
                 } else {
-                    tbody.innerHTML = data.data.map(customer => `
-                        <tr>
-                            <td title="${escapeHtml(customer.name)}">${escapeHtml(customer.name)}</td>
-                            <td title="${escapeHtml(customer.email)}">${escapeHtml(customer.email)}</td>
-                            <td>${customer.orderCount}</td>
-                            <td>MOP ${customer.totalSpent.toFixed(2)}</td>
-                        </tr>
-                    `).join('');
+                    document.getElementById('statStyles').textContent = '0';
+                }
+            } catch (e) {
+                document.getElementById('statStyles').textContent = '0';
+            }
+            document.getElementById('statDailyOrders').textContent = '--';
+            document.getElementById('statActiveCustomers').textContent = '--';
+        }
+
+        // ---------- 轮播图逻辑 (新增) ----------
+        (function initCarousel() {
+            const slides = document.getElementById('carouselSlides');
+            const dots = document.querySelectorAll('.dot');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            let currentIndex = 0;
+            const totalSlides = 3;  // 三张照片
+            let autoPlayInterval = null;
+            const AUTO_PLAY_DELAY = 5000; // 5秒切换
+
+            // 更新轮播位置及激活点
+            function updateCarousel(index) {
+                if (index < 0) index = totalSlides - 1;
+                if (index >= totalSlides) index = 0;
+                currentIndex = index;
+                
+                const offset = -currentIndex * 100;
+                slides.style.transform = `translateX(${offset}%)`;
+                
+                // 更新圆点
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === currentIndex);
+                });
+            }
+
+            // 下一张
+            function nextSlide() {
+                updateCarousel(currentIndex + 1);
+            }
+
+            // 上一张
+            function prevSlide() {
+                updateCarousel(currentIndex - 1);
+            }
+
+            // 跳转到指定索引
+            function goToSlide(index) {
+                updateCarousel(index);
+            }
+
+            // 自动播放控制
+            function startAutoPlay() {
+                if (autoPlayInterval) clearInterval(autoPlayInterval);
+                autoPlayInterval = setInterval(nextSlide, AUTO_PLAY_DELAY);
+            }
+
+            function stopAutoPlay() {
+                if (autoPlayInterval) {
+                    clearInterval(autoPlayInterval);
+                    autoPlayInterval = null;
                 }
             }
-        } catch (err) { console.error('Top customers error:', err); }
-    }
 
-    async function exportSalesToCSV() {
-        const res = await fetch('/api/admin/dashboard/sales-timeline?days=30', { headers: { 'Authorization': `Bearer ${token}` } });
-        const data = await res.json();
-        if (res.ok && data.data) {
-            const headers = ['Date', 'Total Sales (MOP)'];
-            const rows = data.data.map(d => [d.date, d.total]);
-            downloadCSV(headers, rows, 'sales_timeline.csv');
-        } else alert('Failed to fetch sales data');
-    }
-
-    async function exportTopProductsToCSV() {
-        const res = await fetch('/api/admin/dashboard/top-products?limit=100', { headers: { 'Authorization': `Bearer ${token}` } });
-        const data = await res.json();
-        if (res.ok && data.data) {
-            const headers = ['Product Name', 'Units Sold', 'Revenue (MOP)'];
-            const rows = data.data.map(p => [p.name, p.totalQuantity, p.totalRevenue]);
-            downloadCSV(headers, rows, 'top_products.csv');
-        } else alert('Failed to fetch top products');
-    }
-
-    async function exportTopCustomersToCSV() {
-        const res = await fetch('/api/admin/dashboard/top-customers?limit=100', { headers: { 'Authorization': `Bearer ${token}` } });
-        const data = await res.json();
-        if (res.ok && data.data) {
-            const headers = ['Name', 'Email', 'Orders', 'Total Spent (MOP)'];
-            const rows = data.data.map(c => [c.name, c.email, c.orderCount, c.totalSpent.toFixed(2)]);
-            downloadCSV(headers, rows, 'top_customers.csv');
-        } else alert('Failed to fetch top customers');
-    }
-
-    function exportForecastToCSV() {
-        if (currentForecastData.length === 0) {
-            alert('No forecast data to export');
-            return;
-        }
-        const headers = ['Date', 'Forecasted Sales (MOP)', 'Source'];
-        const rows = currentForecastData.map(item => [item.date, item.value.toFixed(2), currentForecastMode === 'auto' ? 'Auto ML' : 'Manual Upload']);
-        downloadCSV(headers, rows, 'forecast_values.csv');
-    }
-
-    function downloadCSV(headers, rows, filename) {
-        const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
-        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.href = url;
-        link.setAttribute('download', filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }
-
-    async function uploadForecast(file) {
-        const formData = new FormData();
-        formData.append('forecast', file);
-        try {
-            const res = await fetch('/api/admin/dashboard/upload-forecast', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
-            const data = await res.json();
-            if (res.ok) {
-                document.getElementById('uploadStatus').innerText = '✓ Forecast uploaded successfully';
-                setTimeout(() => document.getElementById('uploadStatus').innerText = '', 3000);
-                if (currentForecastMode === 'upload') await loadForecast();
-            } else document.getElementById('uploadStatus').innerText = '✗ Error: ' + (data.error || 'Upload failed');
-        } catch (err) { document.getElementById('uploadStatus').innerText = '✗ Network error'; }
-    }
-
-    function initModeToggle() {
-        const radios = document.querySelectorAll('input[name="forecastMode"]');
-        const manualSection = document.getElementById('manualUploadSection');
-        radios.forEach(radio => {
-            radio.addEventListener('change', async (e) => {
-                if (e.target.checked) {
-                    currentForecastMode = e.target.value;
-                    manualSection.style.display = currentForecastMode === 'auto' ? 'none' : 'block';
-                    await loadForecast();
-                }
+            // 绑定事件
+            prevBtn.addEventListener('click', () => {
+                prevSlide();
+                stopAutoPlay();
+                startAutoPlay();  // 重置计时器
             });
+
+            nextBtn.addEventListener('click', () => {
+                nextSlide();
+                stopAutoPlay();
+                startAutoPlay();
+            });
+
+            dots.forEach((dot, idx) => {
+                dot.addEventListener('click', () => {
+                    goToSlide(idx);
+                    stopAutoPlay();
+                    startAutoPlay();
+                });
+            });
+
+            // 鼠标悬停暂停自动播放 (提升用户体验)
+            const container = document.querySelector('.carousel-container');
+            container.addEventListener('mouseenter', stopAutoPlay);
+            container.addEventListener('mouseleave', startAutoPlay);
+
+            // 触摸滑动简单支持 (可选，为移动端增加一点体验，这里用箭头即可)
+            
+            // 启动自动播放
+            startAutoPlay();
+
+            // 页面卸载时清理定时器
+            window.addEventListener('beforeunload', () => {
+                stopAutoPlay();
+            });
+        })();
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartBadge();
+            loadStats();
+            // 轮播图已在自执行函数中初始化
         });
-        manualSection.style.display = 'none';
-    }
-
-    function startAutoRefresh() {
-        if (refreshInterval) clearInterval(refreshInterval);
-        if (document.getElementById('autoRefreshCheckbox').checked) {
-            refreshInterval = setInterval(async () => {
-                console.log('Auto-refreshing dashboard...');
-                await fetchDashboardStats();
-                await fetchSalesTimeline();
-                await loadForecast();
-                await fetchTopProducts();
-                await fetchTopCustomers();
-            }, 60 * 60 * 1000);
-        }
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
-    }
-
-    // 事件绑定
-    document.getElementById('autoRefreshCheckbox').addEventListener('change', startAutoRefresh);
-    document.getElementById('manualRefreshBtn').addEventListener('click', async () => {
-        await fetchDashboardStats();
-        await fetchSalesTimeline();
-        await loadForecast();
-        await fetchTopProducts();
-        await fetchTopCustomers();
-    });
-    document.getElementById('includeTodayCheckbox').addEventListener('change', loadForecast);
-    document.getElementById('exportSalesBtn').addEventListener('click', exportSalesToCSV);
-    document.getElementById('exportProductsBtn').addEventListener('click', exportTopProductsToCSV);
-    document.getElementById('exportCustomersBtn').addEventListener('click', exportTopCustomersToCSV);
-    document.getElementById('exportForecastBtn').addEventListener('click', exportForecastToCSV);
-    document.getElementById('forecastFile').addEventListener('change', (e) => {
-        if (e.target.files.length) uploadForecast(e.target.files[0]);
-        e.target.value = '';
-    });
-
-    // 初始化
-    (async function init() {
-        await fetchDashboardStats();
-        await fetchSalesTimeline();
-        initModeToggle();
-        await loadForecast();
-        await fetchTopProducts();
-        await fetchTopCustomers();
-        startAutoRefresh();
-    })();
-</script>
+        window.addEventListener('storage', updateCartBadge);
+    </script>
 </body>
 </html>

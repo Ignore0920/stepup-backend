@@ -366,7 +366,7 @@ app.delete('/api/products/:id', async (req, res) => {
     }
 });
 
-// ============ 订单创建（含库存扣减） ============
+// ============ 订单创建（含库存扣减 + 保存银行卡信息） ============
 app.post('/api/orders', async (req, res) => {
     try {
         const orderData = req.body;
@@ -409,6 +409,7 @@ app.post('/api/orders', async (req, res) => {
             productId: item.id
         }));
 
+        // 构建订单对象，包含银行卡信息（如果提供）
         const order = new Order({
             orderId: orderData.orderId,
             userId: userId || undefined,
@@ -428,7 +429,12 @@ app.post('/api/orders', async (req, res) => {
             shipping: orderData.shipping,
             total: orderData.total,
             status: orderData.status || 'pending',
-            paymentMethod: orderData.paymentMethod || 'credit'
+            paymentMethod: orderData.paymentMethod || 'credit',
+            paymentDetails: orderData.paymentDetails || {
+                cardHolderName: '',
+                cardLast4: '',
+                cardExpiry: ''
+            }
         });
 
         await order.save();

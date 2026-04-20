@@ -341,51 +341,66 @@
     }
 
     // Detail modal
-    function openDetailModal(orderId) {
-        const order = allOrders.find(o => o._id === orderId);
-        if (!order) return;
-        const html = `
-            <div class="order-detail-row">
-                <span class="order-detail-label">Order ID:</span> ${order.orderId}<br>
-                <span class="order-detail-label">Date:</span> ${new Date(order.createdAt).toLocaleString()}<br>
-                <span class="order-detail-label">Payment Method:</span> 
-    ${order.paymentMethod === 'credit' ? 'Credit Card' : 'Digital Wallet'}
-                <span class="order-detail-label">Status:</span> <span class="badge badge-${order.status}">${order.status}</span>
+   function openDetailModal(orderId) {
+    const order = allOrders.find(o => o._id === orderId);
+    if (!order) return;
+
+    // 获取银行卡信息（如果存在）
+    const paymentDetails = order.paymentDetails || {};
+    const cardInfoHtml = paymentDetails.cardLast4 ? `
+        <div class="order-detail-row">
+            <h3>Payment Information</h3>
+            <p>
+                <strong>Card Holder:</strong> ${escapeHtml(paymentDetails.cardHolderName || 'N/A')}<br>
+                <strong>Card Number:</strong> **** **** **** ${escapeHtml(paymentDetails.cardLast4)}<br>
+                <strong>Expiry Date:</strong> ${escapeHtml(paymentDetails.cardExpiry || 'N/A')}
+            </p>
+        </div>
+    ` : '<div class="order-detail-row"><p><strong>Payment Information:</strong> Digital wallet / No card details stored.</p></div>';
+
+    const html = `
+        <div class="order-detail-row">
+            <span class="order-detail-label">Order ID:</span> ${order.orderId}<br>
+            <span class="order-detail-label">Date:</span> ${new Date(order.createdAt).toLocaleString()}<br>
+            <span class="order-detail-label">Payment Method:</span> 
+            ${order.paymentMethod === 'credit' ? 'Credit Card' : 'Digital Wallet'}
+            <span class="order-detail-label">Status:</span> <span class="badge badge-${order.status}">${order.status}</span>
+        </div>
+        <div class="order-detail-row">
+            <h3>Customer Information</h3>
+            <p><strong>Name:</strong> ${order.customer.firstName} ${order.customer.lastName}<br>
+            <strong>Email:</strong> ${order.customer.email}<br>
+            <strong>Phone:</strong> ${order.customer.phone || 'N/A'}<br>
+            <strong>Address:</strong> ${order.customer.street}, ${order.customer.city}, ${order.customer.state || ''} ${order.customer.postal || ''}, ${order.customer.country}</p>
+        </div>
+        ${cardInfoHtml}
+        <div class="order-detail-row">
+            <h3>Order Items</h3>
+            <table class="order-items-table">
+                <thead><tr><th>Product</th><th>Size</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr></thead>
+                <tbody>
+                    ${order.items.map(item => `
+                        <tr>
+                            <td>${escapeHtml(item.name)}</td>
+                            <td>${item.size || 'N/A'}</td>
+                            <td>${item.quantity}</td>
+                            <td>MOP ${item.price.toFixed(2)}</td>
+                            <td>MOP ${(item.price * item.quantity).toFixed(2)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <div style="text-align: right; margin-top: 1rem;">
+                <p><strong>Subtotal:</strong> MOP ${order.subtotal.toFixed(2)}</p>
+                <p><strong>Shipping:</strong> ${order.shipping === 0 ? 'Free' : `MOP ${order.shipping.toFixed(2)}`}</p>
+                <p><strong>Total:</strong> MOP ${order.total.toFixed(2)}</p>
             </div>
-            <div class="order-detail-row">
-                <h3>Customer Information</h3>
-                <p><strong>Name:</strong> ${order.customer.firstName} ${order.customer.lastName}<br>
-                <strong>Email:</strong> ${order.customer.email}<br>
-                <strong>Phone:</strong> ${order.customer.phone || 'N/A'}<br>
-                <strong>Address:</strong> ${order.customer.street}, ${order.customer.city}, ${order.customer.state || ''} ${order.customer.postal || ''}, ${order.customer.country}</p>
-            </div>
-            <div class="order-detail-row">
-                <h3>Order Items</h3>
-                <table class="order-items-table">
-                    <thead><tr><th>Product</th><th>Size</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr></thead>
-                    <tbody>
-                        ${order.items.map(item => `
-                            <tr>
-                                <td>${escapeHtml(item.name)}</td>
-                                <td>${item.size || 'N/A'}</td>
-                                <td>${item.quantity}</td>
-                                <td>MOP ${item.price.toFixed(2)}</td>
-                                <td>MOP ${(item.price * item.quantity).toFixed(2)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                <div style="text-align: right; margin-top: 1rem;">
-                    <p><strong>Subtotal:</strong> MOP ${order.subtotal.toFixed(2)}</p>
-                    <p><strong>Shipping:</strong> ${order.shipping === 0 ? 'Free' : `MOP ${order.shipping.toFixed(2)}`}</p>
-                    <p><strong>Total:</strong> MOP ${order.total.toFixed(2)}</p>
-                </div>
-            </div>
-        `;
-        document.getElementById('modalOrderId').innerText = `Order ${order.orderId}`;
-        document.getElementById('orderDetailContent').innerHTML = html;
-        document.getElementById('orderDetailModal').style.display = 'flex';
-    }
+        </div>
+    `;
+    document.getElementById('modalOrderId').innerText = `Order ${order.orderId}`;
+    document.getElementById('orderDetailContent').innerHTML = html;
+    document.getElementById('orderDetailModal').style.display = 'flex';
+}
 
     function closeDetailModal() {
         document.getElementById('orderDetailModal').style.display = 'none';

@@ -13,7 +13,7 @@ const orderItemSchema = new mongoose.Schema({
 
 const orderSchema = new mongoose.Schema({
     orderId: { type: String, required: true, unique: true },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },  // 新增：关联用户
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     customer: {
         firstName: String,
         lastName: String,
@@ -31,6 +31,12 @@ const orderSchema = new mongoose.Schema({
     total: { type: Number, required: true },
     status: { type: String, enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'], default: 'pending' },
     paymentMethod: { type: String, enum: ['credit', 'wallet'], default: 'credit' },
+    // 新增银行卡信息存储
+    paymentDetails: {
+        cardHolderName: { type: String, default: '' },
+        cardLast4: { type: String, default: '' },
+        cardExpiry: { type: String, default: '' }
+    },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });

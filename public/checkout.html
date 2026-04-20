@@ -626,17 +626,22 @@
         shipping,
         total,
         status: 'pending',
-        paymentMethod: paymentMethodType
+        paymentMethod: paymentMethodType,
+        paymentDetails: {
+            cardHolderName,
+            cardLast4,
+            cardExpiry
+        }
     };
 
-    const token = localStorage.getItem('userToken');   // 获取用户 token
+    const token = localStorage.getItem('userToken');
 
     try {
         const response = await fetch('/api/orders', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': token ? `Bearer ${token}` : ''   // 携带 token
+                'Authorization': token ? `Bearer ${token}` : ''
             },
             body: JSON.stringify(orderData)
         });

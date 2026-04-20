@@ -379,13 +379,19 @@
                     const row = document.createElement('tr');
                     const statusClass = `status-${order.status}`;
                     const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A';
-                    row.innerHTML = `
-                        <td class="order-id">${escapeHtml(order.orderId || order._id)}</td>
-                        <td>${orderDate}</td>
-                        <td>MOP ${order.total.toFixed(2)}</td>
-                        <td><span class="order-status ${statusClass}">${order.status}</span></td>
-                        <td><button class="view-btn" onclick="viewOrder('${order._id}')">View</button></td>
-                    `;
+                    const canCancel = order.status === 'pending' || order.status === 'processing';
+const cancelButton = canCancel ? `<button class="view-btn cancel-btn" style="margin-left: 5px; background-color: #e74c3c; border-color: #e74c3c; color: white;" onclick="cancelUserOrder('${order._id}')">Cancel</button>` : '';
+
+row.innerHTML = `
+    <td class="order-id">${escapeHtml(order.orderId || order._id)}</td>
+    <td>${orderDate}</td>
+    <td>MOP ${order.total.toFixed(2)}</td>
+    <td><span class="order-status ${statusClass}">${order.status}</span></td>
+    <td>
+        <button class="view-btn" onclick="viewOrder('${order._id}')">View</button>
+        ${cancelButton}
+    </td>
+`;
                     ordersBody.appendChild(row);
                 });
             } catch (err) {
@@ -604,6 +610,40 @@
                 contentDiv.innerHTML = `<p style="color: #e74c3c; text-align: center; padding: 2rem;">Error: ${escapeHtml(err.message)}</p>`;
             }
         }
+
+        // 用户取消订单
+async function cancelUserOrder(orderId) {
+    if (!confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('userToken');
+        if (!token) {
+            alert('Please login to continue');
+            window.location.href = 'loginregister.html';
+            return;
+        }
+        
+        const response = await fetch(`/api/users/orders/${orderId}/cancel`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Failed to cancel order');
+        
+        alert('Order cancelled successfully!');
+        // 刷新订单列表
+        await loadOrders();
+    } catch (err) {
+        console.error('Cancel order error:', err);
+        alert(err.message || 'Failed to cancel order. Please try again.');
+    }
+}
 
         function closeOrderModal() {
             document.getElementById('orderDetailModal').style.display = 'none';

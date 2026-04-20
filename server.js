@@ -283,6 +283,39 @@ app.get('/api/users/orders/:id', verifyUserToken, async (req, res) => {
     }
 });
 
+// 用户取消订单
+app.put('/api/users/orders/:id/cancel', verifyUserToken, async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const order = await Order.findById(orderId);
+        
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+        
+        // 验证订单归属
+        if (order.userId && order.userId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+        
+        // 仅允许取消 pending 或 processing 状态的订单
+        if (order.status !== 'pending' && order.status !== 'processing') {
+            return res.status(400).json({ error: 'Order cannot be cancelled in its current status' });
+        }
+        
+        // 更新状态为 cancelled
+        order.status = 'cancelled';
+        order.updatedAt = Date.now();
+        await order.save();
+        
+        console.log(`✅ User ${req.user.email} cancelled order ${order.orderId}`);
+        res.json({ success: true, message: 'Order cancelled successfully', order });
+    } catch (err) {
+        console.error('Order cancellation error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // ============ 商品路由 ============
 app.get('/api/products/:id', async (req, res) => {
     try {
@@ -816,8 +849,11 @@ function formatLocalDate(date) {
 
 app.get('/api/admin/dashboard/stats', verifyAdminToken, async (req, res) => {
     try {
-        const totalOrders = await Order.countDocuments();
-        const totalRevenueAgg = await Order.aggregate([{ $group: { _id: null, total: { $sum: '$total' } } }]);
+        const totalOrders = await Order.countDocuments({ status: { $ne: 'cancelled' } });
+        const totalRevenueAgg = await Order.aggregate([
+            { $match: { status: { $ne: 'cancelled' } } },
+            { $group: { _id: null, total: { $sum: '$total' } } }
+        ]);
         const totalRevenue = totalRevenueAgg.length ? totalRevenueAgg[0].total : 0;
         const totalUsers = await User.countDocuments();
         const totalProducts = await Product.countDocuments();
@@ -829,12 +865,15 @@ app.get('/api/admin/dashboard/stats', verifyAdminToken, async (req, res) => {
 });
 
 app.get('/api/admin/dashboard/sales-timeline', verifyAdminToken, async (req, res) => {
-    try {
+        try {
         const days = parseInt(req.query.days) || 30;
         const startDate = new Date();
         startDate.setHours(0, 0, 0, 0);
         startDate.setDate(startDate.getDate() - days);
-        const orders = await Order.find({ createdAt: { $gte: startDate } }).select('total createdAt');
+        const orders = await Order.find({ 
+            createdAt: { $gte: startDate },
+            status: { $ne: 'cancelled' }
+        }).select('total createdAt');
         const salesByLocalDate = new Map();
         orders.forEach(order => {
             const localDate = new Date(order.createdAt);
@@ -854,8 +893,13 @@ app.get('/api/admin/dashboard/top-products', verifyAdminToken, async (req, res) 
     try {
         const limit = parseInt(req.query.limit) || 5;
         const pipeline = [
+            { $match: { status: { $ne: 'cancelled' } } },  // 排除取消订单
             { $unwind: '$items' },
-            { $group: { _id: { name: '$items.name', brand: '$items.brand' }, totalQuantity: { $sum: '$items.quantity' }, totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } } } },
+            { $group: { 
+                _id: { name: '$items.name', brand: '$items.brand' }, 
+                totalQuantity: { $sum: '$items.quantity' }, 
+                totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } } 
+            } },
             { $sort: { totalQuantity: -1 } },
             { $limit: limit },
             { $project: { _id: 0, name: '$_id.name', brand: '$_id.brand', totalQuantity: 1, totalRevenue: 1 } }
@@ -888,19 +932,29 @@ app.get('/api/admin/dashboard/top-customers', verifyAdminToken, async (req, res)
                     from: 'orders',
                     localField: '_id',
                     foreignField: 'userId',
-                    as: 'orders'
+                    as: 'allOrders'
                 }
             },
             {
                 $addFields: {
-                    orderCount: { $size: '$orders' },
-                    totalSpent: { $sum: '$orders.total' }
+                    // 只统计非取消订单
+                    validOrders: {
+                        $filter: {
+                            input: '$allOrders',
+                            as: 'order',
+                            cond: { $ne: ['$$order.status', 'cancelled'] }
+                        }
+                    }
                 }
             },
             {
-                $match: {
-                    orderCount: { $gt: 0 }   // 只显示至少有一笔订单的用户
+                $addFields: {
+                    orderCount: { $size: '$validOrders' },
+                    totalSpent: { $sum: '$validOrders.total' }
                 }
+            },
+            {
+                $match: { orderCount: { $gt: 0 } }
             },
             {
                 $project: {
@@ -988,7 +1042,10 @@ app.get('/api/admin/dashboard/auto-forecast', verifyAdminToken, async (req, res)
         const startDate = new Date();
         startDate.setHours(0, 0, 0, 0);
         startDate.setDate(startDate.getDate() - historyDays);
-        const orders = await Order.find({ createdAt: { $gte: startDate } }).select('total createdAt');
+        const orders = await Order.find({ 
+    createdAt: { $gte: startDate },
+    status: { $ne: 'cancelled' }
+}).select('total createdAt');
         const salesByLocalDate = new Map();
         orders.forEach(order => {
             const localDate = new Date(order.createdAt);

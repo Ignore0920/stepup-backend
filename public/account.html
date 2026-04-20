@@ -590,7 +590,7 @@
             alert('📧 A password reset link has been sent to your email address. Please check your inbox to continue.');
         }
 
-        // 查看订单详情 - 与 Order.html 格式保持一致
+        // 查看订单详情 - 与 Order.html 格式完全一致（包含银行卡信息）
 async function viewOrder(orderId) {
     const modal = document.getElementById('orderDetailModal');
     const contentDiv = document.getElementById('orderDetailContent');
@@ -611,7 +611,20 @@ async function viewOrder(orderId) {
         
         titleEl.innerText = `Order ${order.orderId}`;
         
-        // 格式化订单商品列表 HTML（与 Order.html 表格结构一致）
+        // 获取银行卡信息（如果存在）
+        const paymentDetails = order.paymentDetails || {};
+        const cardInfoHtml = paymentDetails.cardLast4 ? `
+            <div class="order-detail-row">
+                <h3>Payment Information</h3>
+                <p>
+                    <strong>Card Holder:</strong> ${escapeHtml(paymentDetails.cardHolderName || 'N/A')}<br>
+                    <strong>Card Number:</strong> **** **** **** ${escapeHtml(paymentDetails.cardLast4)}<br>
+                    <strong>Expiry Date:</strong> ${escapeHtml(paymentDetails.cardExpiry || 'N/A')}
+                </p>
+            </div>
+        ` : '<div class="order-detail-row"><p><strong>Payment Information:</strong> Digital wallet / No card details stored.</p></div>';
+        
+        // 格式化订单商品列表
         let itemsHtml = '';
         order.items.forEach(item => {
             itemsHtml += `
@@ -625,7 +638,7 @@ async function viewOrder(orderId) {
             `;
         });
 
-        // 构建与 Order.html 完全相同的 HTML 结构（不含银行卡信息）
+        // 构建与 Order.html 完全相同的 HTML 结构
         const html = `
             <div class="order-detail-row">
                 <span class="order-detail-label">Order ID:</span> ${order.orderId}<br>
@@ -643,6 +656,7 @@ async function viewOrder(orderId) {
                     <strong>Address:</strong> ${order.customer.street}, ${order.customer.city}, ${order.customer.state || ''} ${order.customer.postal || ''}, ${order.customer.country}
                 </p>
             </div>
+            ${cardInfoHtml}
             <div class="order-detail-row">
                 <h3>Order Items</h3>
                 <table class="order-items-table">

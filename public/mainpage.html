@@ -247,14 +247,14 @@
             color: #ffffff;
         }
 
-        /* 替换后的轮播区域 (原 hero-visual) */
+        /* 轮播区域 */
         .hero-visual {
             position: relative;
             aspect-ratio: 1;
             background-color: #f5f5f5;
             border: 2px solid #d9d9d9;
             border-radius: 0;
-            overflow: hidden; /* 确保圆角裁切 */
+            overflow: hidden;
         }
 
         .hero-carousel-container {
@@ -355,7 +355,7 @@
             }
 
             .hero-visual {
-                display: block; /* 确保在移动端显示 */
+                display: block;
             }
             
             .hero-carousel-arrow {
@@ -804,7 +804,8 @@
                     <div class="logo-text">STEPUP</div>
                 </div>
                 <nav>
-                    <a href="#shop">Shop</a>
+                    <!-- 修改 Shop 链接指向 products.html -->
+                    <a href="products.html">Shop</a>
                     <a href="#collections">Collections</a>
                     <a href="#brands">Brands</a>
                     <a href="about.html">About</a>
@@ -835,11 +836,12 @@
                         </div>
                     </div>
                     <div class="button-group">
-                        <button class="btn btn-primary" onclick="window.location.href='products.html'">Explore Collection</button>
-                        <button class="btn btn-secondary" onclick="window.location.href='about.html'">View Lookbook</button>
+                        <!-- 修改按钮：文字改为 Start Shopping，跳转至 products.html -->
+                        <button class="btn btn-primary" onclick="window.location.href='products.html'">Start Shopping</button>
+                        <!-- 移除 View Lookbook 按钮 -->
                     </div>
                 </div>
-                <!-- 替换后的轮播区域 -->
+                <!-- 轮播区域 -->
                 <div class="hero-visual">
                     <div class="hero-carousel-container">
                         <div class="hero-carousel-slides" id="heroCarouselSlides">
@@ -1229,7 +1231,6 @@
             container.addEventListener('mouseenter', stopAutoPlay);
             container.addEventListener('mouseleave', startAutoPlay);
 
-            // 启动自动播放
             startAutoPlay();
 
             window.addEventListener('beforeunload', () => {

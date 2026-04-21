@@ -179,7 +179,7 @@
 
         .stats-banner {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 2rem;
             text-align: center;
         }
@@ -671,10 +671,6 @@
                     <div class="stat-label">Premium Styles</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number" id="statDailyOrders">--</div>
-                    <div class="stat-label">Monthly Sales (MOP)</div>
-                </div>
-                <div class="stat-item">
                     <div class="stat-number" id="statActiveCustomers">--</div>
                     <div class="stat-label">Active Customers</div>
                 </div>
@@ -843,8 +839,6 @@
                 if (res.ok) {
                     const data = await res.json();
                     document.getElementById('statStyles').textContent = data.totalProducts || '0';
-                    // 此处 data.dailyOrders 实际为当日订单数，如需显示真实月销售额请后端调整接口
-                    document.getElementById('statDailyOrders').textContent = data.dailyOrders || '0';
                     document.getElementById('statActiveCustomers').textContent = data.activeUsers || '0';
                     return;
                 }
@@ -864,7 +858,6 @@
                 document.getElementById('statStyles').textContent = '0';
             }
 
-            document.getElementById('statDailyOrders').textContent = '--';
             document.getElementById('statActiveCustomers').textContent = '--';
         }
 

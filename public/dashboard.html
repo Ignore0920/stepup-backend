@@ -13,8 +13,8 @@
         }
         body {
             font-family: 'Montserrat', sans-serif;
-            background-color: #f5f7fa;
-            color: #1a1a1a;
+            background-color: #f9f9f9;
+            color: #262626;
             line-height: 1.6;
         }
         h1, h2, h3 {
@@ -25,10 +25,10 @@
             min-height: 100vh;
         }
         .sidebar {
-            width: 260px;
-            background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+            width: 250px;
+            background-color: #262626;
             color: white;
-            padding: 24px 16px;
+            padding: 20px;
             flex-shrink: 0;
             position: sticky;
             top: 0;
@@ -36,40 +36,34 @@
         }
         .sidebar h2 {
             font-size: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.15);
+            border-bottom: 1px solid #444;
             padding-bottom: 20px;
             margin-top: 0;
-            letter-spacing: 2px;
         }
         .sidebar nav a {
             display: block;
-            color: rgba(255,255,255,0.7);
+            color: #bbb;
             text-decoration: none;
-            padding: 14px 16px;
-            font-size: 0.85rem;
+            padding: 15px 0;
+            font-size: 0.9rem;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            transition: all 0.3s;
-            border-radius: 8px;
-            margin-bottom: 4px;
+            letter-spacing: 1px;
+            transition: 0.3s;
         }
-        .sidebar nav a:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-        }
+        .sidebar nav a:hover,
         .sidebar nav a.active {
-            background: rgba(255,255,255,0.15);
             color: white;
-            font-weight: 600;
-            border-left: 3px solid #27ae60;
+            font-weight: bold;
+            border-left: 3px solid white;
+            padding-left: 10px;
         }
         hr {
             margin: 20px 0;
-            border-color: rgba(255,255,255,0.1);
+            border-color: #444;
         }
         .main-content {
             flex-grow: 1;
-            padding: 32px 40px;
+            padding: 40px;
             overflow-y: auto;
             background: #f5f7fa;
         }
@@ -92,7 +86,7 @@
             gap: 12px;
         }
 
-        /* 统计卡片 - 全新设计 */
+        /* 统计卡片 */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -181,11 +175,32 @@
             font-size: 0.8rem;
             color: #27ae60;
         }
-        .stat-trend.down {
-            color: #e74c3c;
+
+        /* KPI 快速概览 */
+        .kpi-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 28px;
         }
-        .stat-trend.neutral {
+        .kpi-item {
+            flex: 1;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        .kpi-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
             color: #888;
+            letter-spacing: 0.05em;
         }
 
         /* 卡片通用样式 */
@@ -211,9 +226,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-        .card-title i {
-            font-size: 1.5rem;
         }
 
         /* 按钮样式 */
@@ -262,49 +274,12 @@
             background: #3498db;
         }
 
-        /* 双列布局 */
-        .dashboard-grid-2col {
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: 24px;
-            margin-bottom: 28px;
-        }
-
+        /* 双列布局 - 用于热销产品 & 顶级客户 & 最近订单 */
         .dashboard-grid-3col {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 24px;
             margin-bottom: 28px;
-        }
-
-        /* 表格样式 */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-        .data-table th,
-        .data-table td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        .data-table th {
-            background: #fafafa;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-size: 0.7rem;
-            color: #666;
-            border-bottom: 2px solid #1a1a1a;
-        }
-        .data-table tr:hover {
-            background: #f9f9f9;
-        }
-        .table-responsive {
-            overflow-x: auto;
-            max-height: 360px;
-            overflow-y: auto;
         }
 
         /* 图表容器 */
@@ -342,6 +317,36 @@
             cursor: pointer;
         }
 
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .data-table th,
+        .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .data-table th {
+            background: #fafafa;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.7rem;
+            color: #666;
+            border-bottom: 2px solid #1a1a1a;
+        }
+        .data-table tr:hover {
+            background: #f9f9f9;
+        }
+        .table-responsive {
+            overflow-x: auto;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
         /* 状态标签 */
         .status-badge {
             display: inline-block;
@@ -355,43 +360,24 @@
             background: #e8f5e9;
             color: #27ae60;
         }
-        .status-warning {
-            background: #fff3e0;
-            color: #e67e22;
-        }
         .status-info {
             background: #e3f2fd;
             color: #2980b9;
         }
-        .status-danger {
-            background: #ffebee;
-            color: #e74c3c;
-        }
 
-        /* KPI 小卡片 */
-        .kpi-row {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 16px;
+        /* 订单状态 */
+        .order-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
         }
-        .kpi-item {
-            flex: 1;
-            padding: 16px;
-            background: #fafafa;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .kpi-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #1a1a1a;
-        }
-        .kpi-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: #888;
-            letter-spacing: 0.05em;
-        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-processing { background: #d1ecf1; color: #0c5460; }
+        .status-shipped { background: #d1ecf1; color: #0c5460; }
+        .status-delivered { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
 
         /* 预测表格 */
         .forecast-table-container {
@@ -420,26 +406,9 @@
             border-bottom: none;
         }
 
-        /* 订单状态 */
-        .order-status {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-processing { background: #d1ecf1; color: #0c5460; }
-        .status-shipped { background: #d1ecf1; color: #0c5460; }
-        .status-delivered { background: #d4edda; color: #155724; }
-        .status-cancelled { background: #f8d7da; color: #721c24; }
-
         @media (max-width: 1200px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
-            }
-            .dashboard-grid-2col {
-                grid-template-columns: 1fr;
             }
             .dashboard-grid-3col {
                 grid-template-columns: 1fr;
@@ -479,25 +448,21 @@
                 height: 250px;
                 page-break-inside: avoid;
             }
-            .stat-card {
-                box-shadow: none;
-                border: 1px solid #ddd;
-            }
         }
     </style>
 </head>
 <body>
 <div class="admin-wrapper">
     <aside class="sidebar">
-        <h2>STEPUP ADMIN</h2>
+        <h2>StepUp Admin</h2>
         <nav>
-            <a href="admin.html">👥 Staff Management</a>
-            <a href="Inventory.html">📦 Inventory</a>
-            <a href="User.html">👤 Users</a>
-            <a href="Order.html">🛒 Orders</a>
-            <a href="dashboard.html" class="active">📊 Dashboard</a>
+            <a href="admin.html">STAFF MANAGEMENT</a>
+            <a href="Inventory.html">INVENTORY MANAGEMENT</a>
+            <a href="User.html">USER MANAGEMENT</a>
+            <a href="Order.html">ORDER MANAGEMENT</a>
+            <a href="dashboard.html" class="active">DASHBOARD</a>
             <hr>
-            <a href="#" onclick="logoutAdmin(); return false;" style="color: #e74c3c;">🚪 Logout</a>
+            <a href="#" onclick="logoutAdmin(); return false;" style="color: #e74c3c;">Logout</a>
         </nav>
     </aside>
 
@@ -567,69 +532,66 @@
             </div>
         </div>
 
-        <!-- 双列布局：销售额图表 + 预测图表 -->
-        <div class="dashboard-grid-2col">
-            <!-- 实际销售额图表 -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">📈 Sales Trend (Last 30 Days)</h3>
-                    <button class="btn btn-success" id="exportSalesBtn">📊 Export CSV</button>
-                </div>
-                <div class="chart-container">
-                    <canvas id="salesChart"></canvas>
+        <!-- 实际销售额图表 -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">📈 Sales Trend (Last 30 Days)</h3>
+                <button class="btn btn-success" id="exportSalesBtn">📊 Export CSV</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 预测图表 - 放在 Sales Trend 下方 -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">🔮 Sales Forecast (Next 7 Days)</h3>
+                <button class="btn btn-success" id="exportForecastBtn">📥 Export</button>
+            </div>
+
+            <div class="forecast-controls">
+                <div class="mode-toggle">
+                    <label>
+                        <input type="radio" name="forecastMode" value="auto" checked> 🤖 Auto ML Forecast
+                    </label>
+                    <label>
+                        <input type="radio" name="forecastMode" value="upload"> 📁 Manual Upload
+                    </label>
+                    <label>
+                        <input type="checkbox" id="includeTodayCheckbox"> 📅 Include today
+                    </label>
+                    <label style="margin-left: auto;">
+                        <input type="checkbox" id="autoRefreshCheckbox" checked> 🔄 Auto-refresh (60min)
+                    </label>
                 </div>
             </div>
 
-            <!-- 预测图表 -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">🔮 Sales Forecast (Next 7 Days)</h3>
-                    <button class="btn btn-success" id="exportForecastBtn">📥 Export</button>
-                </div>
+            <div class="chart-container-sm">
+                <canvas id="forecastChart"></canvas>
+            </div>
 
-                <div class="forecast-controls">
-                    <div class="mode-toggle">
-                        <label>
-                            <input type="radio" name="forecastMode" value="auto" checked> 🤖 Auto ML Forecast
-                        </label>
-                        <label>
-                            <input type="radio" name="forecastMode" value="upload"> 📁 Manual Upload
-                        </label>
-                        <label>
-                            <input type="checkbox" id="includeTodayCheckbox"> 📅 Include today
-                        </label>
-                        <label style="margin-left: auto;">
-                            <input type="checkbox" id="autoRefreshCheckbox" checked> 🔄 Auto-refresh (60min)
-                        </label>
-                    </div>
+            <div id="manualUploadSection" style="margin-top: 16px; text-align: center; display: none;">
+                <label class="btn btn-secondary" style="cursor: pointer;">
+                    📁 Upload Forecast CSV
+                    <input type="file" id="forecastFile" accept=".csv" style="display: none;">
+                </label>
+                <span id="uploadStatus" style="margin-left: 16px; font-size: 0.85rem;"></span>
+                <div style="margin-top: 8px; font-size: 0.75rem; color: #888;">
+                    Format: date,forecast_sales (YYYY-MM-DD, number)
                 </div>
+            </div>
 
-                <div class="chart-container-sm">
-                    <canvas id="forecastChart"></canvas>
-                </div>
-
-                <div id="manualUploadSection" style="margin-top: 16px; text-align: center; display: none;">
-                    <label class="btn btn-secondary" style="cursor: pointer;">
-                        📁 Upload Forecast CSV
-                        <input type="file" id="forecastFile" accept=".csv" style="display: none;">
-                    </label>
-                    <span id="uploadStatus" style="margin-left: 16px; font-size: 0.85rem;"></span>
-                    <div style="margin-top: 8px; font-size: 0.75rem; color: #888;">
-                        Format: date,forecast_sales (YYYY-MM-DD, number)
-                    </div>
-                </div>
-
-                <div class="forecast-table-container">
-                    <h4 style="margin: 20px 0 12px; font-size: 1rem;">📋 Forecast Values</h4>
-                    <table class="forecast-table" id="forecastTable">
-                        <thead>
-                            <tr><th>Date</th><th>Forecasted Sales (MOP)</th><th>Source</th></tr>
-                        </thead>
-                        <tbody id="forecastTableBody">
-                            <tr><td colspan="3" style="text-align:center;">Loading forecast...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="forecast-table-container">
+                <h4 style="margin: 20px 0 12px; font-size: 1rem;">📋 Forecast Values</h4>
+                <table class="forecast-table" id="forecastTable">
+                    <thead>
+                        <tr><th>Date</th><th>Forecasted Sales (MOP)</th><th>Source</th></tr>
+                    </thead>
+                    <tbody id="forecastTableBody">
+                        <tr><td colspan="3" style="text-align:center;">Loading forecast...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -662,7 +624,7 @@
                     <h3 class="card-title">🏆 Top Customers</h3>
                     <button class="btn btn-success" id="exportCustomersBtn">Export</button>
                 </div>
-                <div class="table-responsive" style="max-height: 320px;">
+                <div class="table-responsive" style="max-height: 360px;">
                     <table class="data-table" id="topCustomersTable">
                         <thead>
                             <tr><th>Customer</th><th>Orders</th><th>Spent</th></tr>
@@ -680,7 +642,7 @@
                     <h3 class="card-title">🆕 Recent Orders</h3>
                     <button class="btn btn-secondary" onclick="window.location.href='Order.html'">View All</button>
                 </div>
-                <div class="table-responsive" style="max-height: 320px;">
+                <div class="table-responsive" style="max-height: 360px;">
                     <table class="data-table" id="recentOrdersTable">
                         <thead>
                             <tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th></tr>
@@ -737,22 +699,18 @@
                 document.getElementById('totalUsers').innerText = data.totalUsers;
                 document.getElementById('totalProducts').innerText = data.totalProducts;
                 
-                // 计算并显示趋势（模拟数据，实际应从后端获取）
                 document.getElementById('revenueTrend').innerHTML = '📈 +12.5% vs last month';
                 document.getElementById('ordersTrend').innerHTML = '📈 +8.2% vs last month';
                 document.getElementById('usersTrend').innerHTML = '📈 +5.1% vs last month';
                 
-                // KPI 数据
                 const avgOrder = data.totalOrders > 0 ? data.totalRevenue / data.totalOrders : 0;
                 document.getElementById('avgOrderValue').innerText = `MOP ${avgOrder.toFixed(2)}`;
             }
         } catch (err) { console.error('Stats error:', err); }
     }
 
-    // 加载额外统计数据
     async function fetchAdditionalStats() {
         try {
-            // 获取待处理订单数
             const ordersRes = await fetch('/api/admin/orders', { headers: { 'Authorization': `Bearer ${token}` } });
             const ordersData = await ordersRes.json();
             if (ordersRes.ok && ordersData.data) {
@@ -760,7 +718,6 @@
                 document.getElementById('pendingOrdersCount').innerText = pending;
             }
             
-            // 获取低库存产品数
             const productsRes = await fetch('/api/admin/inventory/products', { headers: { 'Authorization': `Bearer ${token}` } });
             const productsData = await productsRes.json();
             if (productsRes.ok && productsData.data) {
@@ -769,7 +726,6 @@
                 document.getElementById('productsTrend').innerHTML = `📊 ${lowStock} low stock alerts`;
             }
             
-            // 转换率（模拟）
             document.getElementById('conversionRate').innerText = '3.2%';
         } catch (err) { console.error('Additional stats error:', err); }
     }
@@ -813,11 +769,7 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { 
-                    tooltip: { 
-                        callbacks: { 
-                            label: (ctx) => `MOP ${ctx.raw.toFixed(2)}` 
-                        } 
-                    },
+                    tooltip: { callbacks: { label: (ctx) => `MOP ${ctx.raw.toFixed(2)}` } },
                     legend: { display: false }
                 },
                 scales: { 
@@ -858,11 +810,7 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { 
-                    tooltip: { 
-                        callbacks: { 
-                            label: (ctx) => `MOP ${ctx.raw.toFixed(2)}` 
-                        } 
-                    },
+                    tooltip: { callbacks: { label: (ctx) => `MOP ${ctx.raw.toFixed(2)}` } },
                     legend: { display: false }
                 },
                 scales: { 
@@ -943,7 +891,6 @@
             if (res.ok && data.data) {
                 renderProductsChart(data.data.map(p => p.name), data.data.map(p => p.totalQuantity));
                 
-                // 更新表格
                 const tbody = document.querySelector('#topProductsTable tbody');
                 tbody.innerHTML = data.data.map(p => `
                     <tr>

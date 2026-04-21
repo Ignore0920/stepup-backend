@@ -391,37 +391,56 @@
         }
     }
 
-    function exportToExcel() {
-    if (filteredProducts.length === 0) {
+    // Export to CSV
+function exportToCSV() {
+    if (filteredUsers.length === 0) {
         alert('No data to export');
         return;
     }
     
-    // 更新表头，与 Product schema 完全吻合
+    // 更新表头，与 User schema 完全吻合（排除密码字段）
     const headers = [
-        'Name', 
-        'Brand', 
-        'Model', 
-        'Size Range', 
-        'Price (MOP)', 
-        'Stock', 
-        'Image URL',
-        'Tag',
-        'Collection',
-        'Description'
+        'User ID',
+        'Name',
+        'Email',
+        'First Name',
+        'Last Name',
+        'Phone',
+        'Street',
+        'City',
+        'State',
+        'Postal Code',
+        'Country',
+        'Card Last 4',
+        'Card Expiry',
+        'Card Holder Name',
+        'Payment Method',
+        'Registered',
+        'Last Login',
+        'Orders',
+        'Total Spent (MOP)'
     ];
     
-    const rows = filteredProducts.map(p => [
-        p.name || '',
-        p.brand || '',
-        p.model || '',
-        p.sizeRange || '',
-        p.price || 0,
-        p.stock || 0,
-        p.image || '',
-        p.tag || '',
-        p.collection || 'Casual',
-        p.description || 'Premium athletic footwear with exceptional comfort and style.'
+    const rows = filteredUsers.map(u => [
+        u._id || '',
+        u.name || '',
+        u.email || '',
+        u.firstName || '',
+        u.lastName || '',
+        u.phone || '',
+        u.street || '',
+        u.city || '',
+        u.state || '',
+        u.postal || '',
+        u.country || '',
+        u.cardLast4 || '',
+        u.cardExpiry || '',
+        u.cardHolderName || '',
+        u.paymentMethodType === 'credit' ? 'Credit Card' : 'Digital Wallet',
+        u.createdAt ? new Date(u.createdAt).toLocaleString() : '',
+        u.lastLogin ? new Date(u.lastLogin).toLocaleString() : '',
+        u.orderCount || 0,
+        (u.totalSpent || 0).toFixed(2)
     ]);
     
     const csvContent = [headers, ...rows].map(row => 
@@ -432,7 +451,7 @@
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.href = url;
-    link.setAttribute('download', 'inventory_export.csv');
+    link.setAttribute('download', 'users_export.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

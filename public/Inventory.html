@@ -471,23 +471,52 @@
     };
 
     function exportToExcel() {
-        if (filteredProducts.length === 0) {
-            alert('No data to export');
-            return;
-        }
-        const headers = ['Name', 'Brand', 'Model', 'Size Range', 'Price (MOP)', 'Stock', 'Tag'];
-        const rows = filteredProducts.map(p => [p.name, p.brand, p.model, p.sizeRange, p.price, p.stock, p.tag || '']);
-        const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
-        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.href = url;
-        link.setAttribute('download', 'inventory_export.csv');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+    if (filteredProducts.length === 0) {
+        alert('No data to export');
+        return;
     }
+    
+    // 更新表头，与 Product schema 完全吻合
+    const headers = [
+        'Name', 
+        'Brand', 
+        'Model', 
+        'Size Range', 
+        'Price (MOP)', 
+        'Stock', 
+        'Image URL',
+        'Tag',
+        'Collection',
+        'Description'
+    ];
+    
+    const rows = filteredProducts.map(p => [
+        p.name || '',
+        p.brand || '',
+        p.model || '',
+        p.sizeRange || '',
+        p.price || 0,
+        p.stock || 0,
+        p.image || '',
+        p.tag || '',
+        p.collection || 'Casual',
+        p.description || 'Premium athletic footwear with exceptional comfort and style.'
+    ]);
+    
+    const csvContent = [headers, ...rows].map(row => 
+        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+    ).join('\n');
+    
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute('download', 'inventory_export.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
 
     function escapeHtml(str) {
         if (!str) return '';

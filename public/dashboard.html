@@ -274,7 +274,7 @@
             background: #3498db;
         }
 
-        /* 双列布局 - 用于热销产品 & 顶级客户 & 最近订单 */
+        /* 三列布局 */
         .dashboard-grid-3col {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -423,45 +423,372 @@
             }
         }
 
-        /* 打印样式 */
-        /* ========== 打印样式 (用于 PDF 导出) ========== */
-@media print {
-    /* 隐藏不需要打印的元素 */
-    .sidebar,
-    .btn,
-    .refresh-bar,
-    .mode-toggle,
-    #manualUploadSection,
-    .forecast-table-container .card-header .btn,
-    #autoRefreshCheckbox,
-    #manualRefreshBtn,
-    #includeTodayCheckbox,
-    #forecastFile,
-    #exportSalesBtn,
-    #exportProductsBtn,
-    #exportCustomersBtn,
-    #exportForecastBtn,
-    .report-btn,
-    .dashboard-header .btn {
-        display: none !important;
-    }
+        /* ========== 打印样式 (用于 PDF 导出 - 长条形报告格式) ========== */
+        @media print {
+            /* 隐藏所有交互元素 */
+            .sidebar,
+            .btn,
+            .forecast-controls,
+            .mode-toggle,
+            #manualUploadSection,
+            #autoRefreshCheckbox,
+            #manualRefreshBtn,
+            #includeTodayCheckbox,
+            #forecastFile,
+            .header-actions,
+            .card-header .btn,
+            .kpi-row .kpi-item:nth-child(2),
+            hr {
+                display: none !important;
+            }
+
+            /* 全局打印设置 */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            html, body {
+                width: 100%;
+                height: auto;
+                margin: 0;
+                padding: 0;
+                background: white;
+                font-size: 10pt;
+            }
+
             .admin-wrapper {
                 display: block;
-            }
-            .main-content {
-                padding: 20px;
-                margin: 0;
                 width: 100%;
+                min-height: auto;
                 background: white;
             }
-            .card {
-                box-shadow: none;
-                border: 1px solid #ccc;
+
+            .main-content {
+                padding: 30pt 40pt;
+                margin: 0;
+                width: 100%;
+                max-width: 100%;
+                background: white;
+            }
+
+            /* ========== 报告标题区域 ========== */
+            .dashboard-header {
+                margin-bottom: 25pt;
+                border-bottom: 3pt solid #1a1a1a;
+                padding-bottom: 15pt;
+                page-break-after: avoid;
+            }
+
+            .dashboard-header h1 {
+                font-size: 28pt;
+                font-weight: 900;
+                margin: 0;
+                color: #1a1a1a;
+                position: relative;
+            }
+
+            .dashboard-header h1::after {
+                content: " | " attr(data-date);
+                font-size: 10pt;
+                font-weight: 400;
+                color: #666;
+                margin-left: 10pt;
+            }
+
+            /* 报告副标题 */
+            .dashboard-header::after {
+                content: "StepUp E-Commerce Analytics Report";
+                display: block;
+                font-size: 11pt;
+                font-weight: 400;
+                color: #666;
+                margin-top: 5pt;
+                font-family: 'Montserrat', sans-serif;
+                text-transform: uppercase;
+                letter-spacing: 2pt;
+            }
+
+            /* ========== 统计卡片 - 4列横向排列 ========== */
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15pt;
+                margin-bottom: 25pt;
                 page-break-inside: avoid;
             }
-            .chart-container {
-                height: 250px;
+
+            .stat-card {
+                padding: 15pt 12pt;
+                box-shadow: none;
+                border: 1.5pt solid #ddd;
+                border-radius: 6pt;
                 page-break-inside: avoid;
+                background: white;
+            }
+
+            .stat-card::before {
+                height: 4pt;
+            }
+
+            .stat-header {
+                gap: 8pt;
+                margin-bottom: 10pt;
+            }
+
+            .stat-icon {
+                width: 35pt;
+                height: 35pt;
+                font-size: 18pt;
+                border-radius: 6pt;
+            }
+
+            .stat-title {
+                font-size: 8pt;
+                letter-spacing: 0.1em;
+            }
+
+            .stat-value {
+                font-size: 22pt;
+                margin-bottom: 5pt;
+            }
+
+            .stat-trend {
+                font-size: 8pt;
+            }
+
+            /* ========== KPI 行 - 3列 ========== */
+            .kpi-row {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15pt;
+                margin-bottom: 30pt;
+                page-break-inside: avoid;
+            }
+
+            .kpi-item {
+                padding: 12pt;
+                box-shadow: none;
+                border: 1.5pt solid #ddd;
+                background: #fafafa;
+            }
+
+            .kpi-value {
+                font-size: 18pt;
+            }
+
+            .kpi-label {
+                font-size: 7pt;
+            }
+
+            /* ========== 章节标题样式 ========== */
+            .card {
+                padding: 20pt;
+                margin-bottom: 25pt;
+                box-shadow: none;
+                border: 1.5pt solid #ddd;
+                page-break-inside: avoid;
+                background: white;
+            }
+
+            .card-header {
+                margin-bottom: 15pt;
+                padding-bottom: 10pt;
+                border-bottom: 2pt solid #1a1a1a;
+            }
+
+            .card-title {
+                font-size: 16pt;
+                font-weight: 700;
+                gap: 8pt;
+            }
+
+            /* ========== 图表容器 ========== */
+            .chart-container {
+                height: 220pt !important;
+                width: 100%;
+                margin-bottom: 15pt;
+                page-break-inside: avoid;
+            }
+
+            .chart-container-sm {
+                height: 160pt !important;
+                width: 100%;
+                margin-bottom: 15pt;
+                page-break-inside: avoid;
+            }
+
+            canvas {
+                max-height: 100%;
+                width: 100% !important;
+            }
+
+            /* ========== Sales Trend 和 Forecast 上下排列 ========== */
+            .card:has(#salesChart) {
+                margin-bottom: 25pt;
+            }
+
+            .card:has(#forecastChart) {
+                margin-bottom: 25pt;
+            }
+
+            /* ========== 预测表格 ========== */
+            .forecast-table-container {
+                margin-top: 15pt;
+                page-break-inside: avoid;
+            }
+
+            .forecast-table-container h4 {
+                font-size: 12pt;
+                margin: 15pt 0 10pt;
+                font-weight: 600;
+                border-left: 4pt solid #1a1a1a;
+                padding-left: 10pt;
+            }
+
+            .forecast-table {
+                width: 100%;
+                border: 1.5pt solid #ddd;
+            }
+
+            .forecast-table th, 
+            .forecast-table td {
+                padding: 8pt 12pt;
+                font-size: 9pt;
+                border-bottom: 1pt solid #ddd;
+            }
+
+            .forecast-table th {
+                background: #1a1a1a !important;
+                color: white !important;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            .forecast-table tr:last-child td {
+                border-bottom: none;
+            }
+
+            /* ========== 三列布局 - 改为单列全宽 ========== */
+            .dashboard-grid-3col {
+                display: block;
+                margin-top: 25pt;
+            }
+
+            .dashboard-grid-3col .card {
+                width: 100%;
+                margin-bottom: 25pt;
+                page-break-inside: avoid;
+            }
+
+            /* ========== 表格通用样式 ========== */
+            .table-responsive {
+                max-height: none;
+                overflow: visible;
+                margin-top: 10pt;
+            }
+
+            .data-table {
+                width: 100%;
+                font-size: 9pt;
+                border: 1.5pt solid #ddd;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 8pt 10pt;
+                border-bottom: 1pt solid #ddd;
+            }
+
+            .data-table th {
+                background: #f0f0f0 !important;
+                border-bottom: 2pt solid #1a1a1a !important;
+                font-size: 8pt;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            .data-table tr:last-child td {
+                border-bottom: none;
+            }
+
+            /* ========== 状态标签 ========== */
+            .order-status,
+            .status-badge {
+                padding: 3pt 8pt;
+                font-size: 7pt;
+                font-weight: 700;
+                border-radius: 12pt;
+            }
+
+            .status-pending { background: #fff3cd !important; color: #856404 !important; }
+            .status-processing { background: #d1ecf1 !important; color: #0c5460 !important; }
+            .status-shipped { background: #d1ecf1 !important; color: #0c5460 !important; }
+            .status-delivered { background: #d4edda !important; color: #155724 !important; }
+            .status-cancelled { background: #f8d7da !important; color: #721c24 !important; }
+            .status-success { background: #e8f5e9 !important; color: #27ae60 !important; }
+            .status-info { background: #e3f2fd !important; color: #2980b9 !important; }
+
+            /* ========== 报告页脚 ========== */
+            .main-content::after {
+                content: "© StepUp Analytics | Confidential | Page " counter(page);
+                display: block;
+                text-align: center;
+                margin-top: 30pt;
+                padding-top: 15pt;
+                border-top: 1pt solid #ddd;
+                font-size: 8pt;
+                color: #999;
+                text-transform: uppercase;
+                letter-spacing: 1pt;
+            }
+
+            /* ========== 分页控制 ========== */
+            .stats-grid,
+            .kpi-row,
+            .card-header {
+                page-break-after: avoid;
+            }
+
+            .chart-container,
+            .chart-container-sm,
+            .forecast-table-container,
+            .table-responsive {
+                page-break-inside: avoid;
+            }
+
+            .dashboard-grid-3col .card {
+                page-break-before: avoid;
+                page-break-after: avoid;
+            }
+
+            h1, h2, h3, h4 {
+                page-break-after: avoid;
+            }
+
+            /* ========== 页面设置 ========== */
+            @page {
+                margin: 40pt 35pt;
+                size: A4;
+            }
+
+            /* ========== 隐藏预测控制栏 ========== */
+            .forecast-controls,
+            .mode-toggle,
+            #manualUploadSection {
+                display: none !important;
+            }
+
+            /* ========== 确保背景色打印 ========== */
+            .stat-card,
+            .kpi-item,
+            .card,
+            .forecast-table th,
+            .data-table th {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
         }
     </style>
@@ -558,7 +885,7 @@
             </div>
         </div>
 
-        <!-- 预测图表 - 放在 Sales Trend 下方 -->
+        <!-- 预测图表 -->
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">🔮 Sales Forecast (Next 7 Days)</h3>
@@ -698,50 +1025,58 @@
     let currentForecastData = [];
     let refreshInterval = null;
 
-    // ---------- Export Report (PDF) ----------
-// ---------- Export Report 功能 (打印为 PDF) ----------
-document.getElementById('exportReportBtn').addEventListener('click', async () => {
-    // 打印前确保所有数据已加载
-    await refreshAllData();
-    
-    // 添加临时打印类
-    document.body.classList.add('printing');
-    
-    // 延迟打印，确保渲染完成
-    setTimeout(() => {
-        window.print();
-        document.body.classList.remove('printing');
-    }, 100);
-});
+    // ---------- Export Report 功能 (打印为 PDF) ----------
+    document.getElementById('exportReportBtn').addEventListener('click', async () => {
+        await refreshAllData();
+        document.body.classList.add('printing');
+        setTimeout(() => {
+            window.print();
+            document.body.classList.remove('printing');
+        }, 100);
+    });
 
-// 添加打印专用的数据压缩函数
-function prepareForPrint() {
-    // 压缩图表大小
-    if (salesChart) {
-        salesChart.options.maintainAspectRatio = true;
-        salesChart.resize();
+    // 添加打印专用的数据压缩函数
+    function prepareForPrint() {
+        const today = new Date();
+        const dateStr = today.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        const header = document.querySelector('.dashboard-header h1');
+        if (header) {
+            header.setAttribute('data-date', dateStr);
+        }
+        
+        if (salesChart) {
+            salesChart.options.maintainAspectRatio = true;
+            salesChart.resize();
+        }
+        if (forecastChart) {
+            forecastChart.options.maintainAspectRatio = true;
+            forecastChart.resize();
+        }
+        if (productsChart) {
+            productsChart.options.maintainAspectRatio = true;
+            productsChart.resize();
+        }
+        
+        document.querySelectorAll('.data-table tbody tr:nth-child(even)').forEach(row => {
+            row.style.backgroundColor = '#f9f9f9';
+        });
+        document.querySelectorAll('.forecast-table tbody tr:nth-child(even)').forEach(row => {
+            row.style.backgroundColor = '#f9f9f9';
+        });
     }
-    if (forecastChart) {
-        forecastChart.options.maintainAspectRatio = true;
-        forecastChart.resize();
-    }
-    if (productsChart) {
-        productsChart.options.maintainAspectRatio = true;
-        productsChart.resize();
-    }
-}
 
-// 监听打印事件
-window.addEventListener('beforeprint', () => {
-    prepareForPrint();
-});
+    window.addEventListener('beforeprint', prepareForPrint);
 
-window.addEventListener('afterprint', () => {
-    // 恢复原始大小
-    if (salesChart) salesChart.resize();
-    if (forecastChart) forecastChart.resize();
-    if (productsChart) productsChart.resize();
-});
+    window.addEventListener('afterprint', () => {
+        if (salesChart) salesChart.resize();
+        if (forecastChart) forecastChart.resize();
+        if (productsChart) productsChart.resize();
+    });
 
     // ---------- 加载仪表盘数据 ----------
     async function fetchDashboardStats() {

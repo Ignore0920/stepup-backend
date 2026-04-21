@@ -765,32 +765,74 @@
         }
 
         async function saveProfile() {
-            const firstName = document.getElementById('editFirstName');
-            const lastName = document.getElementById('editLastName');
-            const email = document.getElementById('editEmail');
-            const phone = document.getElementById('editPhone');
-            
-            if (!firstName.checkValidity()) { firstName.reportValidity(); return; }
-            if (!lastName.checkValidity()) { lastName.reportValidity(); return; }
-            if (!email.checkValidity()) { email.reportValidity(); return; }
-            if (phone.value && !phone.checkValidity()) { phone.reportValidity(); return; }
+    const firstName = document.getElementById('editFirstName');
+    const lastName = document.getElementById('editLastName');
+    const email = document.getElementById('editEmail');
+    const phone = document.getElementById('editPhone');
+    
+    // 获取原始用户数据以比较邮箱是否变更
+    const userData = JSON.parse(localStorage.getItem('userData')) || {};
+    const originalEmail = userData.email || '';
+    
+    if (!firstName.checkValidity()) { firstName.reportValidity(); return; }
+    if (!lastName.checkValidity()) { lastName.reportValidity(); return; }
+    if (!email.checkValidity()) { email.reportValidity(); return; }
+    if (phone.value && !phone.checkValidity()) { phone.reportValidity(); return; }
 
-            try {
-                const res = await authFetch('/api/users/profile', {
-                    method: 'PUT',
-                    body: JSON.stringify({ firstName: firstName.value, lastName: lastName.value, phone: phone.value, email: email.value })
-                });
-                if (!res.ok) throw new Error('Update failed');
-                
-                await loadUserProfile();
-                document.getElementById('profileView').style.display = 'block';
-                document.getElementById('profileEdit').classList.remove('active');
-                showSuccessMessage('profileSuccess');
-            } catch (err) {
-                console.error(err);
-                alert('Failed to update profile. Please try again.');
-            }
+    // 构建更新数据
+    const updateData = {
+        firstName: firstName.value.trim(),
+        lastName: lastName.value.trim(),
+        phone: phone.value.trim()
+    };
+    
+    // 只有当邮箱变更时才包含邮箱字段
+    if (email.value.trim() !== originalEmail) {
+        updateData.email = email.value.trim();
+        
+        // 确认是否要更改邮箱
+        if (!confirm('Changing your email address will require you to log in again. Continue?')) {
+            return;
         }
+    }
+
+    try {
+        const res = await authFetch('/api/users/profile', {
+            method: 'PUT',
+            body: JSON.stringify(updateData)
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+            // 处理特定错误
+            if (data.error && data.error.includes('email')) {
+                throw new Error('This email is already in use. Please use a different email address.');
+            }
+            throw new Error(data.error || 'Update failed');
+        }
+        
+        await loadUserProfile();
+        
+        // 标记用户信息已更新
+        localStorage.setItem('profileUpdatedAt', new Date().toISOString());
+        
+        document.getElementById('profileView').style.display = 'block';
+        document.getElementById('profileEdit').classList.remove('active');
+        showSuccessMessage('profileSuccess');
+        
+        // 如果邮箱已更改，提示用户重新登录
+        if (updateData.email) {
+            alert('Your email has been updated. Please log in again with your new email address.');
+            setTimeout(() => {
+                logout();
+            }, 2000);
+        }
+    } catch (err) {
+        console.error('Save profile error:', err);
+        alert(err.message || 'Failed to update profile. Please try again.');
+    }
+}
 
         async function saveAddress() {
             const street = document.getElementById('editStreet');

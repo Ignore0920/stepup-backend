@@ -72,7 +72,7 @@
                     <form id="addAdminForm">
                         <div class="form-group">
                             <label>Staff Username</label>
-                            <input type="text" id="newAdminName" class="form-control" placeholder="e.g. j_walker" required>
+                            <input type="text" id="newAdminName" class="form-control" placeholder="e.g. j_walker" pattern="[A-Za-z0-9_]{3,20}" title="3-20 characters, letters, numbers, underscore" required>
                         </div>
                         <div class="form-group">
                             <label>Authority Level</label>
@@ -84,7 +84,7 @@
                         </div>
                         <div class="form-group">
                             <label>Temporary Password</label>
-                            <input type="password" id="newAdminPass" class="form-control" placeholder="••••••••" required>
+                            <input type="password" id="newAdminPass" class="form-control" placeholder="••••••••" minlength="6" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Authorize Member</button>
                     </form>
@@ -111,20 +111,19 @@
         <form id="editAdminForm">
             <div class="form-group">
                 <label>Staff Username</label>
-                <input type="text" id="editAdminName" class="form-control" required>
+                <input type="text" id="editAdminName" class="form-control" pattern="[A-Za-z0-9_]{3,20}" title="3-20 characters, letters, numbers, underscore" required>
             </div>
             <div class="form-group">
                 <label>New Password (leave blank to keep unchanged)</label>
-                <input type="password" id="editAdminPassword" class="form-control" placeholder="••••••••">
+                <input type="password" id="editAdminPassword" class="form-control" placeholder="••••••••" minlength="6">
             </div>
             <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
     </div>
 </div>
 
-<!-- ========== SCRIPT MOVED TO THE BOTTOM ========== -->
 <script>
-    // Check admin token on page load
+    // ========== 全局变量和初始化 ==========
     const token = localStorage.getItem('adminToken');
     if (!token) {
         window.location.href = 'admin-login.html';
@@ -150,6 +149,18 @@
 
     let currentEditingId = null;
 
+    // ========== HTML 转义函数（防止 XSS） ==========
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // ========== 加载管理员列表 ==========
     async function loadAdmins() {
         try {
             const response = await fetch('/api/admins', {
@@ -157,30 +168,39 @@
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error);
+            
             const tbody = document.getElementById('teamList');
             tbody.innerHTML = '';
+            
             data.data.forEach(admin => {
                 const row = tbody.insertRow();
                 row.setAttribute('data-id', admin._id);
+                
+                // 对用户名进行转义，并处理单引号以免破坏 onclick 属性
+                const escapedUsername = escapeHtml(admin.username);
+                const safeUsername = escapedUsername.replace(/'/g, "\\'");
+                
                 row.innerHTML = `
-                    <td>${escapeHtml(admin.username)}</td>
+                    <td>${escapedUsername}</td>
                     <td><span class="role-badge">Admin</span></td>
                     <td style="color: #27ae60; font-weight: 600;">Active</td>
                     <td>
                         <div class="action-btns">
-                            <button class="btn-action btn-edit" onclick="openEditModal('${admin._id}', '${escapeHtml(admin.username)}')">Edit</button>
-                            <button class="btn-action btn-remove" onclick="removeAdmin('${admin._id}', '${escapeHtml(admin.username)}')">Remove</button>
+                            <button class="btn-action btn-edit" onclick="openEditModal('${admin._id}', '${safeUsername}')">Edit</button>
+                            <button class="btn-action btn-remove" onclick="removeAdmin('${admin._id}', '${safeUsername}')">Remove</button>
                         </div>
                     </td>
                 `;
             });
+            
             document.getElementById('adminCount').innerText = data.data.length;
         } catch (err) {
-            console.error(err);
+            console.error('Load admins error:', err);
             alert('Failed to load admins: ' + err.message);
         }
     }
 
+    // ========== 编辑模态框 ==========
     function openEditModal(id, username) {
         currentEditingId = id;
         document.getElementById('editAdminName').value = username;
@@ -193,41 +213,51 @@
         currentEditingId = null;
     }
 
+    // ========== 删除管理员 ==========
     async function removeAdmin(id, username) {
-        if (confirm(`Are you sure you want to remove admin "${username}"?`)) {
-            try {
-                const response = await fetch(`/api/admins/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error);
-                alert('Admin removed');
-                loadAdmins();
-            } catch (err) {
-                alert(err.message);
-            }
+        if (!confirm(`Are you sure you want to remove admin "${username}"?`)) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/admins/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error);
+            
+            alert('Admin removed successfully!');
+            loadAdmins();
+        } catch (err) {
+            alert('Failed to remove admin: ' + err.message);
         }
     }
 
-    function escapeHtml(str) {
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
-    // --- Event listeners – now all elements exist because script is at the bottom ---
+    // ========== 创建新管理员（修复后的核心代码） ==========
     const addAdminForm = document.getElementById('addAdminForm');
     if (addAdminForm) {
         addAdminForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = document.getElementById('newAdminName');
-const password = document.getElementById('newAdminPass');
-if (!username.checkValidity()) { username.reportValidity(); return; }
-if (!password.checkValidity()) { password.reportValidity(); return; }
+            
+            // 获取输入框元素
+            const usernameInput = document.getElementById('newAdminName');
+            const passwordInput = document.getElementById('newAdminPass');
+            
+            // 前端验证
+            if (!usernameInput.checkValidity()) { 
+                usernameInput.reportValidity(); 
+                return; 
+            }
+            if (!passwordInput.checkValidity()) { 
+                passwordInput.reportValidity(); 
+                return; 
+            }
+            
+            // ✅ 关键修复：获取实际的字符串值，而不是 DOM 元素
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            
             try {
                 const response = await fetch('/api/admins', {
                     method: 'POST',
@@ -235,33 +265,56 @@ if (!password.checkValidity()) { password.reportValidity(); return; }
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
+                    // ✅ 现在传入的是正确的字符串
                     body: JSON.stringify({ username, password })
                 });
+                
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.error);
+                if (!response.ok) throw new Error(data.error || 'Failed to create admin');
+                
                 alert('Admin created successfully!');
                 loadAdmins();
                 addAdminForm.reset();
             } catch (err) {
-                alert(err.message);
+                console.error('Create admin error:', err);
+                alert('Failed to create admin: ' + err.message);
             }
         });
     } else {
         console.error('addAdminForm not found');
     }
 
+    // ========== 编辑管理员 ==========
     const editAdminForm = document.getElementById('editAdminForm');
     if (editAdminForm) {
         editAdminForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const newUsername = document.getElementById('editAdminName').value.trim();
-            const newPassword = document.getElementById('editAdminPassword').value;
+            
+            const usernameInput = document.getElementById('editAdminName');
+            const passwordInput = document.getElementById('editAdminPassword');
+            
+            if (!usernameInput.checkValidity()) {
+                usernameInput.reportValidity();
+                return;
+            }
+            
+            const newUsername = usernameInput.value.trim();
+            const newPassword = passwordInput.value;
+            
             if (!newUsername) {
                 alert('Username cannot be empty');
                 return;
             }
+            
             const updateData = { username: newUsername };
-            if (newPassword) updateData.password = newPassword;
+            if (newPassword) {
+                if (newPassword.length < 6) {
+                    alert('Password must be at least 6 characters');
+                    return;
+                }
+                updateData.password = newPassword;
+            }
+            
             try {
                 const response = await fetch(`/api/admins/${currentEditingId}`, {
                     method: 'PUT',
@@ -271,32 +324,45 @@ if (!password.checkValidity()) { password.reportValidity(); return; }
                     },
                     body: JSON.stringify(updateData)
                 });
+                
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.error);
-                alert('Admin updated successfully');
+                if (!response.ok) throw new Error(data.error || 'Failed to update admin');
+                
+                alert('Admin updated successfully!');
                 loadAdmins();
                 closeEditModal();
             } catch (err) {
-                alert(err.message);
+                console.error('Update admin error:', err);
+                alert('Failed to update admin: ' + err.message);
             }
         });
     } else {
         console.error('editAdminForm not found');
     }
 
+    // ========== 模态框关闭按钮 ==========
     const cancelBtn = document.getElementById('cancelBtn');
     if (cancelBtn) {
         cancelBtn.addEventListener('click', closeEditModal);
-    } else {
-        console.error('cancelBtn not found');
     }
 
+    // 点击模态框背景关闭
     window.onclick = function(event) {
-        if (event.target == document.getElementById('editModal')) closeEditModal();
+        const modal = document.getElementById('editModal');
+        if (event.target === modal) {
+            closeEditModal();
+        }
     };
 
-    // Load admins after everything is ready
-    loadAdmins();
+    // ========== 暴露函数到全局（供 onclick 调用） ==========
+    window.openEditModal = openEditModal;
+    window.removeAdmin = removeAdmin;
+    window.logoutAdmin = logoutAdmin;
+
+    // ========== 页面加载时获取数据 ==========
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAdmins();
+    });
 </script>
 </body>
 </html>

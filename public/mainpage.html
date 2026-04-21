@@ -672,7 +672,7 @@
                 </div>
                 <div class="stat-item">
                     <div class="stat-number" id="statDailyOrders">--</div>
-                    <div class="stat-label">Daily Orders</div>
+                    <div class="stat-label">Monthly Avg Orders</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-number" id="statActiveCustomers">--</div>
@@ -843,6 +843,7 @@
                 if (res.ok) {
                     const data = await res.json();
                     document.getElementById('statStyles').textContent = data.totalProducts || '0';
+                    // 此处 data.dailyOrders 实际为当日订单数，若需显示月度平均请后端调整接口
                     document.getElementById('statDailyOrders').textContent = data.dailyOrders || '0';
                     document.getElementById('statActiveCustomers').textContent = data.activeUsers || '0';
                     return;

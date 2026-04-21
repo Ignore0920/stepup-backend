@@ -6,72 +6,391 @@
     <title>My Account - StepUp</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* 原有样式完全保留 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; background-color: #fafaf8; color: #262626; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
-        header { background-color: #ffffff; border-bottom: 1px solid #e5e5e5; padding: 1rem 0; position: sticky; top: 0; z-index: 100; }
-        .header-content { display: flex; justify-content: space-between; align-items: center; }
-        .logo { display: flex; align-items: center; gap: 0.5rem; font-weight: bold; font-size: 1.25rem; text-decoration: none; color: #262626; transition: opacity 0.3s; }
-        .logo:hover { opacity: 0.7; }
-        .logo-box { width: 40px; height: 40px; background-color: #262626; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.125rem; }
-        .header-nav { display: flex; gap: 2rem; align-items: center; }
-        .header-nav a { text-decoration: none; color: #262626; font-size: 0.875rem; transition: color 0.3s; cursor: pointer; }
-        .header-nav a:hover { color: #666666; }
-        .user-info { display: flex; align-items: center; gap: 1rem; font-size: 0.875rem; }
-        .user-avatar { width: 32px; height: 32px; background-color: #262626; color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .logout-btn { background: none; border: 1px solid #262626; padding: 0.5rem 1rem; cursor: pointer; font-size: 0.875rem; transition: all 0.3s; }
-        .logout-btn:hover { background-color: #262626; color: #ffffff; }
-        .cart-btn { background: none; border: none; font-size: 24px; cursor: pointer; position: relative; text-decoration: none; color: #262626; transition: color 0.3s; }
-        .cart-btn:hover { color: #666666; }
-        .cart-badge { position: absolute; top: -8px; right: -8px; background-color: #262626; color: #ffffff; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
-        .page-title { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; margin: 3rem 0 1rem; position: relative; padding-bottom: 1.5rem; }
-        .page-title::after { content: ''; position: absolute; bottom: 0; left: 0; width: 60px; height: 3px; background-color: #262626; }
-        .breadcrumb { font-size: 0.875rem; color: #666666; margin-bottom: 2rem; }
-        .breadcrumb a { color: #262626; text-decoration: none; border-bottom: 1px solid #262626; }
-        .account-container { display: grid; grid-template-columns: 250px 1fr; gap: 2rem; margin-bottom: 4rem; }
-        .sidebar { background-color: #ffffff; border: 1px solid #e5e5e5; padding: 2rem; height: fit-content; }
-        .sidebar-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e5e5e5; }
-        .sidebar-menu { display: flex; flex-direction: column; gap: 0; }
-        .sidebar-menu button { background: none; border: none; padding: 0.875rem 1rem; text-align: left; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 0.875rem; color: #666666; transition: all 0.3s; border-left: 3px solid transparent; margin-left: -1rem; padding-left: calc(1rem - 3px); }
-        .sidebar-menu button:hover { color: #262626; background-color: #f5f5f5; }
-        .sidebar-menu button.active { color: #262626; border-left-color: #262626; background-color: #f5f5f5; }
-        .content-section { background-color: #ffffff; border: 1px solid #e5e5e5; padding: 2rem; display: none; }
-        .content-section.active { display: block; }
-        .section-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e5e5e5; }
-        .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
-        .profile-item { display: flex; flex-direction: column; }
-        .profile-label { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #666666; margin-bottom: 0.5rem; }
-        .profile-value { font-size: 1rem; color: #262626; }
-        .edit-btn, .save-btn, .cancel-btn { background-color: #262626; color: #ffffff; border: none; padding: 0.875rem 2rem; font-family: 'Montserrat', sans-serif; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.3s; width: fit-content; margin-right: 0.5rem; }
-        .edit-btn:hover, .save-btn:hover { background-color: #000000; }
-        .cancel-btn { background-color: #e5e5e5; color: #262626; }
-        .cancel-btn:hover { background-color: #d0d0d0; }
-        input[type="text"], input[type="email"], input[type="tel"] { width: 100%; padding: 0.875rem 1rem; border: 1px solid #e5e5e5; background-color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 0.95rem; transition: border-color 0.3s, box-shadow 0.3s; }
-        input[type="text"]:focus, input[type="email"]:focus, input[type="tel"]:focus { outline: none; border-color: #262626; box-shadow: 0 0 0 3px rgba(38, 38, 38, 0.1); }
-        .edit-form { display: none; }
-        .edit-form.active { display: block; }
-        .form-group { margin-bottom: 1.5rem; }
-        .orders-table { width: 100%; border-collapse: collapse; }
-        .orders-table thead { background-color: #f5f5f5; border-bottom: 2px solid #e5e5e5; }
-        .orders-table th { padding: 1rem; text-align: left; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-        .orders-table td { padding: 1rem; border-bottom: 1px solid #e5e5e5; font-size: 0.875rem; }
-        .order-id { font-weight: 600; color: #262626; }
-        .order-status { display: inline-block; padding: 0.375rem 0.75rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        
+        /* Header - 与 mainpage 保持一致 */
+        header { 
+            position: sticky; 
+            top: 0; 
+            z-index: 50; 
+            background-color: #ffffff; 
+            border-bottom: 1px solid #e5e5e5; 
+            padding: 0;
+        }
+        .header-content { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 1.5rem 0; 
+        }
+        .logo { 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            cursor: pointer;
+            text-decoration: none;
+            color: #262626;
+            transition: opacity 0.3s;
+        }
+        .logo:hover { 
+            opacity: 0.7; 
+        }
+        .logo-box { 
+            width: 40px; 
+            height: 40px; 
+            background-color: #262626; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: #ffffff; 
+            font-family: 'Playfair Display', serif; 
+            font-weight: bold; 
+            font-size: 1.125rem; 
+        }
+        .logo-text { 
+            font-size: 1.5rem; 
+            font-family: 'Playfair Display', serif; 
+            font-weight: bold; 
+            letter-spacing: 0.05em; 
+        }
+        nav { 
+            display: flex; 
+            gap: 2rem; 
+        }
+        nav a { 
+            text-decoration: none; 
+            color: #262626; 
+            font-size: 0.875rem; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            transition: color 0.3s; 
+            cursor: pointer;
+        }
+        nav a:hover { 
+            color: #666666; 
+        }
+        .nav-right { 
+            display: flex; 
+            align-items: center; 
+            gap: 1.5rem; 
+        }
+        .nav-right a,
+        .nav-right button { 
+            background: none; 
+            border: none; 
+            cursor: pointer; 
+            color: #262626; 
+            font-size: 1.25rem; 
+            transition: color 0.3s; 
+            text-decoration: none;
+            position: relative;
+        }
+        .nav-right a:hover,
+        .nav-right button:hover { 
+            color: #666666; 
+        }
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #262626;
+            color: #ffffff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        /* 用户信息区域 */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.875rem;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #262626;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .logout-btn {
+            background: none;
+            border: 1px solid #262626;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+        }
+        .logout-btn:hover {
+            background-color: #262626;
+            color: #ffffff;
+        }
+        @media (max-width: 768px) { 
+            nav { display: none; } 
+        }
+
+        /* 页面标题 */
+        .page-title { 
+            font-family: 'Playfair Display', serif; 
+            font-size: 2.5rem; 
+            font-weight: 700; 
+            margin: 3rem 0 1rem; 
+            position: relative; 
+            padding-bottom: 1.5rem; 
+        }
+        .page-title::after { 
+            content: ''; 
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            width: 60px; 
+            height: 3px; 
+            background-color: #262626; 
+        }
+        .breadcrumb { 
+            font-size: 0.875rem; 
+            color: #666666; 
+            margin-bottom: 2rem; 
+        }
+        .breadcrumb a { 
+            color: #262626; 
+            text-decoration: none; 
+            border-bottom: 1px solid #262626; 
+        }
+        
+        /* 账户容器 */
+        .account-container { 
+            display: grid; 
+            grid-template-columns: 250px 1fr; 
+            gap: 2rem; 
+            margin-bottom: 4rem; 
+        }
+        .sidebar { 
+            background-color: #ffffff; 
+            border: 1px solid #e5e5e5; 
+            padding: 2rem; 
+            height: fit-content; 
+        }
+        .sidebar-title { 
+            font-family: 'Playfair Display', serif; 
+            font-size: 1.25rem; 
+            margin-bottom: 1.5rem; 
+            padding-bottom: 1rem; 
+            border-bottom: 2px solid #e5e5e5; 
+        }
+        .sidebar-menu { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 0; 
+        }
+        .sidebar-menu button { 
+            background: none; 
+            border: none; 
+            padding: 0.875rem 1rem; 
+            text-align: left; 
+            cursor: pointer; 
+            font-family: 'Montserrat', sans-serif; 
+            font-size: 0.875rem; 
+            color: #666666; 
+            transition: all 0.3s; 
+            border-left: 3px solid transparent; 
+            margin-left: -1rem; 
+            padding-left: calc(1rem - 3px); 
+        }
+        .sidebar-menu button:hover { 
+            color: #262626; 
+            background-color: #f5f5f5; 
+        }
+        .sidebar-menu button.active { 
+            color: #262626; 
+            border-left-color: #262626; 
+            background-color: #f5f5f5; 
+        }
+        
+        /* 内容区域 */
+        .content-area {
+            background-color: #ffffff;
+            border: 1px solid #e5e5e5;
+        }
+        .content-section { 
+            padding: 2rem; 
+            display: none; 
+        }
+        .content-section.active { 
+            display: block; 
+        }
+        .section-title { 
+            font-family: 'Playfair Display', serif; 
+            font-size: 1.5rem; 
+            margin-bottom: 1.5rem; 
+            padding-bottom: 1rem; 
+            border-bottom: 2px solid #e5e5e5; 
+        }
+        .profile-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 2rem; 
+            margin-bottom: 2rem; 
+        }
+        .profile-item { 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .profile-label { 
+            font-size: 0.875rem; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            color: #666666; 
+            margin-bottom: 0.5rem; 
+        }
+        .profile-value { 
+            font-size: 1rem; 
+            color: #262626; 
+        }
+        .edit-btn, .save-btn, .cancel-btn { 
+            background-color: #262626; 
+            color: #ffffff; 
+            border: none; 
+            padding: 0.875rem 2rem; 
+            font-family: 'Montserrat', sans-serif; 
+            font-size: 0.875rem; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            width: fit-content; 
+            margin-right: 0.5rem; 
+        }
+        .edit-btn:hover, .save-btn:hover { 
+            background-color: #000000; 
+        }
+        .cancel-btn { 
+            background-color: #e5e5e5; 
+            color: #262626; 
+        }
+        .cancel-btn:hover { 
+            background-color: #d0d0d0; 
+        }
+        input[type="text"], input[type="email"], input[type="tel"] { 
+            width: 100%; 
+            padding: 0.875rem 1rem; 
+            border: 1px solid #e5e5e5; 
+            background-color: #ffffff; 
+            font-family: 'Montserrat', sans-serif; 
+            font-size: 0.95rem; 
+            transition: border-color 0.3s, box-shadow 0.3s; 
+        }
+        input[type="text"]:focus, input[type="email"]:focus, input[type="tel"]:focus { 
+            outline: none; 
+            border-color: #262626; 
+            box-shadow: 0 0 0 3px rgba(38, 38, 38, 0.1); 
+        }
+        .edit-form { 
+            display: none; 
+        }
+        .edit-form.active { 
+            display: block; 
+        }
+        .form-group { 
+            margin-bottom: 1.5rem; 
+        }
+        
+        /* 订单表格 */
+        .orders-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        .orders-table thead { 
+            background-color: #f5f5f5; 
+            border-bottom: 2px solid #e5e5e5; 
+        }
+        .orders-table th { 
+            padding: 1rem; 
+            text-align: left; 
+            font-size: 0.875rem; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+        }
+        .orders-table td { 
+            padding: 1rem; 
+            border-bottom: 1px solid #e5e5e5; 
+            font-size: 0.875rem; 
+        }
+        .order-id { 
+            font-weight: 600; 
+            color: #262626; 
+        }
+        .order-status { 
+            display: inline-block; 
+            padding: 0.375rem 0.75rem; 
+            border-radius: 4px; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+        }
         .status-pending { background-color: #fff3cd; color: #856404; }
         .status-processing { background-color: #d1ecf1; color: #0c5460; }
         .status-shipped { background-color: #d1ecf1; color: #0c5460; }
         .status-delivered { background-color: #d4edda; color: #155724; }
         .status-cancelled { background-color: #f8d7da; color: #721c24; }
-        .view-btn { background: none; border: 1px solid #262626; color: #262626; padding: 0.375rem 0.75rem; cursor: pointer; font-size: 0.75rem; transition: all 0.3s; }
-        .view-btn:hover { background-color: #262626; color: #ffffff; }
-        .cancel-btn { margin-left: 5px; background-color: #e74c3c; border-color: #e74c3c; color: white; }
-        .cancel-btn:hover { background-color: #c0392b; border-color: #c0392b; }
-        .empty-state { text-align: center; padding: 3rem 1rem; color: #666666; }
-        .success-message { background-color: #d4edda; border: 1px solid #4caf50; color: #155724; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; display: none; }
-        .success-message.show { display: block; }
+        .view-btn { 
+            background: none; 
+            border: 1px solid #262626; 
+            color: #262626; 
+            padding: 0.375rem 0.75rem; 
+            cursor: pointer; 
+            font-size: 0.75rem; 
+            transition: all 0.3s; 
+        }
+        .view-btn:hover { 
+            background-color: #262626; 
+            color: #ffffff; 
+        }
+        .cancel-btn.order-cancel { 
+            margin-left: 5px; 
+            background-color: #e74c3c; 
+            border-color: #e74c3c; 
+            color: white; 
+        }
+        .cancel-btn.order-cancel:hover { 
+            background-color: #c0392b; 
+            border-color: #c0392b; 
+        }
+        .empty-state { 
+            text-align: center; 
+            padding: 3rem 1rem; 
+            color: #666666; 
+        }
+        .success-message { 
+            background-color: #d4edda; 
+            border: 1px solid #4caf50; 
+            color: #155724; 
+            padding: 1rem; 
+            border-radius: 4px; 
+            margin-bottom: 1.5rem; 
+            display: none; 
+        }
+        .success-message.show { 
+            display: block; 
+        }
 
-        /* 订单详情模态框样式 */
+        /* 模态框样式 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -141,7 +460,6 @@
             .profile-grid { grid-template-columns: 1fr; }
             .orders-table { font-size: 0.75rem; }
             .orders-table th, .orders-table td { padding: 0.75rem 0.5rem; }
-            .header-nav { gap: 1rem; font-size: 0.75rem; }
         }
     </style>
 </head>
@@ -152,12 +470,15 @@
             <div class="header-content">
                 <a href="mainpage.html" class="logo">
                     <div class="logo-box">S</div>
-                    <span>STEPUP</span>
+                    <span class="logo-text">STEPUP</span>
                 </a>
-                <nav class="header-nav">
+                <nav>
                     <a href="mainpage.html">Home</a>
-                    <a href="mainpage.html">Shop</a>
-                    <button class="cart-btn" title="Shopping Cart" onclick="window.location.href='shopping-cart.html'" style="position: relative;">
+                    <a href="products.html">Shop</a>
+                    <a href="shopping-cart.html">Cart</a>
+                </nav>
+                <div class="nav-right">
+                    <button title="Shopping Cart" onclick="location.href='shopping-cart.html'" style="position: relative;">
                         🛒
                         <span class="cart-badge" id="cartBadge">0</span>
                     </button>
@@ -166,7 +487,7 @@
                         <span id="userName"></span>
                         <button class="logout-btn" onclick="logout()">Logout</button>
                     </div>
-                </nav>
+                </div>
             </div>
         </div>
     </header>
@@ -380,7 +701,7 @@
                     const statusClass = `status-${order.status}`;
                     const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A';
                     const canCancel = order.status === 'pending' || order.status === 'processing';
-                    const cancelButton = canCancel ? `<button class="view-btn cancel-btn" onclick="cancelUserOrder('${order._id}')">Cancel</button>` : '';
+                    const cancelButton = canCancel ? `<button class="view-btn cancel-btn order-cancel" onclick="cancelUserOrder('${order._id}')">Cancel</button>` : '';
                     row.innerHTML = `
                         <td class="order-id">${escapeHtml(order.orderId || order._id)}</td>
                         <td>${orderDate}</td>
@@ -425,7 +746,6 @@
                 if (!response.ok) throw new Error(data.error || 'Failed to cancel order');
                 
                 alert('Order cancelled successfully!');
-                // 刷新订单列表
                 await loadOrders();
             } catch (err) {
                 console.error('Cancel order error:', err);
@@ -529,17 +849,12 @@
             updateCartBadge();
         }
 
-        // UI helpers - 修复 switchSection 函数，不再依赖未定义的 event
         function switchSection(sectionName) {
-            // 隐藏所有 section
             const sections = document.querySelectorAll('.content-section');
             sections.forEach(section => section.classList.remove('active'));
-            // 移除所有菜单按钮的 active 类
             const buttons = document.querySelectorAll('.menu-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
-            // 显示选中的 section
             document.getElementById(sectionName).classList.add('active');
-            // 高亮对应的按钮（根据 onclick 属性中包含的 sectionName）
             for (let btn of buttons) {
                 const onclickAttr = btn.getAttribute('onclick');
                 if (onclickAttr && onclickAttr.includes(`'${sectionName}'`)) {
@@ -590,95 +905,91 @@
             alert('📧 A password reset link has been sent to your email address. Please check your inbox to continue.');
         }
 
-        // 查看订单详情 - 与 Order.html 格式完全一致（包含银行卡信息）
-async function viewOrder(orderId) {
-    const modal = document.getElementById('orderDetailModal');
-    const contentDiv = document.getElementById('orderDetailContent');
-    const titleEl = document.getElementById('modalOrderTitle');
-    
-    modal.style.display = 'flex';
-    contentDiv.innerHTML = '<p style="text-align: center; padding: 2rem;">Loading order details...</p>';
+        async function viewOrder(orderId) {
+            const modal = document.getElementById('orderDetailModal');
+            const contentDiv = document.getElementById('orderDetailContent');
+            const titleEl = document.getElementById('modalOrderTitle');
+            
+            modal.style.display = 'flex';
+            contentDiv.innerHTML = '<p style="text-align: center; padding: 2rem;">Loading order details...</p>';
 
-    try {
-        const res = await authFetch(`/api/users/orders/${orderId}`);
-        if (!res.ok) {
-            if (res.status === 403) throw new Error('Access denied');
-            if (res.status === 404) throw new Error('Order not found');
-            throw new Error('Failed to load order');
+            try {
+                const res = await authFetch(`/api/users/orders/${orderId}`);
+                if (!res.ok) {
+                    if (res.status === 403) throw new Error('Access denied');
+                    if (res.status === 404) throw new Error('Order not found');
+                    throw new Error('Failed to load order');
+                }
+                const data = await res.json();
+                const order = data.order;
+                
+                titleEl.innerText = `Order ${order.orderId}`;
+                
+                const paymentDetails = order.paymentDetails || {};
+                const cardInfoHtml = paymentDetails.cardLast4 ? `
+                    <div class="order-detail-row">
+                        <h3>Payment Information</h3>
+                        <p>
+                            <strong>Card Holder:</strong> ${escapeHtml(paymentDetails.cardHolderName || 'N/A')}<br>
+                            <strong>Card Number:</strong> **** **** **** ${escapeHtml(paymentDetails.cardLast4)}<br>
+                            <strong>Expiry Date:</strong> ${escapeHtml(paymentDetails.cardExpiry || 'N/A')}
+                        </p>
+                    </div>
+                ` : '<div class="order-detail-row"><p><strong>Payment Information:</strong> Digital wallet / No card details stored.</p></div>';
+                
+                let itemsHtml = '';
+                order.items.forEach(item => {
+                    itemsHtml += `
+                        <tr>
+                            <td>${escapeHtml(item.name)}</td>
+                            <td>${item.size || 'N/A'}</td>
+                            <td>${item.quantity}</td>
+                            <td>MOP ${item.price.toFixed(2)}</td>
+                            <td>MOP ${(item.price * item.quantity).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                const html = `
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">Order ID:</span> ${order.orderId}<br>
+                        <span class="order-detail-label">Date:</span> ${new Date(order.createdAt).toLocaleString()}<br>
+                        <span class="order-detail-label">Payment Method:</span> 
+                        ${order.paymentMethod === 'credit' ? 'Credit Card' : 'Digital Wallet'}
+                        <span class="order-detail-label">Status:</span> <span class="order-status status-${order.status}">${order.status}</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <h3>Customer Information</h3>
+                        <p>
+                            <strong>Name:</strong> ${order.customer.firstName} ${order.customer.lastName}<br>
+                            <strong>Email:</strong> ${order.customer.email}<br>
+                            <strong>Phone:</strong> ${order.customer.phone || 'N/A'}<br>
+                            <strong>Address:</strong> ${order.customer.street}, ${order.customer.city}, ${order.customer.state || ''} ${order.customer.postal || ''}, ${order.customer.country}
+                        </p>
+                    </div>
+                    ${cardInfoHtml}
+                    <div class="order-detail-row">
+                        <h3>Order Items</h3>
+                        <table class="order-items-table">
+                            <thead>
+                                <tr><th>Product</th><th>Size</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr>
+                            </thead>
+                            <tbody>
+                                ${itemsHtml}
+                            </tbody>
+                        </table>
+                        <div style="text-align: right; margin-top: 1rem;">
+                            <p><strong>Subtotal:</strong> MOP ${order.subtotal.toFixed(2)}</p>
+                            <p><strong>Shipping:</strong> ${order.shipping === 0 ? 'Free' : 'MOP ' + order.shipping.toFixed(2)}</p>
+                            <p><strong>Total:</strong> MOP ${order.total.toFixed(2)}</p>
+                        </div>
+                    </div>
+                `;
+                contentDiv.innerHTML = html;
+            } catch (err) {
+                contentDiv.innerHTML = `<p style="color: #e74c3c; text-align: center; padding: 2rem;">Error: ${escapeHtml(err.message)}</p>`;
+            }
         }
-        const data = await res.json();
-        const order = data.order;
-        
-        titleEl.innerText = `Order ${order.orderId}`;
-        
-        // 获取银行卡信息（如果存在）
-        const paymentDetails = order.paymentDetails || {};
-        const cardInfoHtml = paymentDetails.cardLast4 ? `
-            <div class="order-detail-row">
-                <h3>Payment Information</h3>
-                <p>
-                    <strong>Card Holder:</strong> ${escapeHtml(paymentDetails.cardHolderName || 'N/A')}<br>
-                    <strong>Card Number:</strong> **** **** **** ${escapeHtml(paymentDetails.cardLast4)}<br>
-                    <strong>Expiry Date:</strong> ${escapeHtml(paymentDetails.cardExpiry || 'N/A')}
-                </p>
-            </div>
-        ` : '<div class="order-detail-row"><p><strong>Payment Information:</strong> Digital wallet / No card details stored.</p></div>';
-        
-        // 格式化订单商品列表
-        let itemsHtml = '';
-        order.items.forEach(item => {
-            itemsHtml += `
-                <tr>
-                    <td>${escapeHtml(item.name)}</td>
-                    <td>${item.size || 'N/A'}</td>
-                    <td>${item.quantity}</td>
-                    <td>MOP ${item.price.toFixed(2)}</td>
-                    <td>MOP ${(item.price * item.quantity).toFixed(2)}</td>
-                </tr>
-            `;
-        });
-
-        // 构建与 Order.html 完全相同的 HTML 结构
-        const html = `
-            <div class="order-detail-row">
-                <span class="order-detail-label">Order ID:</span> ${order.orderId}<br>
-                <span class="order-detail-label">Date:</span> ${new Date(order.createdAt).toLocaleString()}<br>
-                <span class="order-detail-label">Payment Method:</span> 
-                ${order.paymentMethod === 'credit' ? 'Credit Card' : 'Digital Wallet'}
-                <span class="order-detail-label">Status:</span> <span class="order-status status-${order.status}">${order.status}</span>
-            </div>
-            <div class="order-detail-row">
-                <h3>Customer Information</h3>
-                <p>
-                    <strong>Name:</strong> ${order.customer.firstName} ${order.customer.lastName}<br>
-                    <strong>Email:</strong> ${order.customer.email}<br>
-                    <strong>Phone:</strong> ${order.customer.phone || 'N/A'}<br>
-                    <strong>Address:</strong> ${order.customer.street}, ${order.customer.city}, ${order.customer.state || ''} ${order.customer.postal || ''}, ${order.customer.country}
-                </p>
-            </div>
-            ${cardInfoHtml}
-            <div class="order-detail-row">
-                <h3>Order Items</h3>
-                <table class="order-items-table">
-                    <thead>
-                        <tr><th>Product</th><th>Size</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr>
-                    </thead>
-                    <tbody>
-                        ${itemsHtml}
-                    </tbody>
-                </table>
-                <div style="text-align: right; margin-top: 1rem;">
-                    <p><strong>Subtotal:</strong> MOP ${order.subtotal.toFixed(2)}</p>
-                    <p><strong>Shipping:</strong> ${order.shipping === 0 ? 'Free' : 'MOP ' + order.shipping.toFixed(2)}</p>
-                    <p><strong>Total:</strong> MOP ${order.total.toFixed(2)}</p>
-                </div>
-            </div>
-        `;
-        contentDiv.innerHTML = html;
-    } catch (err) {
-        contentDiv.innerHTML = `<p style="color: #e74c3c; text-align: center; padding: 2rem;">Error: ${escapeHtml(err.message)}</p>`;
-    }
-}
 
         function closeOrderModal() {
             document.getElementById('orderDetailModal').style.display = 'none';
@@ -699,6 +1010,7 @@ async function viewOrder(orderId) {
         }
 
         document.addEventListener('DOMContentLoaded', initPage);
+        window.addEventListener('storage', updateCartBadge);
     </script>
 </body>
 </html>

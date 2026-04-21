@@ -223,10 +223,19 @@ app.get('/api/users/profile', verifyUserToken, async (req, res) => {
 app.put('/api/users/profile', verifyUserToken, async (req, res) => {
     try {
         const user = req.user;
-        const { firstName, lastName, phone, street, city, state, postal, country, cardLast4, cardExpiry, cardHolderName, paymentMethodType } = req.body;
+        const { firstName, lastName, phone, email, street, city, state, postal, country, cardLast4, cardExpiry, cardHolderName, paymentMethodType } = req.body;
+        
         if (firstName !== undefined) user.firstName = firstName;
         if (lastName !== undefined) user.lastName = lastName;
         if (phone !== undefined) user.phone = phone;
+        if (email !== undefined) {
+            // 检查邮箱是否已被其他用户使用
+            const existingUser = await User.findOne({ email, _id: { $ne: user._id } });
+            if (existingUser) {
+                return res.status(400).json({ error: 'Email already in use by another account' });
+            }
+            user.email = email;
+        }
         if (street !== undefined) user.street = street;
         if (city !== undefined) user.city = city;
         if (state !== undefined) user.state = state;
@@ -236,10 +245,22 @@ app.put('/api/users/profile', verifyUserToken, async (req, res) => {
         if (cardExpiry !== undefined) user.cardExpiry = cardExpiry;
         if (cardHolderName !== undefined) user.cardHolderName = cardHolderName;
         if (paymentMethodType !== undefined) user.paymentMethodType = paymentMethodType;
+        
         await user.save();
-        res.json({ success: true, message: 'Profile updated' });
+        
+        // 如果邮箱更新了，返回提示
+        const emailUpdated = email !== undefined && email !== req.user.email;
+        res.json({ 
+            success: true, 
+            message: 'Profile updated',
+            emailUpdated,
+            requireRelogin: emailUpdated 
+        });
     } catch (err) {
-        console.error(err);
+        console.error('Profile update error:', err);
+        if (err.code === 11000) {
+            return res.status(400).json({ error: 'Email already in use' });
+        }
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -798,18 +819,42 @@ app.post('/api/admin/users', verifyAdminToken, async (req, res) => {
 
 app.put('/api/admin/users/:id', verifyAdminToken, async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, firstName, lastName, phone, street, city, state, postal, country } = req.body;
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ error: 'User not found' });
-        if (name) user.name = name;
-        if (email) user.email = email;
-        if (password) user.password = password;
+        
+        if (name !== undefined) user.name = name;
+        if (firstName !== undefined) user.firstName = firstName;
+        if (lastName !== undefined) user.lastName = lastName;
+        if (phone !== undefined) user.phone = phone;
+        if (street !== undefined) user.street = street;
+        if (city !== undefined) user.city = city;
+        if (state !== undefined) user.state = state;
+        if (postal !== undefined) user.postal = postal;
+        if (country !== undefined) user.country = country;
+        
+        if (email !== undefined && email !== user.email) {
+            // 检查邮箱是否已被其他用户使用
+            const existingUser = await User.findOne({ email, _id: { $ne: user._id } });
+            if (existingUser) {
+                return res.status(400).json({ error: 'Email already in use by another account' });
+            }
+            user.email = email;
+        }
+        
+        if (password !== undefined && password.trim() !== '') {
+            user.password = password;
+        }
+        
         await user.save();
         const userObj = user.toObject();
         delete userObj.password;
         res.json({ success: true, user: userObj });
     } catch (err) {
         console.error('Error updating user:', err);
+        if (err.code === 11000) {
+            return res.status(400).json({ error: 'Email already in use' });
+        }
         res.status(500).json({ error: 'Server error' });
     }
 });

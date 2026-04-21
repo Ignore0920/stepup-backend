@@ -84,13 +84,13 @@
         <h1>Admin Login</h1>
         <form id="adminLoginForm">
             <div class="form-group">
-    <label>Staff Username</label>
-    <input type="text" id="newAdminName" class="form-control" placeholder="e.g. j_walker" pattern="[A-Za-z0-9_]{3,20}" title="3-20 characters, letters, numbers, underscore" required>
-</div>
-<div class="form-group">
-    <label>Temporary Password</label>
-    <input type="password" id="newAdminPass" class="form-control" placeholder="••••••••" minlength="6" required>
-</div>
+                <label>Username</label>
+                <input type="text" id="username" placeholder="Enter username" pattern="[A-Za-z0-9_]{3,20}" title="3-20 characters, letters, numbers, underscore" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter password" minlength="6" required>
+            </div>
             <button type="submit">Sign In</button>
             <div id="errorMsg" class="error"></div>
         </form>
@@ -102,10 +102,16 @@
     <script>
         document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             const errorDiv = document.getElementById('errorMsg');
             errorDiv.textContent = '';
+
+            // 简单前端验证
+            if (!username || !password) {
+                errorDiv.textContent = 'Please enter both username and password';
+                return;
+            }
 
             try {
                 const response = await fetch('/api/admin/login', {
@@ -122,6 +128,7 @@
                     errorDiv.textContent = data.error || 'Login failed';
                 }
             } catch (err) {
+                console.error('Login error:', err);
                 errorDiv.textContent = 'Network error. Please try again.';
             }
         });

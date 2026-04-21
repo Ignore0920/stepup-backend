@@ -13,8 +13,8 @@
         header { position: sticky; top: 0; z-index: 50; background-color: #ffffff; border-bottom: 1px solid #e5e5e5; }
         .header-content { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 0; }
         .logo { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
-        .logo-box { width: 40px; height: 40px; background-color: #262626; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: bold; font-size: 1.125rem; }
-        .logo-text { font-size: 1.5rem; font-weight: bold; letter-spacing: 0.05em; }
+        .logo-box { width: 40px; height: 40px; background-color: #262626; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: bold; font-size: 1.125rem; font-family: 'Playfair Display', serif; }
+        .logo-text { font-size: 1.5rem; font-weight: bold; letter-spacing: 0.05em; font-family: 'Playfair Display', serif; }
         nav { display: flex; gap: 2rem; }
         nav a { text-decoration: none; color: #262626; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.3s; }
         nav a:hover { color: #666666; }
@@ -56,7 +56,10 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <div class="logo" onclick="window.location.href='mainpage.html'"><div class="logo-box">S</div><div class="logo-text">STEPUP</div></div>
+                <div class="logo" onclick="window.location.href='mainpage.html'">
+                    <div class="logo-box">S</div>
+                    <div class="logo-text">STEPUP</div>
+                </div>
                 <nav><a href="products.html">Shop</a><a href="mainpage.html#collections">Collections</a><a href="mainpage.html#brands">Brands</a><a href="about.html">About</a></nav>
                 <div class="nav-right"><button title="Shopping Cart" onclick="location.href='shopping-cart.html'" style="position: relative;">🛒<span class="cart-badge" id="cartBadge">0</span></button><a href="account.html" class="user-icon-btn">👤</a></div>
             </div>
@@ -113,32 +116,24 @@
         function applySearch() { searchQuery = document.getElementById('searchInput').value.toLowerCase(); applyFilters(); }
         
         function applyFilters() {
-            // 获取选中的品牌值
             const selectedBrands = Array.from(document.querySelectorAll('.filter-options input[id^="brand-"]:checked')).map(el => el.value);
-            // 获取选中的集合值
             const selectedCollections = Array.from(document.querySelectorAll('.filter-options input[id^="collection-"]:checked')).map(el => el.value);
             
             filteredProducts = products.filter(p => {
-                // 品牌筛选逻辑
                 let brandMatch = true;
                 if (selectedBrands.length > 0) {
                     const brand = p.brand;
-                    // 如果选中了 "Other" 且同时选中了其他具体品牌
                     const hasOther = selectedBrands.includes('Other');
                     const specificBrands = selectedBrands.filter(b => b !== 'Other');
                     if (hasOther && specificBrands.length > 0) {
-                        // 品牌满足：是具体品牌之一 或者 不在预定义品牌列表中
                         brandMatch = specificBrands.includes(brand) || !predefinedBrands.includes(brand);
                     } else if (hasOther) {
-                        // 只选中了 Other
                         brandMatch = !predefinedBrands.includes(brand);
                     } else {
-                        // 只选中了具体品牌
                         brandMatch = specificBrands.includes(brand);
                     }
                 }
                 
-                // 集合筛选逻辑
                 let collectionMatch = true;
                 if (selectedCollections.length > 0) {
                     const collection = p.collection || '';
@@ -153,9 +148,7 @@
                     }
                 }
                 
-                // 搜索匹配
                 const searchMatch = searchQuery === '' || p.name.toLowerCase().includes(searchQuery) || p.brand.toLowerCase().includes(searchQuery);
-                
                 return brandMatch && collectionMatch && searchMatch;
             });
             renderProducts();

@@ -6,235 +6,39 @@
     <title>StepUp - Premium Men's Athletic Footwear</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #ffffff;
-            color: #262626;
-            line-height: 1.6;
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Playfair Display', serif;
-        }
-
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        /* Navigation Header */
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            background-color: #ffffff;
-            border-bottom: 1px solid #e5e5e5;
-        }
-
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1.5rem 0;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .logo-box {
-            width: 40px;
-            height: 40px;
-            background-color: #262626;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            font-family: 'Playfair Display', serif;
-            font-weight: bold;
-            font-size: 1.125rem;
-        }
-
-        .logo-text {
-            font-size: 1.5rem;
-            font-family: 'Playfair Display', serif;
-            font-weight: bold;
-            letter-spacing: 0.05em;
-        }
-
-        nav {
-            display: flex;
-            gap: 2rem;
-        }
-
-        nav a {
-            text-decoration: none;
-            color: #262626;
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            transition: color 0.3s;
-        }
-
-        nav a:hover {
-            color: #666666;
-        }
-
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .nav-right button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #262626;
-            font-size: 1.25rem;
-            transition: color 0.3s;
-            position: relative;
-        }
-
-        .nav-right button:hover {
-            color: #666666;
-        }
-
-        .user-icon-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #262626;
-            font-size: 1.25rem;
-            transition: color 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .user-icon-btn:hover {
-            color: #666666;
-        }
-
-        .cart-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: #262626;
-            color: #FAFAF8;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        @media (max-width: 768px) {
-            nav {
-                display: none;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #ffffff; color: #262626; line-height: 1.6; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+        header { position: sticky; top: 0; z-index: 50; background-color: #ffffff; border-bottom: 1px solid #e5e5e5; }
+        .header-content { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 0; }
+        .logo { display: flex; align-items: center; gap: 0.5rem; }
+        .logo-box { width: 40px; height: 40px; background-color: #262626; display: flex; align-items: center; justify-content: center; color: #ffffff; font-family: 'Playfair Display', serif; font-weight: bold; font-size: 1.125rem; }
+        .logo-text { font-size: 1.5rem; font-family: 'Playfair Display', serif; font-weight: bold; letter-spacing: 0.05em; }
+        nav { display: flex; gap: 2rem; }
+        nav a { text-decoration: none; color: #262626; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.3s; }
+        nav a:hover { color: #666666; }
+        .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-right button { background: none; border: none; cursor: pointer; color: #262626; font-size: 1.25rem; transition: color 0.3s; position: relative; }
+        .nav-right button:hover { color: #666666; }
+        .user-icon-btn { background: none; border: none; cursor: pointer; color: #262626; font-size: 1.25rem; transition: color 0.3s; text-decoration: none; display: inline-block; }
+        .user-icon-btn:hover { color: #666666; }
+        .cart-badge { position: absolute; top: -8px; right: -8px; background-color: #262626; color: #FAFAF8; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+        @media (max-width: 768px) { nav { display: none; } }
 
         /* Hero Section */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            background-color: #ffffff;
-            padding: 4rem 0;
-        }
-
-        .hero-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 3rem;
-            align-items: center;
-        }
-
-        .deco-frame {
-            position: relative;
-            border-left: 4px solid #262626;
-            border-top: 4px solid #262626;
-            padding-left: 1.5rem;
-            padding-top: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .deco-frame::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            width: 1.5rem;
-            height: 1.5rem;
-            border-right: 4px solid #262626;
-            border-bottom: 4px solid #262626;
-        }
-
-        .hero-text-label {
-            color: #262626;
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 1rem;
-        }
-
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 1rem;
-        }
-
-        .hero-title .highlight {
-            color: #262626;
-        }
-
-        .hero-description {
-            color: #666666;
-            font-size: 1.125rem;
-            margin-bottom: 2rem;
-            max-width: 400px;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .btn {
-            padding: 0.75rem 2rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background-color: #262626;
-            color: #ffffff;
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-        }
+        .hero { min-height: 100vh; display: flex; align-items: center; background-color: #ffffff; padding: 4rem 0; }
+        .hero-content { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+        .deco-frame { position: relative; border-left: 4px solid #262626; border-top: 4px solid #262626; padding-left: 1.5rem; padding-top: 1.5rem; margin-bottom: 2rem; }
+        .deco-frame::after { content: ''; position: absolute; right: 0; bottom: 0; width: 1.5rem; height: 1.5rem; border-right: 4px solid #262626; border-bottom: 4px solid #262626; }
+        .hero-text-label { color: #262626; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+        .hero-title { font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 1rem; }
+        .hero-title .highlight { color: #262626; }
+        .hero-description { color: #666666; font-size: 1.125rem; margin-bottom: 2rem; max-width: 400px; }
+        .button-group { display: flex; gap: 1.5rem; margin-top: 1rem; align-items: center; }
+        .btn { padding: 1rem 2.5rem; font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border: none; cursor: pointer; transition: all 0.3s; border-radius: 2px; }
+        .btn-primary { background-color: #262626; color: #ffffff; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
 
         .btn-secondary {
             background-color: transparent;
@@ -804,7 +608,6 @@
                     <div class="logo-text">STEPUP</div>
                 </div>
                 <nav>
-                    <!-- 修改 Shop 链接指向 products.html -->
                     <a href="products.html">Shop</a>
                     <a href="#collections">Collections</a>
                     <a href="#brands">Brands</a>
@@ -836,12 +639,9 @@
                         </div>
                     </div>
                     <div class="button-group">
-                        <!-- 修改按钮：文字改为 Start Shopping，跳转至 products.html -->
                         <button class="btn btn-primary" onclick="window.location.href='products.html'">Start Shopping</button>
-                        <!-- 移除 View Lookbook 按钮 -->
                     </div>
                 </div>
-                <!-- 轮播区域 -->
                 <div class="hero-visual">
                     <div class="hero-carousel-container">
                         <div class="hero-carousel-slides" id="heroCarouselSlides">
@@ -849,10 +649,8 @@
                             <div class="hero-carousel-slide" style="background-image: url('photo2.jpg');"></div>
                             <div class="hero-carousel-slide" style="background-image: url('photo3.jpg');"></div>
                         </div>
-                        <!-- 左右箭头 -->
                         <div class="hero-carousel-arrow left" id="heroPrevBtn">❮</div>
                         <div class="hero-carousel-arrow right" id="heroNextBtn">❯</div>
-                        <!-- 指示点 -->
                         <div class="hero-carousel-dots" id="heroCarouselDots">
                             <span class="hero-dot active"></span>
                             <span class="hero-dot"></span>

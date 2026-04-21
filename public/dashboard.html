@@ -424,12 +424,27 @@
         }
 
         /* 打印样式 */
-        @media print {
-            .sidebar, .btn, .forecast-controls, .mode-toggle, #manualUploadSection,
-            #autoRefreshCheckbox, #manualRefreshBtn, #includeTodayCheckbox, #forecastFile,
-            .header-actions {
-                display: none !important;
-            }
+        /* ========== 打印样式 (用于 PDF 导出) ========== */
+@media print {
+    /* 隐藏不需要打印的元素 */
+    .sidebar,
+    .btn,
+    .refresh-bar,
+    .mode-toggle,
+    #manualUploadSection,
+    .forecast-table-container .card-header .btn,
+    #autoRefreshCheckbox,
+    #manualRefreshBtn,
+    #includeTodayCheckbox,
+    #forecastFile,
+    #exportSalesBtn,
+    #exportProductsBtn,
+    #exportCustomersBtn,
+    #exportForecastBtn,
+    .report-btn,
+    .dashboard-header .btn {
+        display: none !important;
+    }
             .admin-wrapper {
                 display: block;
             }
@@ -684,9 +699,49 @@
     let refreshInterval = null;
 
     // ---------- Export Report (PDF) ----------
-    document.getElementById('exportReportBtn').addEventListener('click', () => {
+// ---------- Export Report 功能 (打印为 PDF) ----------
+document.getElementById('exportReportBtn').addEventListener('click', async () => {
+    // 打印前确保所有数据已加载
+    await refreshAllData();
+    
+    // 添加临时打印类
+    document.body.classList.add('printing');
+    
+    // 延迟打印，确保渲染完成
+    setTimeout(() => {
         window.print();
-    });
+        document.body.classList.remove('printing');
+    }, 100);
+});
+
+// 添加打印专用的数据压缩函数
+function prepareForPrint() {
+    // 压缩图表大小
+    if (salesChart) {
+        salesChart.options.maintainAspectRatio = true;
+        salesChart.resize();
+    }
+    if (forecastChart) {
+        forecastChart.options.maintainAspectRatio = true;
+        forecastChart.resize();
+    }
+    if (productsChart) {
+        productsChart.options.maintainAspectRatio = true;
+        productsChart.resize();
+    }
+}
+
+// 监听打印事件
+window.addEventListener('beforeprint', () => {
+    prepareForPrint();
+});
+
+window.addEventListener('afterprint', () => {
+    // 恢复原始大小
+    if (salesChart) salesChart.resize();
+    if (forecastChart) forecastChart.resize();
+    if (productsChart) productsChart.resize();
+});
 
     // ---------- 加载仪表盘数据 ----------
     async function fetchDashboardStats() {

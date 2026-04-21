@@ -445,35 +445,70 @@
     }
 
     function exportToCSV() {
-        if (filteredOrders.length === 0) {
-            alert('No data to export');
-            return;
-        }
-        const headers = ['Order ID', 'Date', 'Customer Name', 'Email', 'Address', 'Products', 'Subtotal', 'Shipping', 'Total', 'Status', 'Payment Method'];
-        const rows = filteredOrders.map(o => [
+    if (filteredOrders.length === 0) {
+        alert('No data to export');
+        return;
+    }
+    
+    // 更新表头，添加银行卡信息字段
+    const headers = [
+        'Order ID', 
+        'Date', 
+        'Customer Name', 
+        'Email', 
+        'Phone',
+        'Address', 
+        'Products', 
+        'Subtotal', 
+        'Shipping', 
+        'Total', 
+        'Status', 
+        'Payment Method',
+        'Card Holder Name',
+        'Card Last 4',
+        'Card Expiry'
+    ];
+    
+    const rows = filteredOrders.map(o => {
+        // 获取银行卡信息
+        const paymentDetails = o.paymentDetails || {};
+        const cardHolderName = paymentDetails.cardHolderName || '';
+        const cardLast4 = paymentDetails.cardLast4 || '';
+        const cardExpiry = paymentDetails.cardExpiry || '';
+        
+        return [
             o.orderId,
             new Date(o.createdAt).toLocaleString(),
             `${o.customer.firstName} ${o.customer.lastName}`,
             o.customer.email,
+            o.customer.phone || '',
             `${o.customer.street}, ${o.customer.city}, ${o.customer.state || ''} ${o.customer.postal || ''}, ${o.customer.country}`,
             o.items.map(i => `${i.name}${i.size ? ` (${i.size})` : ''} x${i.quantity}`).join('; '),
-            o.subtotal,
-            o.shipping,
-            o.total,
+            o.subtotal.toFixed(2),
+            o.shipping.toFixed(2),
+            o.total.toFixed(2),
             o.status,
-            o.paymentMethod === 'credit' ? 'Credit Card' : 'Digital Wallet'
-        ]);
-        const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
-        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.href = url;
-        link.setAttribute('download', 'orders_export.csv');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }
+            o.paymentMethod === 'credit' ? 'Credit Card' : 'Digital Wallet',
+            cardHolderName,
+            cardLast4 ? `**** **** **** ${cardLast4}` : '',
+            cardExpiry
+        ];
+    });
+    
+    const csvContent = [headers, ...rows].map(row => 
+        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+    ).join('\n');
+    
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute('download', 'orders_export.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
 
     function escapeHtml(str) {
         if (!str) return '';

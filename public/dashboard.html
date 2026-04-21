@@ -423,374 +423,388 @@
             }
         }
 
-        /* ========== 打印样式 (用于 PDF 导出 - 长条形报告格式) ========== */
-        @media print {
-            /* 隐藏所有交互元素 */
-            .sidebar,
-            .btn,
-            .forecast-controls,
-            .mode-toggle,
-            #manualUploadSection,
-            #autoRefreshCheckbox,
-            #manualRefreshBtn,
-            #includeTodayCheckbox,
-            #forecastFile,
-            .header-actions,
-            .card-header .btn,
-            .kpi-row .kpi-item:nth-child(2),
-            hr {
-                display: none !important;
-            }
+        /* ========== 打印样式 (强制一页竖版 A4) ========== */
+@media print {
+    /* 隐藏所有交互元素 */
+    .sidebar,
+    .btn,
+    .forecast-controls,
+    .mode-toggle,
+    #manualUploadSection,
+    #autoRefreshCheckbox,
+    #manualRefreshBtn,
+    #includeTodayCheckbox,
+    #forecastFile,
+    .header-actions,
+    .card-header .btn,
+    .kpi-row .kpi-item:nth-child(2),
+    hr {
+        display: none !important;
+    }
 
-            /* 全局打印设置 */
-            * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
+    /* 全局打印设置 - 强制一页 */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
 
-            html, body {
-                width: 100%;
-                height: auto;
-                margin: 0;
-                padding: 0;
-                background: white;
-                font-size: 10pt;
-            }
+    html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white;
+        font-size: 7pt;
+        overflow: visible !important;
+    }
 
-            .admin-wrapper {
-                display: block;
-                width: 100%;
-                min-height: auto;
-                background: white;
-            }
+    .admin-wrapper {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: auto;
+        background: white;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
 
-            .main-content {
-                padding: 30pt 40pt;
-                margin: 0;
-                width: 100%;
-                max-width: 100%;
-                background: white;
-            }
+    .main-content {
+        padding: 8pt 12pt !important;
+        margin: 0 !important;
+        width: 100%;
+        max-width: 100%;
+        background: white;
+        height: 100%;
+        box-sizing: border-box;
+    }
 
-            /* ========== 报告标题区域 ========== */
-            .dashboard-header {
-                margin-bottom: 25pt;
-                border-bottom: 3pt solid #1a1a1a;
-                padding-bottom: 15pt;
-                page-break-after: avoid;
-            }
+    /* ========== 报告标题区域 - 极致压缩 ========== */
+    .dashboard-header {
+        margin-bottom: 4pt !important;
+        border-bottom: 1.5pt solid #1a1a1a;
+        padding-bottom: 3pt !important;
+        page-break-after: avoid;
+    }
 
-            .dashboard-header h1 {
-                font-size: 28pt;
-                font-weight: 900;
-                margin: 0;
-                color: #1a1a1a;
-                position: relative;
-            }
+    .dashboard-header h1 {
+        font-size: 14pt !important;
+        font-weight: 900;
+        margin: 0 !important;
+        color: #1a1a1a;
+    }
 
-            .dashboard-header h1::after {
-                content: " | " attr(data-date);
-                font-size: 10pt;
-                font-weight: 400;
-                color: #666;
-                margin-left: 10pt;
-            }
+    .dashboard-header h1::after {
+        content: " | " attr(data-date);
+        font-size: 6pt;
+        font-weight: 400;
+        color: #666;
+    }
 
-            /* 报告副标题 */
-            .dashboard-header::after {
-                content: "StepUp E-Commerce Analytics Report";
-                display: block;
-                font-size: 11pt;
-                font-weight: 400;
-                color: #666;
-                margin-top: 5pt;
-                font-family: 'Montserrat', sans-serif;
-                text-transform: uppercase;
-                letter-spacing: 2pt;
-            }
+    .dashboard-header::after {
+        content: "StepUp E-Commerce Analytics Report";
+        display: block;
+        font-size: 6pt;
+        font-weight: 400;
+        color: #666;
+        margin-top: 1pt;
+        text-transform: uppercase;
+        letter-spacing: 1pt;
+    }
 
-            /* ========== 统计卡片 - 4列横向排列 ========== */
-            .stats-grid {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 15pt;
-                margin-bottom: 25pt;
-                page-break-inside: avoid;
-            }
+    /* ========== 统计卡片 - 4列极致压缩 ========== */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4pt !important;
+        margin-bottom: 6pt !important;
+        page-break-inside: avoid;
+    }
 
-            .stat-card {
-                padding: 15pt 12pt;
-                box-shadow: none;
-                border: 1.5pt solid #ddd;
-                border-radius: 6pt;
-                page-break-inside: avoid;
-                background: white;
-            }
+    .stat-card {
+        padding: 5pt 4pt !important;
+        box-shadow: none;
+        border: 1pt solid #ddd;
+        border-radius: 3pt;
+        page-break-inside: avoid;
+        background: white;
+    }
 
-            .stat-card::before {
-                height: 4pt;
-            }
+    .stat-card::before {
+        height: 2pt;
+    }
 
-            .stat-header {
-                gap: 8pt;
-                margin-bottom: 10pt;
-            }
+    .stat-header {
+        gap: 3pt;
+        margin-bottom: 3pt;
+    }
 
-            .stat-icon {
-                width: 35pt;
-                height: 35pt;
-                font-size: 18pt;
-                border-radius: 6pt;
-            }
+    .stat-icon {
+        width: 16pt;
+        height: 16pt;
+        font-size: 8pt;
+        border-radius: 3pt;
+    }
 
-            .stat-title {
-                font-size: 8pt;
-                letter-spacing: 0.1em;
-            }
+    .stat-title {
+        font-size: 5pt;
+        letter-spacing: 0.05em;
+    }
 
-            .stat-value {
-                font-size: 22pt;
-                margin-bottom: 5pt;
-            }
+    .stat-value {
+        font-size: 12pt;
+        margin-bottom: 1pt;
+        line-height: 1.1;
+    }
 
-            .stat-trend {
-                font-size: 8pt;
-            }
+    .stat-trend {
+        font-size: 5pt;
+        gap: 2pt;
+    }
 
-            /* ========== KPI 行 - 3列 ========== */
-            .kpi-row {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 15pt;
-                margin-bottom: 30pt;
-                page-break-inside: avoid;
-            }
+    /* ========== KPI 行 - 4列极致压缩 ========== */
+    .kpi-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 4pt !important;
+        margin-bottom: 6pt !important;
+        page-break-inside: avoid;
+    }
 
-            .kpi-item {
-                padding: 12pt;
-                box-shadow: none;
-                border: 1.5pt solid #ddd;
-                background: #fafafa;
-            }
+    .kpi-row .kpi-item:nth-child(2) {
+        display: block !important;
+    }
 
-            .kpi-value {
-                font-size: 18pt;
-            }
+    .kpi-item {
+        padding: 4pt 3pt !important;
+        box-shadow: none;
+        border: 1pt solid #ddd;
+        background: #fafafa;
+    }
 
-            .kpi-label {
-                font-size: 7pt;
-            }
+    .kpi-value {
+        font-size: 10pt;
+        line-height: 1.1;
+    }
 
-            /* ========== 章节标题样式 ========== */
-            .card {
-                padding: 20pt;
-                margin-bottom: 25pt;
-                box-shadow: none;
-                border: 1.5pt solid #ddd;
-                page-break-inside: avoid;
-                background: white;
-            }
+    .kpi-label {
+        font-size: 4.5pt;
+        letter-spacing: 0.03em;
+    }
 
-            .card-header {
-                margin-bottom: 15pt;
-                padding-bottom: 10pt;
-                border-bottom: 2pt solid #1a1a1a;
-            }
+    /* ========== 卡片通用 - 极致压缩 ========== */
+    .card {
+        padding: 6pt 8pt !important;
+        margin-bottom: 6pt !important;
+        box-shadow: none;
+        border: 1pt solid #ddd;
+        page-break-inside: avoid;
+        background: white;
+    }
 
-            .card-title {
-                font-size: 16pt;
-                font-weight: 700;
-                gap: 8pt;
-            }
+    .card-header {
+        margin-bottom: 4pt !important;
+        padding-bottom: 2pt !important;
+        border-bottom: 1pt solid #1a1a1a;
+    }
 
-            /* ========== 图表容器 ========== */
-            .chart-container {
-                height: 220pt !important;
-                width: 100%;
-                margin-bottom: 15pt;
-                page-break-inside: avoid;
-            }
+    .card-title {
+        font-size: 9pt !important;
+        font-weight: 700;
+        gap: 4pt;
+    }
 
-            .chart-container-sm {
-                height: 160pt !important;
-                width: 100%;
-                margin-bottom: 15pt;
-                page-break-inside: avoid;
-            }
+    /* ========== 图表容器 - 极致压缩高度 ========== */
+    .chart-container {
+        height: 80pt !important;
+        width: 100%;
+        margin-bottom: 3pt;
+        page-break-inside: avoid;
+    }
 
-            canvas {
-                max-height: 100%;
-                width: 100% !important;
-            }
+    .chart-container-sm {
+        height: 55pt !important;
+        width: 100%;
+        margin-bottom: 3pt;
+        page-break-inside: avoid;
+    }
 
-            /* ========== Sales Trend 和 Forecast 上下排列 ========== */
-            .card:has(#salesChart) {
-                margin-bottom: 25pt;
-            }
+    canvas {
+        max-height: 100%;
+        width: 100% !important;
+    }
 
-            .card:has(#forecastChart) {
-                margin-bottom: 25pt;
-            }
+    /* ========== 预测表格 - 极致压缩 ========== */
+    .forecast-table-container {
+        margin-top: 4pt;
+        page-break-inside: avoid;
+    }
 
-            /* ========== 预测表格 ========== */
-            .forecast-table-container {
-                margin-top: 15pt;
-                page-break-inside: avoid;
-            }
+    .forecast-table-container h4 {
+        font-size: 7pt;
+        margin: 4pt 0 3pt;
+        font-weight: 600;
+        border-left: 2pt solid #1a1a1a;
+        padding-left: 4pt;
+    }
 
-            .forecast-table-container h4 {
-                font-size: 12pt;
-                margin: 15pt 0 10pt;
-                font-weight: 600;
-                border-left: 4pt solid #1a1a1a;
-                padding-left: 10pt;
-            }
+    .forecast-table {
+        width: 100%;
+        border: 1pt solid #ddd;
+    }
 
-            .forecast-table {
-                width: 100%;
-                border: 1.5pt solid #ddd;
-            }
+    .forecast-table th, 
+    .forecast-table td {
+        padding: 2pt 4pt !important;
+        font-size: 5.5pt;
+        border-bottom: 0.5pt solid #ddd;
+    }
 
-            .forecast-table th, 
-            .forecast-table td {
-                padding: 8pt 12pt;
-                font-size: 9pt;
-                border-bottom: 1pt solid #ddd;
-            }
+    .forecast-table th {
+        background: #1a1a1a !important;
+        color: white !important;
+        font-weight: 600;
+    }
 
-            .forecast-table th {
-                background: #1a1a1a !important;
-                color: white !important;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-            }
+    /* ========== 三列布局 - 改为单列全宽，并排显示以节省空间 ========== */
+    .dashboard-grid-3col {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 4pt !important;
+        margin-top: 4pt !important;
+    }
 
-            .forecast-table tr:last-child td {
-                border-bottom: none;
-            }
+    .dashboard-grid-3col .card {
+        width: 100%;
+        margin-bottom: 0 !important;
+        padding: 4pt 5pt !important;
+        page-break-inside: avoid;
+    }
 
-            /* ========== 三列布局 - 改为单列全宽 ========== */
-            .dashboard-grid-3col {
-                display: block;
-                margin-top: 25pt;
-            }
+    /* ========== 表格通用样式 - 极致压缩 ========== */
+    .table-responsive {
+        max-height: none;
+        overflow: visible;
+        margin-top: 3pt;
+    }
 
-            .dashboard-grid-3col .card {
-                width: 100%;
-                margin-bottom: 25pt;
-                page-break-inside: avoid;
-            }
+    .data-table {
+        width: 100%;
+        font-size: 5pt;
+        border: 1pt solid #ddd;
+    }
 
-            /* ========== 表格通用样式 ========== */
-            .table-responsive {
-                max-height: none;
-                overflow: visible;
-                margin-top: 10pt;
-            }
+    .data-table th,
+    .data-table td {
+        padding: 2pt 3pt !important;
+        border-bottom: 0.5pt solid #ddd;
+    }
 
-            .data-table {
-                width: 100%;
-                font-size: 9pt;
-                border: 1.5pt solid #ddd;
-            }
+    .data-table th {
+        background: #f0f0f0 !important;
+        border-bottom: 1pt solid #1a1a1a !important;
+        font-size: 4.5pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
 
-            .data-table th,
-            .data-table td {
-                padding: 8pt 10pt;
-                border-bottom: 1pt solid #ddd;
-            }
+    /* 隐藏热销产品卡片中的图表以节省空间 */
+    .dashboard-grid-3col .card:first-child .chart-container-sm {
+        height: 45pt !important;
+    }
 
-            .data-table th {
-                background: #f0f0f0 !important;
-                border-bottom: 2pt solid #1a1a1a !important;
-                font-size: 8pt;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-            }
+    /* 压缩最近订单表格的显示行数（通过CSS无法真正隐藏，但可以压缩高度） */
+    #recentOrdersTable tbody tr:nth-child(n+4) {
+        /* 让第4行及以后的行隐藏 - 只显示3条最近订单 */
+        display: none;
+    }
 
-            .data-table tr:last-child td {
-                border-bottom: none;
-            }
+    #topCustomersTable tbody tr:nth-child(n+4) {
+        display: none;
+    }
 
-            /* ========== 状态标签 ========== */
-            .order-status,
-            .status-badge {
-                padding: 3pt 8pt;
-                font-size: 7pt;
-                font-weight: 700;
-                border-radius: 12pt;
-            }
+    /* ========== 状态标签 - 极致压缩 ========== */
+    .order-status,
+    .status-badge {
+        padding: 1pt 3pt;
+        font-size: 4.5pt;
+        font-weight: 600;
+        border-radius: 8pt;
+    }
 
-            .status-pending { background: #fff3cd !important; color: #856404 !important; }
-            .status-processing { background: #d1ecf1 !important; color: #0c5460 !important; }
-            .status-shipped { background: #d1ecf1 !important; color: #0c5460 !important; }
-            .status-delivered { background: #d4edda !important; color: #155724 !important; }
-            .status-cancelled { background: #f8d7da !important; color: #721c24 !important; }
-            .status-success { background: #e8f5e9 !important; color: #27ae60 !important; }
-            .status-info { background: #e3f2fd !important; color: #2980b9 !important; }
+    .status-pending { background: #fff3cd !important; color: #856404 !important; }
+    .status-processing { background: #d1ecf1 !important; color: #0c5460 !important; }
+    .status-shipped { background: #d1ecf1 !important; color: #0c5460 !important; }
+    .status-delivered { background: #d4edda !important; color: #155724 !important; }
+    .status-cancelled { background: #f8d7da !important; color: #721c24 !important; }
+    .status-success { background: #e8f5e9 !important; color: #27ae60 !important; }
+    .status-info { background: #e3f2fd !important; color: #2980b9 !important; }
 
-            /* ========== 报告页脚 ========== */
-            .main-content::after {
-                content: "© StepUp Analytics | Confidential | Page " counter(page);
-                display: block;
-                text-align: center;
-                margin-top: 30pt;
-                padding-top: 15pt;
-                border-top: 1pt solid #ddd;
-                font-size: 8pt;
-                color: #999;
-                text-transform: uppercase;
-                letter-spacing: 1pt;
-            }
+    /* ========== 报告页脚 - 极小 ========== */
+    .main-content::after {
+        content: "© StepUp Analytics | Confidential";
+        display: block;
+        text-align: center;
+        margin-top: 4pt;
+        padding-top: 2pt;
+        border-top: 0.5pt solid #ddd;
+        font-size: 5pt;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: 0.5pt;
+    }
 
-            /* ========== 分页控制 ========== */
-            .stats-grid,
-            .kpi-row,
-            .card-header {
-                page-break-after: avoid;
-            }
+    /* ========== 分页控制 - 全部 avoid ========== */
+    .stats-grid,
+    .kpi-row,
+    .card-header,
+    .card,
+    .chart-container,
+    .chart-container-sm,
+    .forecast-table-container,
+    .table-responsive,
+    .dashboard-grid-3col,
+    .dashboard-grid-3col .card {
+        page-break-inside: avoid;
+        page-break-before: avoid;
+        page-break-after: avoid;
+    }
 
-            .chart-container,
-            .chart-container-sm,
-            .forecast-table-container,
-            .table-responsive {
-                page-break-inside: avoid;
-            }
+    h1, h2, h3, h4 {
+        page-break-after: avoid;
+    }
 
-            .dashboard-grid-3col .card {
-                page-break-before: avoid;
-                page-break-after: avoid;
-            }
+    /* ========== 页面设置 - 最大化可用空间 ========== */
+    @page {
+        margin: 8pt 10pt !important;
+        size: A4 portrait;
+    }
 
-            h1, h2, h3, h4 {
-                page-break-after: avoid;
-            }
+    /* ========== 隐藏元素 ========== */
+    .forecast-controls,
+    .mode-toggle,
+    #manualUploadSection {
+        display: none !important;
+    }
 
-            /* ========== 页面设置 ========== */
-            @page {
-                margin: 40pt 35pt;
-                size: A4;
-            }
+    /* ========== 强制所有内容在一页内 ========== */
+    .admin-wrapper,
+    .main-content {
+        page-break-before: avoid;
+        page-break-after: avoid;
+    }
 
-            /* ========== 隐藏预测控制栏 ========== */
-            .forecast-controls,
-            .mode-toggle,
-            #manualUploadSection {
-                display: none !important;
-            }
+    /* 缩小所有间距 */
+    p, h1, h2, h3, h4, h5, h6 {
+        margin: 0 0 2pt 0 !important;
+    }
 
-            /* ========== 确保背景色打印 ========== */
-            .stat-card,
-            .kpi-item,
-            .card,
-            .forecast-table th,
-            .data-table th {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-        }
+    /* 图表内文字缩小 */
+    .chart-container canvas,
+    .chart-container-sm canvas {
+        max-height: 100% !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -1036,47 +1050,58 @@
     });
 
     // 添加打印专用的数据压缩函数
-    function prepareForPrint() {
-        const today = new Date();
-        const dateStr = today.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
-        
-        const header = document.querySelector('.dashboard-header h1');
-        if (header) {
-            header.setAttribute('data-date', dateStr);
-        }
-        
-        if (salesChart) {
-            salesChart.options.maintainAspectRatio = true;
-            salesChart.resize();
-        }
-        if (forecastChart) {
-            forecastChart.options.maintainAspectRatio = true;
-            forecastChart.resize();
-        }
-        if (productsChart) {
-            productsChart.options.maintainAspectRatio = true;
-            productsChart.resize();
-        }
-        
-        document.querySelectorAll('.data-table tbody tr:nth-child(even)').forEach(row => {
-            row.style.backgroundColor = '#f9f9f9';
-        });
-        document.querySelectorAll('.forecast-table tbody tr:nth-child(even)').forEach(row => {
-            row.style.backgroundColor = '#f9f9f9';
+function prepareForPrint() {
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+    
+    const header = document.querySelector('.dashboard-header h1');
+    if (header) {
+        header.setAttribute('data-date', dateStr);
+    }
+    
+    // 强制压缩图表
+    if (salesChart) {
+        salesChart.options.maintainAspectRatio = false;
+        salesChart.options.responsive = true;
+        salesChart.resize();
+    }
+    if (forecastChart) {
+        forecastChart.options.maintainAspectRatio = false;
+        forecastChart.options.responsive = true;
+        forecastChart.resize();
+    }
+    if (productsChart) {
+        productsChart.options.maintainAspectRatio = false;
+        productsChart.options.responsive = true;
+        productsChart.resize();
+    }
+    
+    // 限制表格显示行数（只保留前3条）
+    const recentOrdersBody = document.querySelector('#recentOrdersTable tbody');
+    if (recentOrdersBody) {
+        const rows = recentOrdersBody.querySelectorAll('tr');
+        rows.forEach((row, index) => {
+            if (index >= 3) row.style.display = 'none';
         });
     }
-
-    window.addEventListener('beforeprint', prepareForPrint);
-
-    window.addEventListener('afterprint', () => {
-        if (salesChart) salesChart.resize();
-        if (forecastChart) forecastChart.resize();
-        if (productsChart) productsChart.resize();
+    
+    const topCustomersBody = document.querySelector('#topCustomersTable tbody');
+    if (topCustomersBody) {
+        const rows = topCustomersBody.querySelectorAll('tr');
+        rows.forEach((row, index) => {
+            if (index >= 3) row.style.display = 'none';
+        });
+    }
+    
+    // 添加斑马纹
+    document.querySelectorAll('.data-table tbody tr:nth-child(even)').forEach(row => {
+        row.style.backgroundColor = '#f9f9f9';
     });
+}
 
     // ---------- 加载仪表盘数据 ----------
     async function fetchDashboardStats() {

@@ -188,7 +188,7 @@
                     </select>
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn export-btn" onclick="exportToExcel()">📊 Export to Excel</button>
+                    <button class="btn export-btn" onclick="exportToCSV()">📊 Export to CSV</button>
                     <label class="btn btn-primary import-label" style="display: inline-block; cursor: pointer;" onclick="showImportFormatAndSelectFile()">
                         📤 Import Products
                     </label>
@@ -470,7 +470,7 @@
         } catch (err) { alert(err.message); }
     };
 
-    function exportToExcel() {
+    function exportToCSV() {
     if (filteredProducts.length === 0) {
         alert('No data to export');
         return;

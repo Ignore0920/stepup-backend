@@ -3,135 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - StepUp</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>All Products - StepUp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #fafaf8;
-            color: #262626;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .login-container {
-            background: white;
-            padding: 2rem;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid #e5e5e5;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.5rem;
-        }
-        input {
-            width: 100%;
-            padding: 0.875rem;
-            border: 1px solid #e5e5e5;
-            font-family: 'Montserrat', sans-serif;
-        }
-        button {
-            width: 100%;
-            padding: 0.875rem;
-            background-color: #262626;
-            color: white;
-            border: none;
-            font-weight: 600;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        button:hover {
-            background-color: #404040;
-        }
-        .error {
-            color: #e74c3c;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-            text-align: center;
-        }
-        .back-link {
-            text-align: center;
-            margin-top: 1rem;
-            font-size: 0.875rem;
-        }
-        .back-link a {
-            color: #262626;
-            text-decoration: none;
-            border-bottom: 1px solid #262626;
-        }
+        body { font-family: 'Montserrat', sans-serif; background-color: #ffffff; color: #262626; line-height: 1.6; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+        header { position: sticky; top: 0; z-index: 50; background-color: #ffffff; border-bottom: 1px solid #e5e5e5; }
+        .header-content { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 0; }
+        .logo { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+        .logo-box { width: 40px; height: 40px; background-color: #262626; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: bold; font-size: 1.125rem; font-family: 'Playfair Display', serif; }
+        .logo-text { font-size: 1.5rem; font-weight: bold; letter-spacing: 0.05em; font-family: 'Playfair Display', serif; }
+        nav { display: flex; gap: 2rem; }
+        nav a { text-decoration: none; color: #262626; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.3s; }
+        nav a:hover { color: #666666; }
+        .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-right button { background: none; border: none; cursor: pointer; color: #262626; font-size: 1.25rem; transition: color 0.3s; position: relative; }
+        .cart-badge { position: absolute; top: -8px; right: -8px; background-color: #262626; color: #ffffff; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; }
+        .user-icon-btn { text-decoration: none; color: #262626; font-size: 1.25rem; transition: color 0.3s; }
+        .search-bar { margin: 2rem 0; display: flex; gap: 1rem; }
+        .search-input { flex: 1; padding: 0.75rem 1rem; border: 1px solid #e5e5e5; border-radius: 4px; font-size: 0.95rem; }
+        .search-input:focus { outline: none; border-color: #262626; }
+        .search-button { padding: 0.75rem 1.5rem; background-color: #262626; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; text-transform: uppercase; }
+        .products-page { display: grid; grid-template-columns: 250px 1fr; gap: 2rem; padding: 2rem 0; }
+        .sidebar { background-color: #f9f9f9; padding: 2rem; border-radius: 8px; height: fit-content; }
+        .filter-group { margin-bottom: 2rem; }
+        .filter-group h3 { font-size: 1rem; margin-bottom: 1rem; text-transform: uppercase; }
+        .filter-options { display: flex; flex-direction: column; gap: 0.75rem; }
+        .filter-option { display: flex; align-items: center; gap: 0.75rem; }
+        .filter-option input { width: 18px; height: 18px; cursor: pointer; }
+        .filter-option label { cursor: pointer; font-size: 0.9rem; }
+        .products-section { background-color: #ffffff; }
+        .products-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e5e5; }
+        .products-header h2 { font-size: 1.5rem; }
+        .sort-dropdown { padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 4px; background-color: #fff; cursor: pointer; font-size: 0.9rem; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2rem; }
+        .product-card { background-color: #fff; border-radius: 8px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; cursor: pointer; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .product-image { width: 100%; height: 250px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .product-image img { width: 100%; height: 100%; object-fit: contain; padding: 1rem; }
+        .product-info { padding: 1rem; flex: 1; display: flex; flex-direction: column; }
+        .product-brand { font-size: 0.8rem; color: #999; text-transform: uppercase; margin-bottom: 0.25rem; }
+        .product-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.3; }
+        .product-price { font-size: 1.1rem; font-weight: bold; color: #000; margin-top: auto; }
+        .product-tag { display: inline-block; background-color: #ff6b6b; color: white; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.7rem; margin-top: 0.5rem; width: fit-content; }
+        .no-products { text-align: center; padding: 3rem; color: #999; }
+        @media (max-width: 768px) { .products-page { grid-template-columns: 1fr; } .sidebar { display: none; } .products-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } nav { display: none; } }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h1>Admin Login</h1>
-        <form id="adminLoginForm">
-            <div class="form-group">
-                <label>Username</label>
-                <input type="text" id="username" placeholder="Enter username" pattern="[A-Za-z0-9_]{3,20}" title="3-20 characters, letters, numbers, underscore" required>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo" onclick="window.location.href='mainpage.html'">
+                    <div class="logo-box">S</div>
+                    <div class="logo-text">STEPUP</div>
+                </div>
+                <nav><a href="products.html">Shop</a><a href="mainpage.html#collections">Collections</a><a href="mainpage.html#brands">Brands</a><a href="about.html">About</a></nav>
+                <div class="nav-right"><button title="Shopping Cart" onclick="location.href='shopping-cart.html'" style="position: relative;">🛒<span class="cart-badge" id="cartBadge">0</span></button><a href="account.html" class="user-icon-btn">👤</a></div>
             </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password" placeholder="Enter password" minlength="6" required>
+        </div>
+    </header>
+    <div class="container">
+        <div class="products-page">
+            <aside class="sidebar">
+                <!-- Brand Filter -->
+                <div class="filter-group"><h3>Brand</h3><div class="filter-options">
+                    <div class="filter-option"><input type="checkbox" id="brand-nike" value="Nike" onchange="applyFilters()"><label for="brand-nike">Nike</label></div>
+                    <div class="filter-option"><input type="checkbox" id="brand-jordan" value="Jordan" onchange="applyFilters()"><label for="brand-jordan">Jordan</label></div>
+                    <div class="filter-option"><input type="checkbox" id="brand-adidas" value="Adidas" onchange="applyFilters()"><label for="brand-adidas">Adidas</label></div>
+                    <div class="filter-option"><input type="checkbox" id="brand-puma" value="Puma" onchange="applyFilters()"><label for="brand-puma">Puma</label></div>
+                    <div class="filter-option"><input type="checkbox" id="brand-newbalance" value="New Balance" onchange="applyFilters()"><label for="brand-newbalance">New Balance</label></div>
+                    <div class="filter-option"><input type="checkbox" id="brand-converse" value="Converse" onchange="applyFilters()"><label for="brand-converse">Converse</label></div>
+                    <!-- Other 选项 -->
+                    <div class="filter-option"><input type="checkbox" id="brand-other" value="Other" onchange="applyFilters()"><label for="brand-other">Other</label></div>
+                </div></div>
+                <!-- Collection Filter -->
+                <div class="filter-group"><h3>Collection</h3><div class="filter-options">
+                    <div class="filter-option"><input type="checkbox" id="collection-running" value="Running" onchange="applyFilters()"><label for="collection-running">Running</label></div>
+                    <div class="filter-option"><input type="checkbox" id="collection-casual" value="Casual" onchange="applyFilters()"><label for="collection-casual">Casual</label></div>
+                    <div class="filter-option"><input type="checkbox" id="collection-sports" value="Basketball" onchange="applyFilters()"><label for="collection-sports">Sports</label></div>
+                    <div class="filter-option"><input type="checkbox" id="collection-premium" value="Training" onchange="applyFilters()"><label for="collection-premium">Premium</label></div>
+                    <!-- Other 选项 -->
+                    <div class="filter-option"><input type="checkbox" id="collection-other" value="Other" onchange="applyFilters()"><label for="collection-other">Other</label></div>
+                </div></div>
+            </aside>
+            <div class="products-section">
+                <div class="search-bar"><input type="text" class="search-input" id="searchInput" placeholder="Search products..." onkeyup="applySearch()"><button class="search-button" onclick="applySearch()">Search</button></div>
+                <div class="products-header"><h2>All Products</h2><select class="sort-dropdown" onchange="sortProducts(this.value)"><option value="">Sort By</option><option value="name-asc">Name (A-Z)</option><option value="name-desc">Name (Z-A)</option><option value="price-asc">Price (Low to High)</option><option value="price-desc">Price (High to Low)</option></select></div>
+                <div class="products-grid" id="productsGrid"></div>
+                <div class="no-products" id="noProducts" style="display: none;"><p>No products found matching your filters.</p></div>
             </div>
-            <button type="submit">Sign In</button>
-            <div id="errorMsg" class="error"></div>
-        </form>
-        <div class="back-link">
-            <a href="mainpage.html">← Back to Store</a>
         </div>
     </div>
-
     <script>
-        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('errorMsg');
-            errorDiv.textContent = '';
+        let products = [], filteredProducts = [], searchQuery = '';
 
-            // 简单前端验证
-            if (!username || !password) {
-                errorDiv.textContent = 'Please enter both username and password';
-                return;
-            }
+        // 预定义品牌列表和集合列表
+        const predefinedBrands = ['Nike', 'Jordan', 'Adidas', 'Puma', 'New Balance', 'Converse'];
+        const predefinedCollections = ['Running', 'Casual', 'Basketball', 'Training'];
 
+        async function loadProducts() {
             try {
-                const response = await fetch('/api/admin/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await response.json();
+                const res = await fetch('/api/products');
+                const data = await res.json();
+                if (data.success) { products = data.data; filteredProducts = [...products]; renderProducts(); }
+                else throw new Error('Failed to load');
+            } catch (err) { console.error(err); document.getElementById('productsGrid').innerHTML = '<div class="no-products"><p>Error loading products.</p></div>'; }
+        }
 
-                if (response.ok) {
-                    localStorage.setItem('adminToken', data.token);
-                    window.location.href = 'admin.html';
-                } else {
-                    errorDiv.textContent = data.error || 'Login failed';
+        function applySearch() { searchQuery = document.getElementById('searchInput').value.toLowerCase(); applyFilters(); }
+        
+        function applyFilters() {
+            // 获取选中的品牌值
+            const selectedBrands = Array.from(document.querySelectorAll('.filter-options input[id^="brand-"]:checked')).map(el => el.value);
+            // 获取选中的集合值
+            const selectedCollections = Array.from(document.querySelectorAll('.filter-options input[id^="collection-"]:checked')).map(el => el.value);
+            
+            filteredProducts = products.filter(p => {
+                // 品牌筛选逻辑
+                let brandMatch = true;
+                if (selectedBrands.length > 0) {
+                    const brand = p.brand;
+                    // 如果选中了 "Other" 且同时选中了其他具体品牌
+                    const hasOther = selectedBrands.includes('Other');
+                    const specificBrands = selectedBrands.filter(b => b !== 'Other');
+                    if (hasOther && specificBrands.length > 0) {
+                        // 品牌满足：是具体品牌之一 或者 不在预定义品牌列表中
+                        brandMatch = specificBrands.includes(brand) || !predefinedBrands.includes(brand);
+                    } else if (hasOther) {
+                        // 只选中了 Other
+                        brandMatch = !predefinedBrands.includes(brand);
+                    } else {
+                        // 只选中了具体品牌
+                        brandMatch = specificBrands.includes(brand);
+                    }
                 }
-            } catch (err) {
-                console.error('Login error:', err);
-                errorDiv.textContent = 'Network error. Please try again.';
-            }
+                
+                // 集合筛选逻辑
+                let collectionMatch = true;
+                if (selectedCollections.length > 0) {
+                    const collection = p.collection || '';
+                    const hasOtherColl = selectedCollections.includes('Other');
+                    const specificColls = selectedCollections.filter(c => c !== 'Other');
+                    if (hasOtherColl && specificColls.length > 0) {
+                        collectionMatch = specificColls.includes(collection) || !predefinedCollections.includes(collection);
+                    } else if (hasOtherColl) {
+                        collectionMatch = !predefinedCollections.includes(collection);
+                    } else {
+                        collectionMatch = specificColls.includes(collection);
+                    }
+                }
+                
+                // 搜索匹配
+                const searchMatch = searchQuery === '' || p.name.toLowerCase().includes(searchQuery) || p.brand.toLowerCase().includes(searchQuery);
+                
+                return brandMatch && collectionMatch && searchMatch;
+            });
+            renderProducts();
+        }
+        
+        function sortProducts(sortBy) {
+            if (sortBy === 'name-asc') filteredProducts.sort((a,b) => a.name.localeCompare(b.name));
+            else if (sortBy === 'name-desc') filteredProducts.sort((a,b) => b.name.localeCompare(a.name));
+            else if (sortBy === 'price-asc') filteredProducts.sort((a,b) => a.price - b.price);
+            else if (sortBy === 'price-desc') filteredProducts.sort((a,b) => b.price - a.price);
+            renderProducts();
+        }
+        
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid'), no = document.getElementById('noProducts');
+            if (!filteredProducts.length) { grid.style.display = 'none'; no.style.display = 'block'; return; }
+            grid.style.display = 'grid'; no.style.display = 'none';
+            grid.innerHTML = filteredProducts.map(p => `
+                <a href="product-detail.html?id=${p._id}" class="product-card">
+                    <div class="product-image" style="background-image: url('${p.image || ''}'); background-size: contain; background-repeat: no-repeat; background-position: center;">
+                        ${!p.image ? '<span style="font-size: 3rem;">👟</span>' : ''}
+                    </div>
+                    <div class="product-info"><div class="product-brand">${p.brand}</div><div class="product-name">${p.name}</div><div class="product-price">MOP $${p.price.toFixed(2)}</div>${p.tag ? `<div class="product-tag">${p.tag}</div>` : ''}</div>
+                </a>
+            `).join('');
+        }
+        
+        function updateCartBadge() { const cart = JSON.parse(localStorage.getItem('cart')) || []; const total = cart.reduce((s,i) => s + i.quantity, 0); document.getElementById('cartBadge').textContent = total; }
+        
+        window.addEventListener('load', () => { 
+            loadProducts(); 
+            updateCartBadge(); 
+            const coll = sessionStorage.getItem('selectedCollection'), brand = sessionStorage.getItem('selectedBrand'); 
+            if (coll) { 
+                const cb = document.getElementById('collection-'+coll.toLowerCase()); 
+                if(cb) cb.checked=true; 
+                sessionStorage.removeItem('selectedCollection'); 
+            } 
+            if(brand) { 
+                const cb = document.getElementById('brand-'+brand.toLowerCase()); 
+                if(cb) cb.checked=true; 
+                sessionStorage.removeItem('selectedBrand'); 
+            } 
+            applyFilters(); 
         });
+        window.addEventListener('storage', updateCartBadge);
     </script>
 </body>
 </html>
